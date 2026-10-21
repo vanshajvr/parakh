@@ -16,16 +16,28 @@ Stock tips from Telegram groups and finfluencers come with no track record, no s
 ## Docs
 
 - [Product requirements (PRD)](docs/PRD.md)
+- [Model card: what the model does and how well](docs/model-card.md)
 - [Decision log](docs/decisions.md)
 - [Original prototype and its known issues](research/README.md)
+
+## Run it locally
+
+Requires Python 3.11–3.13. On macOS, LightGBM also needs `brew install libomp`.
+
+```bash
+python3.11 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pytest                          # run the tests
+python -m jobs.retrain --refresh  # download data, evaluate, train, write docs/model-card.md, print today's calls
+```
 
 ## Status
 
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Repo cleanup, PRD, decision log | ✅ Done |
-| 1 | ML core: walk-forward evaluation, baselines, calibration, SHAP | ⏳ Next |
-| 2 | Live ledger: Neon Postgres + daily GitHub Actions job | — |
+| 1 | ML core: walk-forward evaluation, baselines, calibration, SHAP | ✅ Done |
+| 2 | Live ledger: Neon Postgres + daily GitHub Actions job | ⏳ Next |
 | 3 | FastAPI API | — |
 | 4 | React frontend | — |
 | 5 | Deployment, CI, case study | — |

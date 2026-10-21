@@ -44,9 +44,11 @@ Beginners can't separate signal from noise, so they trust whoever sounds most co
 
 | Decision | Choice | Rationale |
 |---|---|---|
+| What we predict | Will the stock **beat the NIFTY 50** over the horizon? | A beginner's honest alternative is an index fund; it also removes market-mood swings (D-008) |
 | Prediction horizon | 5 trading days | Less noisy than next-day; matches a beginner's holding period |
-| Stock universe | 15–20 liquid NIFTY 50 stocks | Better data quality and stats you can trust; a focused experience |
-| Signal types | Bullish lean / Bearish lean / No call | Bearish shown as "data suggests waiting", since beginners rarely short |
+| Stock universe | 20 liquid NIFTY 50 stocks | Better data quality and stats you can trust; a focused experience |
+| Signal types | Bullish lean (likely to outperform the index) / Bearish lean (likely to lag it) / No call | Bearish shown as "data suggests waiting", since beginners rarely short |
+| How often we make a call | About 25% of stock-days, with *Slight* / *Stronger edge* labels | The model's edge is small; fixed thresholds would almost never trigger (D-010) |
 | Publishing cadence | Daily, after market close, before the next open | Calls are locked in before the outcome is known |
 | Track record | Live ledger kept separate from the simulated backtest | Never mix simulated results with real out-of-sample results |
 | Explanations | SHAP values turned into fixed sentence templates | Deterministic; a reason can't be made up |
@@ -59,7 +61,7 @@ See [decisions.md](decisions.md) for the full decision log.
 
 1. **Today**
    - A card for each stock: its lean, a confidence band and a one-line reason.
-   - A scoreboard strip: hit rate on confident calls vs a coin flip vs "always bullish" vs buy-and-hold.
+   - A scoreboard strip: hit rate on calls vs a coin flip, and how bullish-lean stocks did relative to simply holding a NIFTY 50 index fund.
 2. **Stock page**
    - A price chart with past signals marked as hits or misses.
    - A "Why" breakdown: the top factors, in plain words.
@@ -89,7 +91,9 @@ Trade execution, portfolio tracking, intraday data, personalised advice, user ac
 ## 7. Success metrics
 
 ### Model quality
-- **Hit rate on confident calls** compared with a coin flip and with "always bullish".
+See [model-card.md](model-card.md) for current numbers.
+- **Hit rate on calls** compared with a coin flip (50%) and with "always beats the index".
+- **Excess return vs the NIFTY 50** after bullish and bearish calls, compared with trading costs.
 - **Calibration**: stated confidence should match the actual hit rate (for example, measured by expected calibration error).
 - **Coverage**: the share of stock-days on which the model makes a call.
 
@@ -105,7 +109,8 @@ Trade execution, portfolio tracking, intraday data, personalised advice, user ac
 
 | Risk | Mitigation |
 |---|---|
-| The model is barely better than random | The product's value is honesty; the scoreboard shows the truth either way |
+| The model is barely better than random (confirmed in Phase 1: 51.2% hit rate, an edge smaller than trading costs) | The product's value is honesty; the scoreboard and model card show the truth either way |
+| Explanations that sound illogical (the model often bets on reversals) | "Biggest factors" wording, plus a plain-words explainer on How it works (D-013) |
 | yfinance outages or rate limits | Cache data in the database; show a "data delayed" state |
 | Being perceived as investment advice | Lean wording, disclaimers, educational framing, no personalisation |
 | The live track record starts empty | Show the simulated record, clearly labelled, until the live record has enough history |
