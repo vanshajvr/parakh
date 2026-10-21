@@ -1,10 +1,14 @@
 """Evaluate all candidate models walk-forward, train the chosen one on all data, write the report.
 
-Usage: python -m jobs.retrain [--refresh]
+With --publish, the model becomes the active version in the database and the simulated
+(backtest) record is replaced. Runs weekly in GitHub Actions.
+
+Usage: python -m jobs.retrain [--refresh] [--publish]
 """
 
 import argparse
 
+from ledger import db
 from ml import config
 from ml.data import load_prices
 from ml.evaluate import run_walk_forward, summary_metrics
@@ -27,7 +31,19 @@ def choose_model(results: dict) -> str:
     return best
 
 
-def main(refresh: bool) -> None:
+def publish(model: SignalModel, version: str, metrics: dict, oos) -> None:
+    with db.connect() as conn:
+        db.ensure_schema(conn)
+        if db.save_model_version(conn, model, version, metrics):
+            db.replace_backtest(conn, oos, version)
+            detail = f"published {version}"
+        else:
+            detail = f"{version} already exists; kept the stored artifact and made it active"
+        db.log_run(conn, "retrain", "ok", detail)
+    print(detail)
+
+
+def main(refresh: bool, publish_to_db: bool) -> None:
     prices = load_prices(refresh=refresh)
     data = add_labels(build_features(prices), prices).dropna(subset=FEATURE_COLUMNS)
     labeled = data.dropna(subset=["label"])
@@ -45,10 +61,12 @@ def main(refresh: bool) -> None:
     save_model(model)
     results[chosen]["oos"].to_parquet(config.ARTIFACTS_DIR / "backtest_predictions.parquet", index=False)
 
-    write_metrics(results, chosen, version)
+    metrics = write_metrics(results, chosen, version)
     plot_calibration(results[chosen]["oos"])
     write_model_card(results, chosen, version, len(labeled))
     print(f"\nChosen: {chosen} ({version}). Model card written to docs/model-card.md\n")
+    if publish_to_db:
+        publish(model, version, metrics, results[chosen]["oos"])
 
     for s in latest_signals(model, data):
         print(f"{s['date']}  {s['ticker']:14s} {s['lean_label']:13s} {s['confidence']:13s} {s['reason']}")
@@ -57,4 +75,6 @@ def main(refresh: bool) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--refresh", action="store_true", help="re-download prices from Yahoo Finance")
-    main(parser.parse_args().refresh)
+    parser.add_argument("--publish", action="store_true", help="store the model in the database")
+    args = parser.parse_args()
+    main(args.refresh, args.publish)

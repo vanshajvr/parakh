@@ -1,0 +1,33 @@
+name: Weekly retrain
+
+# Re-run the walk-forward evaluation and publish a new model version.
+on:
+  schedule:
+    - cron: "30 3 * * 6" # 09:00 IST, Saturday
+  workflow_dispatch:
+
+concurrency:
+  group: ledger
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -e .
+      - run: python -m jobs.retrain --refresh --publish
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-card
+          path: |
+            docs/model-card.md
+            docs/img/calibration.png
+            artifacts/metrics.json

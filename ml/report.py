@@ -24,7 +24,8 @@ def _bp(x: float) -> str:
     return "—" if pd.isna(x) else f"{x * 100:+.2f}%"
 
 
-def write_metrics(results: dict, chosen: str, version: str) -> None:
+def write_metrics(results: dict, chosen: str, version: str) -> dict:
+    """Write artifacts/metrics.json and return its contents."""
     payload = {
         "model_version": version,
         "chosen_model": chosen,
@@ -35,6 +36,7 @@ def write_metrics(results: dict, chosen: str, version: str) -> None:
     }
     config.ARTIFACTS_DIR.mkdir(exist_ok=True)
     (config.ARTIFACTS_DIR / "metrics.json").write_text(json.dumps(payload, indent=2, default=float))
+    return payload
 
 
 def plot_calibration(oos: pd.DataFrame) -> None:

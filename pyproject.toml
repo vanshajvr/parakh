@@ -14,13 +14,15 @@ dependencies = [
     "matplotlib>=3.11",
     "pyarrow>=26.0",
     "joblib",
+    "psycopg[binary]>=3.3",
+    "python-dotenv>=1.2",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=9.1"]
 
 [tool.setuptools]
-packages = ["ml", "jobs"]
+packages = ["ml", "jobs", "ledger"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

@@ -1,0 +1,26 @@
+name: Daily ledger
+
+# After the NSE close: score matured calls and publish the next session's calls.
+on:
+  schedule:
+    - cron: "30 12 * * 1-5" # 18:00 IST, Monday–Friday
+  workflow_dispatch:
+
+concurrency:
+  group: ledger
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -e .
+      - run: python -m jobs.daily
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
