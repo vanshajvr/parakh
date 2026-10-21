@@ -3,16 +3,11 @@ name = "parakh"
 version = "0.1.0"
 description = "ML stock signals with receipts: calibrated, explained, and publicly scored."
 requires-python = ">=3.11,<3.14"
+# Core: what the read-only API needs. The ML stack is an extra, so the API host stays small.
 dependencies = [
-    "yfinance>=1.7",
     "pandas>=3.0",
     "numpy>=2.4",
     "ta>=0.11",
-    "scikit-learn>=1.9",
-    "lightgbm>=4.7",
-    "shap>=0.51",
-    "matplotlib>=3.11",
-    "pyarrow>=26.0",
     "joblib",
     "psycopg[binary]>=3.3",
     "psycopg-pool>=3.3",
@@ -22,10 +17,22 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Training, the daily job and the model card.
+ml = [
+    "yfinance>=1.7",
+    "scikit-learn>=1.9",
+    "lightgbm>=4.7",
+    "shap>=0.51",
+    "matplotlib>=3.11",
+    "pyarrow>=26.0",
+]
 dev = ["pytest>=9.1", "httpx>=0.28"]
 
 [tool.setuptools]
 packages = ["ml", "jobs", "ledger", "api"]
+
+[tool.setuptools.package-data]
+ledger = ["schema.sql"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

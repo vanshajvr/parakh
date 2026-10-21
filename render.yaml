@@ -1,0 +1,22 @@
+# Render blueprint for the read-only API (Render dashboard → New → Blueprint → this repo).
+services:
+  - type: web
+    name: parakh-api
+    runtime: python
+    region: singapore # next to the Neon database
+    plan: free
+    buildCommand: pip install .
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - api/**
+        - ml/**
+        - ledger/**
+        - pyproject.toml
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: DATABASE_URL
+        sync: false # set in the dashboard; never committed
