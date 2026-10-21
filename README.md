@@ -4,7 +4,7 @@
 
 **ML stock signals with receipts.** An installable web app for beginner Indian investors. Every call shows its track record, its confidence and its reasoning. It says "No call" when the data isn't clear, and it admits when its edge is too small to trade on.
 
-**Live app:** _link coming with the first deployment_ · [Model card](docs/model-card.md) · [Decision log](docs/decisions.md) · [PRD](docs/PRD.md)
+**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Model card](docs/model-card.md) · [Decision log](docs/decisions.md) · [PRD](docs/PRD.md)
 
 <p>
   <img src="docs/img/screen-today-phone.png" alt="Parakh's Today screen on a phone: five calls, each with a lean, a confidence label and its testing hit rate, and a warning on Titan" width="260">

@@ -71,7 +71,7 @@ TypeScript types are generated from the API's OpenAPI schema, so the frontend an
 | Piece | Where | Config |
 |---|---|---|
 | API | Render (free plan, Singapore) | [`render.yaml`](../render.yaml); set `DATABASE_URL` in the dashboard |
-| Frontend | Vercel (root directory `frontend`) | [`frontend/vercel.json`](../frontend/vercel.json) forwards `/api/*` to the API |
+| Frontend | Vercel (root directory `frontend`), live at [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) | [`frontend/vercel.json`](../frontend/vercel.json) forwards `/api/*` to the API |
 | Jobs | GitHub Actions | `DATABASE_URL` secret |
 | Keep-warm ping | GitHub Actions | `API_URL` repository variable ([why](../.github/workflows/keep-warm.yml)) |
 | Database | Neon Postgres (Singapore) | — |
