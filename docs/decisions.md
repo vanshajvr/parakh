@@ -4,6 +4,25 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-015 · Ledger integrity rules are enforced by the system, not by promise
+**Date:** 2026-10-22
+**Decision:**
+- Postgres triggers reject any `UPDATE` or `DELETE` on published calls and on outcomes.
+- Outcomes live in a separate table, so scoring never touches a call.
+- A call is published only after its session has fully closed (16:00 IST) and before the next session opens (09:15 IST). If the job misses that window, the day stays as a visible gap instead of being backfilled.
+- Every job run is logged in `job_runs`, so gaps can be explained.
+**Why:** "Receipts" only mean something if nobody, including us, can quietly edit or backfill them.
+**Alternatives:** Publishing a hash of each day's calls to a public place (for example, a git commit). Could be added later as an external proof.
+
+### D-014 · Weekly retrain, daily predict-and-score; models stored in the database
+**Date:** 2026-10-22
+**Decision:** GitHub Actions runs `jobs.daily` at 18:00 IST on weekdays and `jobs.retrain --publish` on Saturdays. Each model is stored in `model_versions`, and every call records the version that made it. A stored version is never overwritten.
+**Why:**
+- Calls stay stable through the week instead of shifting with a daily retrain.
+- Every call can be traced to the exact model that made it.
+- The ledger and its models live in one place.
+**Alternatives:** Retraining daily (simpler, but calls drift and versions churn); committing the model file to git (bot commits, and the file history mixes with code).
+
 ### D-013 · Reasons say "Biggest factors", not "because"
 **Date:** 2026-10-22
 **Decision:** The one-line reason lists the factors that pushed the call most (from SHAP), worded as "Biggest factors: …" rather than "because …".

@@ -31,14 +31,24 @@ pytest                          # run the tests
 python -m jobs.retrain --refresh  # download data, evaluate, train, write docs/model-card.md, print today's calls
 ```
 
+### Live ledger (Neon Postgres)
+
+```bash
+cp .env.example .env                 # then paste your Neon connection string as DATABASE_URL
+python -m jobs.retrain --publish     # create tables, store the model as the active version
+python -m jobs.daily                 # refresh prices, score matured calls, publish the next calls
+```
+
+In production, both jobs run in GitHub Actions ([daily](.github/workflows/daily.yml) at 18:00 IST on weekdays, [retrain](.github/workflows/retrain.yml) on Saturdays) using a `DATABASE_URL` repository secret. The ledger rules (append-only, publish window) are described in [decision D-015](docs/decisions.md).
+
 ## Status
 
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Repo cleanup, PRD, decision log | ✅ Done |
 | 1 | ML core: walk-forward evaluation, baselines, calibration, SHAP | ✅ Done |
-| 2 | Live ledger: Neon Postgres + daily GitHub Actions job | ⏳ Next |
-| 3 | FastAPI API | — |
+| 2 | Live ledger: Neon Postgres + daily GitHub Actions job | ✅ Done |
+| 3 | FastAPI API | ⏳ Next |
 | 4 | React frontend | — |
 | 5 | Deployment, CI, case study | — |
 
