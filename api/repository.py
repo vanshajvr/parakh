@@ -100,6 +100,29 @@ class Repository:
             rows, columns=["date", "p_outperform", "lean", "confidence", "beat_index", "excess_return"]
         )
 
+    def closes_on(self, day: date) -> dict[str, tuple[float, float | None]]:
+        """Each stock's close on `day` and its change from the previous session."""
+        rows = self._all(
+            """
+            SELECT ticker, close, close / prev - 1 AS change FROM (
+                SELECT ticker, date, close, lag(close) OVER (PARTITION BY ticker ORDER BY date) AS prev
+                FROM prices WHERE date BETWEEN %(day)s::date - 14 AND %(day)s
+            ) p WHERE date = %(day)s
+            """,
+            {"day": day},
+        )
+        return {r["ticker"]: (r["close"], r["change"]) for r in rows}
+
+    def backtest_by_ticker(self) -> list[dict]:
+        """Simulated hit rate per stock, over bullish/bearish calls only."""
+        return self._all("""
+            SELECT ticker,
+                   count(*) AS n_calls,
+                   avg(CASE WHEN (lean = 'bullish') = beat_index THEN 1.0 ELSE 0.0 END) AS hit_rate
+            FROM backtest_predictions WHERE lean <> 'no_call'
+            GROUP BY ticker
+        """)
+
     def recent_runs(self, limit: int = 10) -> list[dict]:
         return self._all(
             "SELECT job, started_at, status, detail FROM job_runs ORDER BY id DESC LIMIT %s", (limit,)

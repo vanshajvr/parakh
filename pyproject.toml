@@ -1,5 +1,5 @@
 [project]
-name = "signalforge"
+name = "parakh"
 version = "0.1.0"
 description = "ML stock signals with receipts: calibrated, explained, and publicly scored."
 requires-python = ">=3.11,<3.14"

@@ -1,10 +1,10 @@
-# Product Requirements: SignalForge (working name)
+# Product Requirements: Parakh
 
 > Status: v0 draft · Owner: Vanshaj Verma · Last updated: 2026-10-22
 
 ## 1. Summary
 
-SignalForge is an ML-powered stock signal tool for beginner Indian investors, designed as the opposite of a stock-tips group. Every signal comes with its **track record**, its **confidence** and its **reasoning** in plain language, and the tool openly says "No call" when the data isn't clear.
+Parakh is an ML-powered stock signal tool for beginner Indian investors, designed as the opposite of a stock-tips group. Every signal comes with its **track record**, its **confidence** and its **reasoning** in plain language, and the tool openly says "No call" when the data isn't clear.
 
 **One-liner:** ML stock signals with receipts.
 
@@ -58,6 +58,8 @@ See [decisions.md](decisions.md) for the full decision log.
 ## 6. MVP scope
 
 ### Screens
+
+On the phone, every screen shows a short summary first and reveals detail on tap. The receipt on each call and any per-stock warning are always visible (decisions D-018 and D-019). Desktop layouts open the detail by default.
 
 1. **Today**
    - A card for each stock: its lean, a confidence band and a one-line reason.
@@ -129,4 +131,4 @@ See [model-card.md](model-card.md) for current numbers.
 
 ## 10. Disclaimer
 
-SignalForge is an educational project. It is not investment advice, and it is not registered with SEBI as an investment adviser or research analyst.
+Parakh is an educational project. It is not investment advice, and it is not registered with SEBI as an investment adviser or research analyst.

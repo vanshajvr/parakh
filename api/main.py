@@ -1,4 +1,4 @@
-"""SignalForge read-only API.
+"""Parakh read-only API.
 
 Run locally: uvicorn api.main:app --reload
 """
@@ -18,7 +18,7 @@ from fastapi.responses import StreamingResponse
 from api.repository import Repository
 from ledger.db import database_url
 from api.schemas import (
-    CallStats, DataStatus, LedgerPage, LedgerRow, ModelInfo, PricePoint, Scoreboard, Signal,
+    CallStats, DataStatus, LedgerPage, LedgerRow, ModelInfo, PricePoint, Receipt, Scoreboard, Signal,
     SimulatedCall, StatusResponse, StockDetail, StockSummary, TodayResponse, TrackRecord,
 )
 from ledger.scoring import IST
@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="SignalForge API",
+    title="Parakh API",
     description="Read-only access to the live ledger, the simulated record and the active model.",
     version="0.1.0",
     lifespan=lifespan,
@@ -98,12 +98,42 @@ def stock_summary(ticker: str, call: dict | None = None) -> StockSummary:
     )
 
 
-def to_signal(row: dict) -> Signal:
-    name, sector = config.STOCKS[row["ticker"]]
-    return Signal(
-        **row, symbol=row["ticker"].removesuffix(".NS"), name=name, sector=sector,
-        lean_label=LEAN_LABELS[row["lean"]],
-    )
+def receipt_lookup(repo: Repository):
+    """Build each call's receipt from the active model's metrics and per-stock simulated record."""
+    model = repo.active_model()
+    bands = model["metrics"]["models"][model["kind"]].get("by_confidence", {}) if model else {}
+    stocks = {r["ticker"]: r for r in repo.backtest_by_ticker()}
+
+    def receipt(ticker: str, confidence: str) -> Receipt:
+        band, stock = bands.get(confidence, {}), stocks.get(ticker, {})
+        stock_hit = float(stock["hit_rate"]) if stock.get("hit_rate") is not None else None
+        return Receipt(
+            band_hit_rate=_clean(band.get("hit_rate")),
+            band_n_calls=band.get("n_calls", 0),
+            stock_hit_rate=stock_hit,
+            stock_n_calls=stock.get("n_calls", 0),
+            stock_below_coin_flip=stock_hit is not None and stock_hit < 0.5,
+        )
+
+    return receipt
+
+
+def to_signals(repo: Repository, rows: list[dict]) -> list[Signal]:
+    """Published calls with display names, receipts and the closing price they were based on."""
+    if not rows:
+        return []
+    receipt = receipt_lookup(repo)
+    closes = repo.closes_on(rows[0]["as_of"])
+    signals = []
+    for row in rows:
+        name, sector = config.STOCKS[row["ticker"]]
+        close, change = closes.get(row["ticker"], (None, None))
+        signals.append(Signal(
+            **row, symbol=row["ticker"].removesuffix(".NS"), name=name, sector=sector,
+            lean_label=LEAN_LABELS[row["lean"]], receipt=receipt(row["ticker"], row["confidence"]),
+            close=close, change_1d=change,
+        ))
+    return signals
 
 
 def to_ledger_rows(df: pd.DataFrame) -> list[LedgerRow]:
@@ -163,10 +193,13 @@ def today(repo: Repository = Depends(get_repo)):
     simulated, period = simulated_summary(repo.active_model())
     return TodayResponse(
         as_of=as_of,
-        signals=[to_signal(c) for c in calls],
+        signals=to_signals(repo, calls),
         scoreboard=Scoreboard(
             live=scored_stats(ledger) if not ledger.empty else None,
             live_since=ledger["as_of"].min() if not ledger.empty else None,
+            live_published=len(ledger),
+            live_scored=int(ledger["beat_index"].notna().sum()) if not ledger.empty else 0,
+            live_days=ledger["as_of"].nunique() if not ledger.empty else 0,
             simulated=simulated,
             simulated_period=period,
         ),
@@ -190,13 +223,12 @@ def stock(ticker: str, repo: Repository = Depends(get_repo)):
     backtest = repo.backtest(ticker)
     recent_backtest = backtest[backtest["date"] >= since]
 
-    simulated_stats = None
-    if not backtest.empty:
-        simulated_stats = CallStats(**_clean(call_stats(_as_metric_rows(backtest))))
+    def stats(rows: pd.DataFrame) -> CallStats | None:
+        return CallStats(**_clean(call_stats(_as_metric_rows(rows)))) if not rows.empty else None
 
     return StockDetail(
         stock=stock_summary(ticker, latest),
-        latest=to_signal(latest) if latest else None,
+        latest=to_signals(repo, [latest])[0] if latest else None,
         prices=[
             PricePoint(**{k: round(v, 2) if k in ("open", "high", "low", "close") else v for k, v in p.items()})
             for p in repo.prices(ticker, since)
@@ -206,7 +238,8 @@ def stock(ticker: str, repo: Repository = Depends(get_repo)):
         simulated_calls=[
             SimulatedCall(**r) for r in recent_backtest[recent_backtest["lean"] != "no_call"].to_dict("records")
         ],
-        simulated_stats=simulated_stats,
+        simulated_stats=stats(backtest),
+        simulated_past_year_stats=stats(recent_backtest),
     )
 
 
@@ -230,6 +263,9 @@ def track_record(repo: Repository = Depends(get_repo)):
         live_by_confidence=by_confidence,
         live_calibration=calibration,
         live_since=ledger["as_of"].min() if not ledger.empty else None,
+        live_published=len(ledger),
+        live_scored=len(scored),
+        live_days=ledger["as_of"].nunique() if not ledger.empty else 0,
         n_pending=int(len(ledger) - len(scored)),
         simulated=_clean(model["metrics"]) if model else None,
     )
@@ -256,7 +292,7 @@ def ledger_csv(repo: Repository = Depends(get_repo)):
     buffer.seek(0)
     return StreamingResponse(
         buffer, media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=signalforge-ledger.csv"},
+        headers={"Content-Disposition": "attachment; filename=parakh-ledger.csv"},
     )
 
 
