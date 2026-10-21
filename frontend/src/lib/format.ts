@@ -31,6 +31,20 @@ export function closeLabel(isoDate: string): string {
   return `${weekday}'s close, ${day}`
 }
 
+/** "2026-10-19" -> "19 Oct 2026" */
+export function shortDate(isoDate: string): string {
+  return new Date(`${isoDate}T12:00:00Z`).toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
+  })
+}
+
+/** "2026-10-19" -> "Mon 19 Oct" */
+export function dayLabel(isoDate: string): string {
+  const d = new Date(`${isoDate}T12:00:00Z`)
+  const weekday = d.toLocaleDateString('en-IN', { weekday: 'short', timeZone: 'UTC' })
+  return `${weekday} ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' })}`
+}
+
 export function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }

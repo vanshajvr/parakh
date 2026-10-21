@@ -4,28 +4,22 @@ import { useToday, type Signal, type Today as TodayData } from '../api/client'
 import { CallCard } from '../components/CallCard'
 import { Disclosure } from '../components/Disclosure'
 import { Info, Minus, Warning } from '../components/Icons'
+import { Loading, LoadError } from '../components/States'
 import { closeLabel, count, pct } from '../lib/format'
 import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 type Filter = 'calls' | 'bullish' | 'bearish'
 
 export function Today() {
   const { data, isPending, isError, refetch } = useToday()
-  if (isPending) return <p className="text-muted">Loading today's calls…</p>
-  if (isError) {
-    return (
-      <div className="rounded-2xl border border-line bg-surface p-5">
-        <p className="m-0 mb-3 text-ink">We couldn't load today's calls.</p>
-        <button type="button" onClick={() => refetch()} className="h-10 cursor-pointer rounded-full border border-line-2 bg-surface px-4 text-sm font-medium text-ink">
-          Try again
-        </button>
-      </div>
-    )
-  }
+  if (isPending) return <Loading what="today's calls" />
+  if (isError) return <LoadError what="today's calls" onRetry={() => refetch()} />
   return <TodayView data={data} />
 }
 
 export function TodayView({ data }: { data: TodayData }) {
+  useDocumentTitle()
   const [filter, setFilter] = useState<Filter>('calls')
   const [questionOpen, setQuestionOpen] = useState(false)
   const isDesktop = useMediaQuery(DESKTOP)

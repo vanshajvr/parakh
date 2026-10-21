@@ -143,6 +143,7 @@ def test_scoreboard_uses_only_scored_calls(client):
 def test_track_record_keeps_live_and_simulated_apart(client):
     body = client.get("/api/track-record").json()
     assert body["n_pending"] == 3
+    assert (body["live_published"], body["live_scored"], body["live_days"]) == (6, 3, 2)
     assert body["live_since"] == str(DAY1)
     assert body["live"]["n_calls"] == 2
     assert body["live_calibration"] is None  # too few outcomes to show calibration

@@ -1,7 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { Layout } from './components/Layout'
-import { ComingSoon } from './pages/ComingSoon'
+import { Learn } from './pages/Learn'
+import { PageNotFound } from './pages/PageNotFound'
+
+import { Record } from './pages/Record'
+import { Stock } from './pages/Stock'
+import { Stocks } from './pages/Stocks'
 import { Today } from './pages/Today'
 
 // Calls change once a day, so there's no need to refetch aggressively.
@@ -16,11 +21,11 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Today />} />
-            <Route path="stocks" element={<ComingSoon title="Stocks" />} />
-            <Route path="stocks/:symbol" element={<ComingSoon title="Stock page" />} />
-            <Route path="record" element={<ComingSoon title="Track record" />} />
-            <Route path="learn" element={<ComingSoon title="How it works" />} />
-            <Route path="*" element={<ComingSoon title="Page not found" />} />
+            <Route path="stocks" element={<Stocks />} />
+            <Route path="stocks/:symbol" element={<Stock />} />
+            <Route path="record" element={<Record />} />
+            <Route path="learn" element={<Learn />} />
+            <Route path="*" element={<PageNotFound />} />
           </Route>
         </Routes>
       </BrowserRouter>

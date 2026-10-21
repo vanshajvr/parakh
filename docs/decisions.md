@@ -4,6 +4,18 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-021 · Offline: show the last saved calls, never stale data silently
+**Date:** 2026-10-22
+**Decision:** The PWA precaches the app itself and caches API responses network-first (6-second timeout, kept for 3 days). When the device is offline, a banner says the calls shown are the last ones saved on this device. The CSV download is never cached.
+**Why:** A beginner opening the installed app on a train should see something useful, but must never mistake old calls for today's. Network-first means a working connection always wins.
+**Alternatives:** Cache-first (faster, but risks showing yesterday's calls as current); no offline support (a blank screen when offline).
+
+### D-020 · A custom SVG price chart instead of a charting library
+**Date:** 2026-10-22
+**Decision:** The stock page's price chart is a small hand-written SVG component, not TradingView's `lightweight-charts`.
+**Why:** The approved design encodes each past call as colour = lean and filled/hollow = right/wrong, which that library's markers can't draw. A trader-style chart with crosshairs and candles also isn't what a beginner needs. The custom chart is about 150 lines, fully accessible (`role="img"` with a text summary) and removes a dependency.
+**Alternatives:** `lightweight-charts` (planned in Phase 0); Recharts (heavier, generic styling).
+
 ### D-019 · Warn about stocks the model handles badly; don't hide them (yet)
 **Date:** 2026-10-22
 **Decision:** If a stock's own simulated hit rate is below 50%, its stock page and its call card say so plainly (for example, Titan: "47.1% right in testing, below a coin flip"), and the warning stays visible even when sections are collapsed. Calls on those stocks are still published.

@@ -75,6 +75,8 @@ npm run gen:api        # regenerate src/api/schema.ts after changing the API's r
 
 TypeScript types come straight from the API's OpenAPI schema, so the frontend and backend can't drift apart. Fixtures are used only in development and are never included in production builds.
 
+The app is an installable PWA: "Install app" appears in supporting browsers (Chrome, Edge, Android), and on iPhone it can be added from Safari's Share menu. Offline, it shows the last calls it saved, with a banner saying so ([D-021](docs/decisions.md)).
+
 ## Status
 
 | Phase | Scope | Status |
@@ -83,8 +85,8 @@ TypeScript types come straight from the API's OpenAPI schema, so the frontend an
 | 1 | ML core: walk-forward evaluation, baselines, calibration, SHAP | ✅ Done |
 | 2 | Live ledger: Neon Postgres + daily GitHub Actions job | ✅ Done |
 | 3 | FastAPI API | ✅ Done |
-| 4 | Frontend (installable web app) | 🚧 In progress: Today screen done; stock page, track record, PWA next |
-| 5 | Deployment, CI, case study | — |
+| 4 | Frontend: installable web app (PWA) with Today, Stock, Track record and How it works | ✅ Done |
+| 5 | Deployment, case study | ⏳ Next |
 
 ## Disclaimer
 

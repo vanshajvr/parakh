@@ -263,6 +263,9 @@ def track_record(repo: Repository = Depends(get_repo)):
         live_by_confidence=by_confidence,
         live_calibration=calibration,
         live_since=ledger["as_of"].min() if not ledger.empty else None,
+        live_published=len(ledger),
+        live_scored=len(scored),
+        live_days=ledger["as_of"].nunique() if not ledger.empty else 0,
         n_pending=int(len(ledger) - len(scored)),
         simulated=_clean(model["metrics"]) if model else None,
     )

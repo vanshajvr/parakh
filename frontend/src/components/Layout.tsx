@@ -1,5 +1,7 @@
-import { NavLink, Outlet } from 'react-router'
-import { Book, Calendar, Chart, ReceiptIcon } from './Icons'
+import { useEffect } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router'
+import { useInstallPrompt, useOnline } from '../lib/pwa'
+import { Book, Calendar, Chart, Download, ReceiptIcon } from './Icons'
 import { Logo } from './Logo'
 
 const NAV = [
@@ -10,8 +12,20 @@ const NAV = [
 ]
 
 export function Layout() {
+  const install = useInstallPrompt()
+  const online = useOnline()
+  const { pathname, hash } = useLocation()
+
+  // New page, new scroll position (in-page links like #ledger handle their own scrolling).
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0)
+  }, [pathname, hash])
+
   return (
     <div className="min-h-dvh bg-page">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-20 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2">
+        Skip to content
+      </a>
       <header className="sticky top-0 z-10 border-b border-line bg-surface">
         <div className="mx-auto flex min-h-14 max-w-6xl items-center gap-8 px-5 lg:min-h-16 lg:px-8">
           <NavLink to="/" aria-label="Parakh home" className="no-underline">
@@ -33,10 +47,25 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
+          {install && (
+            <button
+              type="button"
+              onClick={install}
+              className="ml-auto inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-line-2 bg-surface px-3 text-[13px] font-medium text-ink lg:h-10 lg:border-brand lg:bg-brand lg:px-4 lg:text-sm lg:text-on-brand"
+            >
+              <Download size={15} /> Install app
+            </button>
+          )}
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 pt-5 pb-28 lg:px-8 lg:pt-8 lg:pb-12">
+      {!online && (
+        <p role="status" className="m-0 bg-chip px-5 py-2 text-center text-[13px] text-ink-2">
+          You're offline. Showing the last calls Parakh saved on this device.
+        </p>
+      )}
+
+      <main id="main" className="mx-auto max-w-6xl px-4 pt-5 pb-28 lg:px-8 lg:pt-8 lg:pb-12">
         <Outlet />
         <p className="mt-8 px-1 text-xs leading-relaxed text-muted">
           Parakh is an educational project. It is not investment advice and is not registered with SEBI.

@@ -495,6 +495,12 @@ export interface components {
             }[] | null;
             /** Live Since */
             live_since: string | null;
+            /** Live Published */
+            live_published: number;
+            /** Live Scored */
+            live_scored: number;
+            /** Live Days */
+            live_days: number;
             /** N Pending */
             n_pending: number;
             /** Simulated */

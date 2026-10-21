@@ -151,6 +151,9 @@ class TrackRecord(BaseModel):
     live_by_confidence: dict[str, CallStats]
     live_calibration: list[dict] | None
     live_since: date | None
+    live_published: int
+    live_scored: int
+    live_days: int
     n_pending: int
     simulated: dict | None
     coin_flip_hit_rate: float = 0.5

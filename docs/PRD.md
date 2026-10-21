@@ -59,6 +59,8 @@ See [decisions.md](decisions.md) for the full decision log.
 
 ### Screens
 
+On the phone, every screen shows a short summary first and reveals detail on tap. The receipt on each call and any per-stock warning are always visible (decisions D-018 and D-019). Desktop layouts open the detail by default.
+
 1. **Today**
    - A card for each stock: its lean, a confidence band and a one-line reason.
    - A scoreboard strip: hit rate on calls vs a coin flip, and how bullish-lean stocks did relative to simply holding a NIFTY 50 index fund.
