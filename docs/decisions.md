@@ -4,6 +4,39 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-013 · Reasons say "Biggest factors", not "because"
+**Date:** 2026-10-22
+**Decision:** The one-line reason lists the factors that pushed the call most (from SHAP), worded as "Biggest factors: …" rather than "because …".
+**Why:** The model often bets on reversals (a big weekly gain can push towards *lagging*), and feature effects depend on combinations. "Because it's up 10.9% this week → bearish" sounds illogical to a beginner. "Biggest factors" is faithful to the model without implying simple cause and effect.
+**Follow-up:** The How-it-works page should explain reversal effects in plain words.
+
+### D-012 · Model selection by Brier score, simpler model wins ties
+**Date:** 2026-10-22
+**Decision:** Compare candidates on out-of-sample Brier score; on a tie (difference under 0.00001), pick the simpler model. Result: LightGBM (hit rate 51.2%, calibration error 0.7%) over logistic regression (48.7%, 1.6%).
+**Why:** The product promises honest probabilities, so the selection metric rewards calibrated probabilities rather than raw accuracy.
+
+### D-011 · Probabilities centred within each day; base model refit after calibration
+**Date:** 2026-10-22
+**Decision:** After calibration, centre each day's probabilities on 50%. Fit the calibrator on the latest 20% of the training window, then refit the base model on the whole window.
+**Why:** Without centring, the calibrator picked up how often stocks beat the index recently, so whole years became all-bullish or all-bearish (2022: 100% bearish). Since the target is relative, about half the stocks beat the index on any day, so centring is principled. Training only on the first 80% cost signal (AUC fell from 0.512 to 0.500); refitting recovered it.
+
+### D-010 · The "No call" band is sized by coverage, not a fixed threshold
+**Date:** 2026-10-22
+**Decision:** Each model sizes its "No call" band on its calibration slice so about 25% of stock-days get a call. Calls are split into *Slight edge* and *Stronger edge* (the more confident half).
+**Why:** With a weak model, calibrated probabilities sit between about 46% and 54%, so the planned fixed 55%/45% thresholds would almost never trigger and the Today screen would always say "No call". Sizing by coverage keeps the screen useful, and the hit rate shown next to each band keeps it honest. *Stronger edge* calls have done better (51.9% vs 50.6%).
+**Alternatives:** Fixed thresholds (too few calls); always calling the top/bottom N each day (overstates confidence on quiet days).
+
+### D-009 · Extra features tested and dropped
+**Date:** 2026-10-22
+**Decision:** 12-month momentum, distance from the 52-week high and sector-relative return were tested and not added.
+**Why:** AUC moved from 0.5095 to 0.5118 (within noise), and the gap between top- and bottom-ranked stocks didn't improve. They would also cost a year of warm-up data. Simpler model wins.
+
+### D-008 · Target: "beats the NIFTY 50 over 5 days", not "price goes up"
+**Date:** 2026-10-22
+**Decision:** Predict whether a stock's 5-day return beats the NIFTY 50's.
+**Why:** On the absolute target the model had no edge (AUC ≈ 0.50), and its calls followed the market mood (bullish on 98% of stock-days in 2024). The relative target removes market swings, kept a small, steady edge across years in early tests, and fits the user: the honest alternative for a beginner is an index fund, so the question is "is this stock likely to do better than the index?"
+**Consequence:** Copy becomes "likely to outperform / lag the NIFTY 50", and the scoreboard benchmark becomes the index fund.
+
 ### D-007 · Explanations use fixed templates, not an LLM (for now)
 **Date:** 2026-10-22
 **Decision:** Turn each prediction's SHAP values into fixed plain-English sentence templates.
@@ -28,7 +61,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ### D-003 · 5-trading-day horizon, 15–20 stocks
 **Date:** 2026-10-22
-**Decision:** Predict direction over 5 trading days for 15–20 liquid NIFTY 50 stocks.
+**Decision:** Predict direction over 5 trading days for 15–20 liquid NIFTY 50 stocks (20 chosen; see `ml/config.py`). The target was later changed to performance relative to the index (D-008).
 **Why:** Next-day direction is close to random. A 5-day horizon is less noisy and fits how beginners actually hold stocks. A small universe keeps the data and stats clean.
 **Alternatives:** Next-day (too noisy); all of NIFTY 50 (can be added later).
 
