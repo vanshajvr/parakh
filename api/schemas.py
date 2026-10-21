@@ -16,6 +16,16 @@ class Factor(BaseModel):
     text: str
 
 
+class Receipt(BaseModel):
+    """The track record shown next to a call: how this confidence level and this stock have done."""
+
+    band_hit_rate: float | None
+    band_n_calls: int
+    stock_hit_rate: float | None
+    stock_n_calls: int
+    stock_below_coin_flip: bool
+
+
 class Signal(BaseModel):
     ticker: str
     symbol: str
@@ -30,6 +40,9 @@ class Signal(BaseModel):
     factors: list[Factor]
     model_version: str
     published_at: datetime
+    receipt: Receipt
+    close: float | None
+    change_1d: float | None
 
 
 class CallStats(BaseModel):
@@ -47,6 +60,9 @@ class CallStats(BaseModel):
 class Scoreboard(BaseModel):
     live: CallStats | None
     live_since: date | None
+    live_published: int
+    live_scored: int
+    live_days: int
     simulated: CallStats | None
     simulated_period: list[date] | None
     coin_flip_hit_rate: float = 0.5
@@ -120,6 +136,7 @@ class StockDetail(BaseModel):
     live_stats: CallStats | None
     simulated_calls: list[SimulatedCall]
     simulated_stats: CallStats | None
+    simulated_past_year_stats: CallStats | None
 
 
 class LedgerPage(BaseModel):

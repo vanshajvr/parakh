@@ -1,0 +1,89 @@
+@import "tailwindcss";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-serif/600.css";
+
+/* Design tokens (decision D-018). Bullish and bearish always come with an icon and a label,
+   never colour alone. */
+:root {
+  --page: #f5f6f7;
+  --surface: #ffffff;
+  --ink: #16191d;
+  --ink-2: #3a4048;
+  --muted: #59616b;
+  --line: #e3e6e9;
+  --line-2: #d5d9de;
+  --chip: #f0f1f3;
+  --brand: #1f2328;
+  --on-brand: #ffffff;
+  --link: #1d5ba6;
+  --bull: #1d5ba6;
+  --bull-tint: #e9f1fb;
+  --bear: #974a0c;
+  --bear-mark: #c2600f;
+  --bear-tint: #fbefe4;
+  --warn-ink: #5e2f07;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #0f1114;
+    --surface: #171a1e;
+    --ink: #eceef0;
+    --ink-2: #c4c9cf;
+    --muted: #9aa2ab;
+    --line: #2a2f35;
+    --line-2: #383e45;
+    --chip: #22262b;
+    --brand: #eceef0;
+    --on-brand: #16191d;
+    --link: #8bb8f2;
+    --bull: #8bb8f2;
+    --bull-tint: #172638;
+    --bear: #f0a868;
+    --bear-mark: #e08a45;
+    --bear-tint: #33210f;
+    --warn-ink: #f3c9a0;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-chip: var(--chip);
+  --color-brand: var(--brand);
+  --color-on-brand: var(--on-brand);
+  --color-link: var(--link);
+  --color-bull: var(--bull);
+  --color-bull-tint: var(--bull-tint);
+  --color-bear: var(--bear);
+  --color-bear-mark: var(--bear-mark);
+  --color-bear-tint: var(--bear-tint);
+  --color-warn-ink: var(--warn-ink);
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-serif: "IBM Plex Serif", Georgia, serif;
+}
+
+/* In the base layer so utility classes (e.g. nav link colours) can override them. */
+@layer base {
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--link);
+  }
+}

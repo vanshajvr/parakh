@@ -1,4 +1,4 @@
--- SignalForge ledger schema. Idempotent: safe to run on every job start.
+-- Parakh ledger schema. Idempotent: safe to run on every job start.
 
 -- Every trained model, stored with its evaluation so each call can be traced to the exact model.
 CREATE TABLE IF NOT EXISTS model_versions (

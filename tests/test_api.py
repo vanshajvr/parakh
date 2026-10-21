@@ -44,6 +44,7 @@ SIM_SUMMARY = {
     "n_calls": 100, "coverage": 0.2, "hit_rate": 0.51, "n_bullish": 50, "bullish_hit_rate": 0.5,
     "n_bearish": 50, "bearish_hit_rate": 0.52, "avg_excess_after_bullish": 0.002,
     "avg_excess_after_bearish": 0.0005, "period": ["2019-01-02", "2026-10-12"],
+    "by_confidence": {"Slight edge": {"n_calls": 60, "hit_rate": 0.505}},
 }
 
 
@@ -87,6 +88,13 @@ class FakeRepository:
              "beat_index": False, "excess_return": -0.01},
         ])
 
+    def closes_on(self, day):
+        return {"TCS.NS": (3100.5, -0.012)} if day == DAY2 else {}
+
+    def backtest_by_ticker(self):
+        return [{"ticker": "INFY.NS", "n_calls": 300, "hit_rate": 0.53},
+                {"ticker": "TCS.NS", "n_calls": 340, "hit_rate": 0.471}]
+
     def recent_runs(self, limit=10):
         return [{"job": "daily", "started_at": PUBLISHED, "status": "ok", "detail": "published"}][:limit]
 
@@ -105,7 +113,24 @@ def test_today_shows_latest_calls_most_confident_first(client):
     assert [s["symbol"] for s in body["signals"]] == ["TCS", "INFY", "ITC"]
     assert body["signals"][0]["name"] == "Tata Consultancy Services"
     assert body["signals"][0]["lean_label"] == "Bullish lean"
+    assert body["signals"][0]["close"] == 3100.5 and body["signals"][0]["change_1d"] == -0.012
+    assert body["signals"][1]["close"] is None  # missing price data is shown as unknown
     assert body["status"]["stale"] is False
+    assert body["scoreboard"]["live_published"] == 6
+    assert body["scoreboard"]["live_scored"] == 3
+    assert body["scoreboard"]["live_days"] == 2
+
+
+def test_every_call_carries_its_receipt(client):
+    signals = {s["symbol"]: s for s in client.get("/api/today").json()["signals"]}
+    tcs, infy, itc = signals["TCS"]["receipt"], signals["INFY"]["receipt"], signals["ITC"]["receipt"]
+
+    assert tcs["band_hit_rate"] == 0.505 and tcs["band_n_calls"] == 60
+    assert tcs["stock_hit_rate"] == 0.471 and tcs["stock_below_coin_flip"] is True
+    assert infy["stock_below_coin_flip"] is False
+    # A band or stock with no simulated history gets an empty receipt, not an error.
+    assert itc["band_hit_rate"] is None and itc["stock_hit_rate"] is None
+    assert itc["stock_below_coin_flip"] is False
 
 
 def test_scoreboard_uses_only_scored_calls(client):
@@ -131,6 +156,8 @@ def test_stock_page_accepts_plain_symbols(client):
     assert body["prices"][0]["close"] == 100.46
     assert [c["id"] for c in body["live_calls"]] == [4, 1]
     assert len(body["simulated_calls"]) == 1  # "No call" days aren't chart markers
+    assert body["simulated_stats"]["n_calls"] == 1
+    assert body["simulated_past_year_stats"]["hit_rate"] == 1.0
     assert client.get("/api/stocks/NOPE").status_code == 404
 
 

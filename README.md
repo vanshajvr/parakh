@@ -1,4 +1,6 @@
-# SignalForge (working name)
+# Parakh
+
+*Parakh (परख): to test something's true worth, the way a jeweller tests gold on a touchstone.*
 
 **ML stock signals with receipts.** A signal tool for beginner Indian investors. Every call shows its track record, its confidence and its reasoning, and it says "No call" when the data isn't clear.
 
@@ -6,7 +8,7 @@
 
 ## Why
 
-Stock tips from Telegram groups and finfluencers come with no track record, no stated confidence and no reasoning. SignalForge is the opposite:
+Stock tips from Telegram groups and finfluencers come with no track record, no stated confidence and no reasoning. Parakh is the opposite:
 
 - **Receipts:** a public, append-only ledger of every call, published before the outcome is known.
 - **Confidence:** calibrated probabilities, never a bare "BUY".
@@ -58,6 +60,21 @@ The API is read-only (its database sessions can't write) and caches results for 
 
 In production, both jobs run in GitHub Actions ([daily](.github/workflows/daily.yml) at 18:00 IST on weekdays, [retrain](.github/workflows/retrain.yml) on Saturdays) using a `DATABASE_URL` repository secret. The ledger rules (append-only, publish window) are described in [decision D-015](docs/decisions.md).
 
+### Frontend
+
+React + TypeScript + Vite, styled with Tailwind. Requires Node 20+.
+
+```bash
+cd frontend
+npm install
+npm run dev            # http://localhost:5173, with the API running on :8000
+npm run dev:fixtures   # no API needed: uses recorded responses from src/fixtures/
+npm test               # component and logic tests
+npm run gen:api        # regenerate src/api/schema.ts after changing the API's response models
+```
+
+TypeScript types come straight from the API's OpenAPI schema, so the frontend and backend can't drift apart. Fixtures are used only in development and are never included in production builds.
+
 ## Status
 
 | Phase | Scope | Status |
@@ -66,7 +83,7 @@ In production, both jobs run in GitHub Actions ([daily](.github/workflows/daily.
 | 1 | ML core: walk-forward evaluation, baselines, calibration, SHAP | ✅ Done |
 | 2 | Live ledger: Neon Postgres + daily GitHub Actions job | ✅ Done |
 | 3 | FastAPI API | ✅ Done |
-| 4 | React frontend | ⏳ Next |
+| 4 | Frontend (installable web app) | 🚧 In progress: Today screen done; stock page, track record, PWA next |
 | 5 | Deployment, CI, case study | — |
 
 ## Disclaimer

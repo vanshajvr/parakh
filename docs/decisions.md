@@ -4,6 +4,34 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-019 · Warn about stocks the model handles badly; don't hide them (yet)
+**Date:** 2026-10-22
+**Decision:** If a stock's own simulated hit rate is below 50%, its stock page and its call card say so plainly (for example, Titan: "47.1% right in testing, below a coin flip"), and the warning stays visible even when sections are collapsed. Calls on those stocks are still published.
+**Why:** Transparency is the product. Quietly dropping weak stocks would make the overall record look better than it is, which is the cherry-picking Parakh exists to oppose. Users can weigh the call themselves.
+**Alternatives:** Suppressing calls on stocks below 50% (more protective, but it hides information and flatters the scoreboard).
+**Finding:** 8 of the 20 stocks are below 50% in testing (lowest: ICICI Bank at 44.2%; highest: UltraTech Cement at 58.2%). With roughly 300–450 calls per stock, much of that spread could be chance, so the expanded card says "part of that gap from 50% may be chance" rather than implying the model is reliably wrong on those stocks.
+**Follow-up:** Revisit in a modelling pass before adding more stocks: per-stock or per-sector behaviour, regime features, and whether the repeated "short-term trend below longer-term trend" explanation (3 of 5 calls on 19 Oct) points to a feature that dominates too much.
+
+### D-018 · Installable web app (PWA), calm editorial design, details on demand
+**Date:** 2026-10-22
+**Decision:**
+- One responsive web app that can be installed as a PWA on phones and on Windows/Mac. No native apps.
+- A calm, editorial look: IBM Plex Serif and Sans (Plex has a matching Devanagari typeface for the planned Hindi version).
+- Blue for bullish and orange for bearish, always with an icon and a label, never colour alone.
+- Progressive disclosure on the phone: cards and sections show a summary and expand on tap.
+- The receipt line and any per-stock warning never collapse.
+**Why:**
+- Beginners discover stocks on their phones, while recruiters and researchers use laptops; one codebase serves both.
+- App stores add cost and review overhead with no benefit for this audience.
+- The first mockups were judged "too open and detailed" for a beginner, so detail moved behind taps without hiding the receipts.
+**Alternatives:** React Native/Expo apps; Electron/Tauri desktop apps; bright fintech styling.
+
+### D-017 · Name: Parakh
+**Date:** 2026-10-22
+**Decision:** Rename the product from "SignalForge (working name)" to **Parakh** (परख, to test something's true worth, as a jeweller tests gold).
+**Why:** It says what the product does to stock tips, has an easy story to tell, suits an Indian audience and points towards a Hindi version. "Signal" names sound like the paid tips channels Parakh is positioned against.
+**Alternatives:** Tilt ("a tilt, not a tip"), Kasauti, Hisaab, Tipcheck, Receipts. Names containing "Nifty" were ruled out (NSE trademark).
+
 ### D-016 · A thin, read-only API that shares the model card's scoring code
 **Date:** 2026-10-22
 **Decision:**
