@@ -8,11 +8,13 @@ import time
 from datetime import date
 
 import pandas as pd
+import psycopg
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
 CACHE_SECONDS = 300
-# Neon suspends idle compute after ~5 minutes and drops its connections; recycle ours first.
+# Neon suspends idle compute after ~5 minutes and drops its connections. Extra pooled connections
+# are closed before then; the pool's one permanent connection can still go stale (see _all).
 MAX_IDLE_SECONDS = 240
 
 LEDGER_COLUMNS = """
@@ -45,10 +47,19 @@ class Repository:
         hit = self._cache.get(key)
         if hit and time.monotonic() - hit[0] < CACHE_SECONDS:
             return hit[1]
-        with self.pool.connection() as conn:
-            rows = conn.execute(sql, params).fetchall()
+        try:
+            rows = self._query(sql, params)
+        except psycopg.OperationalError:
+            # Neon closes connections when its compute sleeps, and the pool keeps one connection
+            # open, so the first query after a quiet spell can hit a dead connection. The pool
+            # discards broken connections, so one retry gets a fresh one.
+            rows = self._query(sql, params)
         self._cache[key] = (time.monotonic(), rows)
         return rows
+
+    def _query(self, sql: str, params: tuple | dict) -> list[dict]:
+        with self.pool.connection() as conn:
+            return conn.execute(sql, params).fetchall()
 
     def latest_calls(self) -> list[dict]:
         return self._all("""
