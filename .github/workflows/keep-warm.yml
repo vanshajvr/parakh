@@ -1,0 +1,17 @@
+name: Keep API warm
+
+# Render's free plan sleeps after 15 idle minutes, and waking takes up to a minute.
+# Pinging during Indian waking hours keeps first visits fast. Set the API_URL repository
+# variable (Settings → Secrets and variables → Actions → Variables) to enable this.
+on:
+  schedule:
+    - cron: "*/10 0-18 * * *" # every 10 minutes, 05:30–00:30 IST
+  workflow_dispatch:
+
+jobs:
+  ping:
+    if: vars.API_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: curl --silent --show-error --fail --retry 3 --retry-delay 20 --max-time 90 "${{ vars.API_URL }}/api/health"

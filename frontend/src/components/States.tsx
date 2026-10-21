@@ -1,8 +1,23 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 
+/** After a few seconds, explain the wait: the free API host sleeps when idle. */
 export function Loading({ what }: { what: string }) {
-  return <p role="status" className="m-0 px-1 text-muted">Loading {what}…</p>
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    const timer = setTimeout(() => setSlow(true), 4000)
+    return () => clearTimeout(timer)
+  }, [])
+  return (
+    <div role="status" className="flex flex-col gap-1 px-1">
+      <p className="m-0 text-muted">Loading {what}…</p>
+      {slow && (
+        <p className="m-0 text-sm text-muted">
+          Parakh runs on free hosting that sleeps when nobody's using it. Waking up can take up to a minute.
+        </p>
+      )}
+    </div>
+  )
 }
 
 export function LoadError({ what, onRetry }: { what: string; onRetry: () => void }) {
