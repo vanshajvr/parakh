@@ -1,55 +1,39 @@
-# Signal Forge
+# SignalForge (working name)
 
-A mini algo-trading prototype using RSI & DMA strategy, ML-based predictions, and Google Sheets automation.
+**ML stock signals with receipts.** A signal tool for beginner Indian investors. Every call shows its track record, its confidence and its reasoning, and it says "No call" when the data isn't clear.
 
-## Overview
-This project implements an automated trading system prototype that:
+> 🚧 **Under active rebuild.** This project started as a notebook for a screening assignment and is being rebuilt into a full product. See the [roadmap](docs/PRD.md#9-roadmap).
 
-- Fetches historical stock data for NIFTY 50 stocks from Yahoo Finance.
-- Applies a technical trading strategy combining RSI and moving average crossovers.
-- Uses basic machine learning models to predict next-day stock price movement.
-- Logs trades and performance metrics automatically to Google Sheets.
-- Calculates and displays trade PnL and win ratio for performance analysis.
+## Why
 
-## Features
+Stock tips from Telegram groups and finfluencers come with no track record, no stated confidence and no reasoning. SignalForge is the opposite:
 
-- **Technical Indicators:** RSI (14-day), 20-day & 50-day moving averages.
-- **Trading Signals:** Buy when RSI < 30 and 20DMA crosses above 50DMA.
-- **Machine Learning:** Logistic Regression and Decision Tree classifiers on RSI, MACD, and volume.
-- **Automation:** Google Sheets integration for live trade logs and PnL summaries.
-- **Modular Code:** Functions organised for data fetching, indicator calculation, signal generation, ML modelling, and Google Sheets updates.
+- **Receipts:** a public, append-only ledger of every call, published before the outcome is known.
+- **Confidence:** calibrated probabilities, never a bare "BUY".
+- **Reasoning:** a plain-English explanation of the top factors behind each call.
+- **Honesty:** "No call" when the model isn't confident, and the worst periods shown openly.
 
-## Machine Learning Details
+## Docs
 
-- Input features: RSI, MACD (and its components), and trading volume.
-- Target: Binary classification of next-day price movement (up/down).
-- Models implemented: Logistic Regression and Decision Tree.
-- Achieved around 60% accuracy with Decision Tree.
+- [Product requirements (PRD)](docs/PRD.md)
+- [Decision log](docs/decisions.md)
+- [Original prototype and its known issues](research/README.md)
 
-## Google Sheets Automation
+## Status
 
-- Trade signals and related metrics logged in "Trade Log" sheet.
-- Summary tab includes total trades, wins, win ratio, and net PnL.
-- Enables real-time monitoring and performance tracking.
+| Phase | Scope | Status |
+|---|---|---|
+| 0 | Repo cleanup, PRD, decision log | ✅ Done |
+| 1 | ML core: walk-forward evaluation, baselines, calibration, SHAP | ⏳ Next |
+| 2 | Live ledger: Neon Postgres + daily GitHub Actions job | — |
+| 3 | FastAPI API | — |
+| 4 | React frontend | — |
+| 5 | Deployment, CI, case study | — |
 
-## Setup & Usage
+## Disclaimer
 
-1. Clone this repository.
-2. Install required Python packages:
-
-```bash
-pip install yfinance ta gspread oauth2client scikit-learn pandas matplotlib
-```
-3. Upload your Google Cloud service account JSON key in the Colab notebook.
-4. Run the notebook cells sequentially to fetch data, compute indicators, generate signals, train ML models, and update Google Sheets.
-5. Run the notebook cells sequentially to fetch data, compute indicators, generate signals, train ML models, and update Google Sheets.
-
-## Demonstrations
-- Strategy Logic & Code Flow: [Insert Link Here]
-- [ML Predictions & Google Sheets Integration](https://docs.google.com/spreadsheets/d/1CRLLwpluvyTambBjM_5vpVhi3iUbTJXbx8K-dycx1vY/edit?gid=1864352357#gid=1864352357)
+This is an educational project. It is not investment advice, and it is not registered with SEBI as an investment adviser or research analyst.
 
 ## Author
-Vanshaj Verma — NSUT'27 | ICE Dept
-[GitHub](https://github.com/vanshajvr) | [LinkedIn](https://www.linkedin.com/in/vanshajverma60/)
 
-
+Vanshaj Verma · NSUT '27 · [GitHub](https://github.com/vanshajvr) · [LinkedIn](https://www.linkedin.com/in/vanshajverma60/)
