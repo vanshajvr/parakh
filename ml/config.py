@@ -7,20 +7,30 @@ DATA_DIR = ROOT / "data"
 ARTIFACTS_DIR = ROOT / "artifacts"
 DOCS_DIR = ROOT / "docs"
 
-TICKERS = [
-    # Banks / financials
-    "HDFCBANK.NS", "ICICIBANK.NS", "SBIN.NS", "KOTAKBANK.NS", "AXISBANK.NS", "BAJFINANCE.NS",
-    # IT
-    "TCS.NS", "INFY.NS",
-    # Energy / utilities
-    "RELIANCE.NS", "NTPC.NS",
-    # Consumer
-    "ITC.NS", "HINDUNILVR.NS", "ASIANPAINT.NS", "TITAN.NS", "MARUTI.NS",
-    # Industrials / materials
-    "LT.NS", "TATASTEEL.NS", "ULTRACEMCO.NS",
-    # Others
-    "BHARTIARTL.NS", "SUNPHARMA.NS",
-]
+# Ticker -> (display name, sector)
+STOCKS = {
+    "HDFCBANK.NS": ("HDFC Bank", "Financials"),
+    "ICICIBANK.NS": ("ICICI Bank", "Financials"),
+    "SBIN.NS": ("State Bank of India", "Financials"),
+    "KOTAKBANK.NS": ("Kotak Mahindra Bank", "Financials"),
+    "AXISBANK.NS": ("Axis Bank", "Financials"),
+    "BAJFINANCE.NS": ("Bajaj Finance", "Financials"),
+    "TCS.NS": ("Tata Consultancy Services", "IT"),
+    "INFY.NS": ("Infosys", "IT"),
+    "RELIANCE.NS": ("Reliance Industries", "Energy"),
+    "NTPC.NS": ("NTPC", "Utilities"),
+    "ITC.NS": ("ITC", "Consumer"),
+    "HINDUNILVR.NS": ("Hindustan Unilever", "Consumer"),
+    "ASIANPAINT.NS": ("Asian Paints", "Consumer"),
+    "TITAN.NS": ("Titan Company", "Consumer"),
+    "MARUTI.NS": ("Maruti Suzuki", "Automobiles"),
+    "LT.NS": ("Larsen & Toubro", "Industrials"),
+    "TATASTEEL.NS": ("Tata Steel", "Materials"),
+    "ULTRACEMCO.NS": ("UltraTech Cement", "Materials"),
+    "BHARTIARTL.NS": ("Bharti Airtel", "Telecom"),
+    "SUNPHARMA.NS": ("Sun Pharmaceutical", "Healthcare"),
+}
+TICKERS = list(STOCKS)
 BENCHMARK = "^NSEI"
 START_DATE = "2016-01-01"
 

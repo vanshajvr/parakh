@@ -1,7 +1,7 @@
 """Walk-forward evaluation and the metrics reported in the model card.
 
 A "hit" is a bullish call on a stock that then beat the NIFTY 50 over the horizon, or a bearish
-call on one that lagged it.
+call on one that lagged it (see ml.metrics).
 """
 
 from collections.abc import Iterator
@@ -11,6 +11,7 @@ import pandas as pd
 from sklearn.metrics import brier_score_loss, roc_auc_score
 
 from ml import config
+from ml.metrics import calibration_table, call_stats, expected_calibration_error
 from ml.model import SignalModel
 from ml.signals import confidence_band, lean_from_prob
 
@@ -49,38 +50,6 @@ def run_walk_forward(labeled: pd.DataFrame, kind: str) -> pd.DataFrame:
     return pd.concat(folds, ignore_index=True)
 
 
-def expected_calibration_error(p: np.ndarray, y: np.ndarray, n_bins: int = 10) -> float:
-    bins = np.minimum((p * n_bins).astype(int), n_bins - 1)
-    ece = 0.0
-    for b in np.unique(bins):
-        in_bin = bins == b
-        ece += in_bin.mean() * abs(p[in_bin].mean() - y[in_bin].mean())
-    return float(ece)
-
-
-def _mean(s: pd.Series) -> float:
-    return float(s.mean()) if len(s) else float("nan")
-
-
-def call_stats(oos: pd.DataFrame) -> dict:
-    """How the bullish/bearish calls did, ignoring 'No call' rows."""
-    calls = oos[oos["lean"] != "no_call"]
-    bull = calls[calls["lean"] == "bullish"]
-    bear = calls[calls["lean"] == "bearish"]
-    hits = np.where(calls["lean"] == "bullish", calls["label"] == 1, calls["label"] == 0)
-    return {
-        "coverage": len(calls) / len(oos) if len(oos) else 0.0,
-        "n_calls": int(len(calls)),
-        "hit_rate": float(hits.mean()) if len(calls) else float("nan"),
-        "n_bullish": int(len(bull)),
-        "bullish_hit_rate": _mean(bull["label"] == 1),
-        "n_bearish": int(len(bear)),
-        "bearish_hit_rate": _mean(bear["label"] == 0),
-        "avg_excess_after_bullish": _mean(bull["excess_return"]),
-        "avg_excess_after_bearish": _mean(bear["excess_return"]),
-    }
-
-
 def summary_metrics(oos: pd.DataFrame) -> dict:
     p, y = oos["p_up"].to_numpy(), oos["label"].to_numpy()
     base_rate = float(y.mean())
@@ -100,18 +69,6 @@ def summary_metrics(oos: pd.DataFrame) -> dict:
             band: call_stats(g) for band, g in oos[oos["lean"] != "no_call"].groupby("confidence")
         },
     }
-
-
-def calibration_table(oos: pd.DataFrame, n_bins: int = 10) -> pd.DataFrame:
-    """Predicted vs actual frequency, binned by predicted probability (empty bins dropped)."""
-    lo, hi = oos["p_up"].quantile([0.005, 0.995])
-    edges = np.linspace(lo, hi, n_bins + 1)
-    edges[0], edges[-1] = 0.0, 1.0
-    binned = pd.cut(oos["p_up"], edges, include_lowest=True)
-    table = oos.groupby(binned, observed=True).agg(
-        n=("label", "size"), predicted=("p_up", "mean"), actual=("label", "mean")
-    )
-    return table.reset_index(drop=True)
 
 
 def coverage_table(oos: pd.DataFrame, coverages=(0.05, 0.10, 0.25, 0.50, 1.0)) -> pd.DataFrame:

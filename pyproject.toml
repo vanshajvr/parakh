@@ -15,16 +15,22 @@ dependencies = [
     "pyarrow>=26.0",
     "joblib",
     "psycopg[binary]>=3.3",
+    "psycopg-pool>=3.3",
     "python-dotenv>=1.2",
+    "fastapi>=0.159",
+    "uvicorn>=0.54",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=9.1"]
+dev = ["pytest>=9.1", "httpx>=0.28"]
 
 [tool.setuptools]
-packages = ["ml", "jobs", "ledger"]
+packages = ["ml", "jobs", "ledger", "api"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-filterwarnings = ["ignore::PendingDeprecationWarning:shap.*"]
+filterwarnings = [
+    "ignore::PendingDeprecationWarning:shap.*",
+    "ignore:Using `httpx` with `starlette.testclient`",
+]

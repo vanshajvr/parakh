@@ -68,8 +68,8 @@ were tested and dropped because they didn't improve out-of-sample results (decis
 
 | Confidence | Calls | Hit rate |
 |---|---|---|
-| Slight edge | 3,982 | 50.6% |
-| Stronger edge | 3,236 | 51.9% |
+| Slight edge | 4,018 | 51.0% |
+| Stronger edge | 3,336 | 51.3% |
 
 ![Calibration chart](img/calibration.png)
 
@@ -77,33 +77,33 @@ were tested and dropped because they didn't improve out-of-sample results (decis
 
 | Year | Coverage | Hit rate | AUC | Avg excess return after bullish | after bearish |
 |---|---|---|---|---|---|
-| 2019 | 18% | 51.1% | 0.509 | +0.66% | +0.22% |
-| 2020 | 23% | 48.9% | 0.496 | -0.02% | -0.02% |
-| 2021 | 12% | 45.5% | 0.477 | +0.25% | +0.72% |
-| 2022 | 20% | 54.7% | 0.528 | +0.39% | -0.17% |
-| 2023 | 33% | 52.2% | 0.513 | +0.09% | -0.06% |
-| 2024 | 13% | 53.0% | 0.517 | +0.23% | +0.06% |
-| 2025 | 11% | 49.6% | 0.510 | +0.07% | -0.05% |
-| 2026 | 21% | 52.2% | 0.515 | +0.32% | -0.03% |
+| 2019 | 19% | 52.9% | 0.511 | +0.84% | +0.14% |
+| 2020 | 23% | 48.8% | 0.500 | +0.06% | -0.04% |
+| 2021 | 12% | 46.9% | 0.479 | +0.43% | +0.62% |
+| 2022 | 20% | 54.8% | 0.529 | +0.38% | -0.13% |
+| 2023 | 35% | 51.0% | 0.513 | +0.07% | -0.01% |
+| 2024 | 14% | 53.2% | 0.515 | +0.27% | -0.02% |
+| 2025 | 11% | 48.7% | 0.508 | +0.06% | +0.03% |
+| 2026 | 21% | 51.4% | 0.509 | +0.33% | +0.11% |
 
-Worst year: **2021**, with a hit rate of 45.5%.
+Worst year: **2021**, with a hit rate of 46.9%.
 
 ### Fewer vs more calls (what-if)
 
 | Target coverage | Actual | Hit rate | Excess after bullish | after bearish |
 |---|---|---|---|---|
-| 5% | 5% | 51.7% | +0.12% | -0.03% |
-| 10% | 10% | 51.3% | +0.22% | +0.03% |
-| 25% | 25% | 51.2% | +0.22% | +0.02% |
-| 50% | 50% | 51.3% | +0.24% | +0.03% |
-| 100% | 100% | 50.7% | +0.15% | +0.05% |
+| 5% | 5% | 51.1% | +0.10% | -0.00% |
+| 10% | 10% | 51.5% | +0.20% | -0.02% |
+| 25% | 25% | 51.4% | +0.24% | +0.03% |
+| 50% | 50% | 51.1% | +0.22% | +0.02% |
+| 100% | 100% | 50.6% | +0.14% | +0.05% |
 
 ## Honest summary
 
 - The model has a **small edge**: 51.2% of its calls were right, against 50% for a coin flip, and it is
   well calibrated (calibration error 0.7%).
-- Over 5 days, stocks with a bullish lean did +0.23% relative to the index on average,
-  and stocks with a bearish lean did +0.04%. The gap (+0.19%) is **smaller than a typical
+- Over 5 days, stocks with a bullish lean did +0.28% relative to the index on average,
+  and stocks with a bearish lean did +0.05%. The gap (+0.23%) is **smaller than a typical
   round-trip trading cost of about 0.25%**, so trading on these signals alone would not be expected to make money.
 - The edge varies from year to year and has been negative in some years (see the table above).
 
@@ -111,7 +111,9 @@ Worst year: **2021**, with a hit rate of 45.5%.
 
 - Uses price and volume only: no fundamentals, news or earnings dates.
 - Large, liquid stocks are the hardest to predict. This is expected behaviour, not a bug.
-- yfinance data can be delayed or revised.
+- yfinance data can be delayed or revised. Yahoo rewrites adjusted price history after dividends and
+  corporate actions, so the simulated numbers above can shift slightly between retrains (we have
+  seen hit rates move by about 0.2 points). Live calls can't shift: each one is stored when it's published.
 - Past out-of-sample performance does not guarantee future performance. The live ledger is the real test.
 
 ## Disclaimer
