@@ -1,7 +1,7 @@
 import pandas as pd
 
-from ml.explain import FEATURE_INFO, phrase, reason
-from ml.features import FEATURE_COLUMNS
+from ml.explain import phrase, reason
+from ml.features import FEATURE_COLUMNS, FEATURE_INFO
 from ml.signals import confidence_band, lean_from_prob
 
 

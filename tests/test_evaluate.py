@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from ml.evaluate import call_stats, walk_forward_splits
+from ml.evaluate import walk_forward_splits
+from ml.metrics import call_stats
 
 
 def test_walk_forward_leaves_a_gap_before_each_test_year():

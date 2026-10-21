@@ -28,6 +28,25 @@ FEATURE_COLUMNS = [
     "rel_strength_20d",
 ]
 
+# Plain-English meaning of each feature, shown in the model card and on "How it works".
+FEATURE_INFO = {
+    "ret_1d": "Return over the last session",
+    "ret_5d": "Return over the past week (5 sessions)",
+    "ret_20d": "Return over the past month (20 sessions)",
+    "rsi_14": "RSI (14): momentum gauge; below 30 looks oversold, above 70 overbought",
+    "macd_hist": "MACD histogram (scaled by price): whether short-term momentum is turning up or down",
+    "dist_dma20": "Distance of the price from its 20-day average",
+    "dist_dma50": "Distance of the price from its 50-day average",
+    "dma20_vs_dma50": "Short-term (20-day) average vs longer-term (50-day) average",
+    "vol_20d": "Volatility over the past month, annualised",
+    "atr_pct": "Average true range (14) as a share of price: typical daily movement",
+    "bb_pctb": "Bollinger %B: where the price sits within its recent range",
+    "volume_z": "Today's trading volume vs the last 20 days",
+    "mkt_ret_5d": "NIFTY 50 return over the past week",
+    "mkt_ret_20d": "NIFTY 50 return over the past month",
+    "rel_strength_20d": "Stock's past-month return minus the NIFTY 50's",
+}
+
 
 def _stock_features(df: pd.DataFrame) -> pd.DataFrame:
     """Per-ticker features from one ticker's OHLCV history (sorted by date)."""

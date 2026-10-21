@@ -39,6 +39,23 @@ python -m jobs.retrain --publish     # create tables, store the model as the act
 python -m jobs.daily                 # refresh prices, score matured calls, publish the next calls
 ```
 
+### API
+
+```bash
+uvicorn api.main:app --reload        # http://localhost:8000/docs for the interactive API docs
+```
+
+| Endpoint | Powers |
+|---|---|
+| `GET /api/today` | Today screen: latest calls (most confident first), scoreboard, data freshness |
+| `GET /api/stocks`, `/api/stocks/{symbol}` | Stock list; stock page with a 1-year chart, the latest call with its factors, and live and simulated history |
+| `GET /api/track-record` | Track record: live stats, by confidence and calibration, next to the simulated record |
+| `GET /api/ledger`, `/api/ledger.csv` | The full public ledger, paginated or as a CSV download |
+| `GET /api/model` | How it works: model version, features and evaluation |
+| `GET /api/status` | "Data delayed" state and recent job runs |
+
+The API is read-only (its database sessions can't write) and caches results for 5 minutes.
+
 In production, both jobs run in GitHub Actions ([daily](.github/workflows/daily.yml) at 18:00 IST on weekdays, [retrain](.github/workflows/retrain.yml) on Saturdays) using a `DATABASE_URL` repository secret. The ledger rules (append-only, publish window) are described in [decision D-015](docs/decisions.md).
 
 ## Status
@@ -48,8 +65,8 @@ In production, both jobs run in GitHub Actions ([daily](.github/workflows/daily.
 | 0 | Repo cleanup, PRD, decision log | ✅ Done |
 | 1 | ML core: walk-forward evaluation, baselines, calibration, SHAP | ✅ Done |
 | 2 | Live ledger: Neon Postgres + daily GitHub Actions job | ✅ Done |
-| 3 | FastAPI API | ⏳ Next |
-| 4 | React frontend | — |
+| 3 | FastAPI API | ✅ Done |
+| 4 | React frontend | ⏳ Next |
 | 5 | Deployment, CI, case study | — |
 
 ## Disclaimer

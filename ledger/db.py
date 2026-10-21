@@ -1,10 +1,13 @@
 """Database access for the ledger (Neon Postgres via psycopg 3)."""
 
+from __future__ import annotations
+
 import io
 import json
 import os
 from contextlib import contextmanager
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import joblib
 import pandas as pd
@@ -12,19 +15,31 @@ import psycopg
 from dotenv import load_dotenv
 from psycopg.types.json import Jsonb
 
-from ml.model import SignalModel
+if TYPE_CHECKING:  # the API imports this module and shouldn't load LightGBM
+    from ml.model import SignalModel
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
+
+
+def database_url() -> str:
+    """DATABASE_URL, checked without ever echoing it (job logs are public)."""
+    load_dotenv()
+    url = os.environ.get("DATABASE_URL", "").strip()
+    if not url:
+        raise RuntimeError("DATABASE_URL is not set (add it to .env or the environment)")
+    if not url.startswith(("postgresql://", "postgres://")):
+        raise RuntimeError("DATABASE_URL must start with postgresql:// (value not shown)")
+    try:
+        psycopg.conninfo.conninfo_to_dict(url)
+    except psycopg.ProgrammingError:
+        raise RuntimeError("DATABASE_URL is not a valid connection string (value not shown)") from None
+    return url
 
 
 @contextmanager
 def connect():
     """A connection that commits on success and rolls back on error."""
-    load_dotenv()
-    url = os.environ.get("DATABASE_URL")
-    if not url:
-        raise RuntimeError("DATABASE_URL is not set (add it to .env or the environment)")
-    with psycopg.connect(url) as conn:
+    with psycopg.connect(database_url()) as conn:
         yield conn
 
 

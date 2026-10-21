@@ -4,6 +4,20 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-016 · A thin, read-only API that shares the model card's scoring code
+**Date:** 2026-10-22
+**Decision:**
+- FastAPI serves precomputed data from Postgres; no model runs at request time, and ML libraries aren't loaded.
+- Database sessions are read-only.
+- Responses are cached for 5 minutes in memory and through `Cache-Control` headers.
+- Live stats are computed with the same `ml.metrics` functions as the model card.
+- An empty ledger is a normal, valid state, not an error.
+**Why:**
+- The ledger changes once a day, so caching costs nothing in freshness.
+- Read-only sessions mean an API bug can't touch the receipts.
+- Shared scoring code means the live and simulated hit rates are defined the same way.
+- The API stays small enough for a free host.
+
 ### D-015 · Ledger integrity rules are enforced by the system, not by promise
 **Date:** 2026-10-22
 **Decision:**

@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from ml import config
-from ml.evaluate import calibration_table, coverage_table, yearly_table
-from ml.explain import FEATURE_INFO
+from ml.evaluate import coverage_table, yearly_table
+from ml.features import FEATURE_INFO
+from ml.metrics import calibration_table
 
 IMG_DIR = config.DOCS_DIR / "img"
 
@@ -170,7 +171,9 @@ Worst year: **{int(worst.year)}**, with a hit rate of {_p(worst.hit_rate)}.
 
 - Uses price and volume only: no fundamentals, news or earnings dates.
 - Large, liquid stocks are the hardest to predict. This is expected behaviour, not a bug.
-- yfinance data can be delayed or revised.
+- yfinance data can be delayed or revised. Yahoo rewrites adjusted price history after dividends and
+  corporate actions, so the simulated numbers above can shift slightly between retrains (we have
+  seen hit rates move by about 0.2 points). Live calls can't shift: each one is stored when it's published.
 - Past out-of-sample performance does not guarantee future performance. The live ledger is the real test.
 
 ## Disclaimer
