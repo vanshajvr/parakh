@@ -80,9 +80,39 @@ class DataStatus(BaseModel):
     last_run_status: str | None
 
 
+class ProgressPoint(BaseModel):
+    date: date
+    stock_return: float
+    index_return: float
+    excess_return: float
+
+
+class OpenCall(BaseModel):
+    """A published call still inside its 5 sessions. Provisional: only the final close scores it."""
+
+    id: int
+    ticker: str
+    symbol: str
+    name: str
+    as_of: date
+    lean: Lean
+    lean_label: str
+    confidence: str
+    p_outperform: float
+    sessions_done: int
+    horizon: int
+    # Since the close the call was based on, as of the latest close (None before the first session).
+    stock_return: float | None
+    index_return: float | None
+    excess_return: float | None
+    on_track: bool | None
+    path: list[ProgressPoint]
+
+
 class TodayResponse(BaseModel):
     as_of: date | None
     signals: list[Signal]
+    open_calls: list[OpenCall] = []
     scoreboard: Scoreboard
     status: DataStatus
 

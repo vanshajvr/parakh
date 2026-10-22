@@ -318,6 +318,50 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /**
+         * OpenCall
+         * @description A published call still inside its 5 sessions. Provisional: only the final close scores it.
+         */
+        OpenCall: {
+            /** Id */
+            id: number;
+            /** Ticker */
+            ticker: string;
+            /** Symbol */
+            symbol: string;
+            /** Name */
+            name: string;
+            /**
+             * As Of
+             * Format: date
+             */
+            as_of: string;
+            /**
+             * Lean
+             * @enum {string}
+             */
+            lean: "bullish" | "bearish" | "no_call";
+            /** Lean Label */
+            lean_label: string;
+            /** Confidence */
+            confidence: string;
+            /** P Outperform */
+            p_outperform: number;
+            /** Sessions Done */
+            sessions_done: number;
+            /** Horizon */
+            horizon: number;
+            /** Stock Return */
+            stock_return: number | null;
+            /** Index Return */
+            index_return: number | null;
+            /** Excess Return */
+            excess_return: number | null;
+            /** On Track */
+            on_track: boolean | null;
+            /** Path */
+            path: components["schemas"]["ProgressPoint"][];
+        };
         /** PricePoint */
         PricePoint: {
             /**
@@ -335,6 +379,20 @@ export interface components {
             close: number;
             /** Volume */
             volume: number | null;
+        };
+        /** ProgressPoint */
+        ProgressPoint: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Stock Return */
+            stock_return: number;
+            /** Index Return */
+            index_return: number;
+            /** Excess Return */
+            excess_return: number;
         };
         /**
          * Receipt
@@ -488,6 +546,11 @@ export interface components {
             as_of: string | null;
             /** Signals */
             signals: components["schemas"]["Signal"][];
+            /**
+             * Open Calls
+             * @default []
+             */
+            open_calls: components["schemas"]["OpenCall"][];
             scoreboard: components["schemas"]["Scoreboard"];
             status: components["schemas"]["DataStatus"];
         };

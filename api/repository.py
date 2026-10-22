@@ -83,6 +83,22 @@ class Repository:
         )
         return pd.DataFrame(rows, columns=[c.strip().split(".")[1] for c in LEDGER_COLUMNS.split(",")])
 
+    def open_calls(self) -> list[dict]:
+        """Bullish and bearish calls whose 5 sessions haven't been scored yet, newest first."""
+        return self._all("""
+            SELECT p.id, p.ticker, p.as_of, p.lean, p.confidence, p.p_outperform
+            FROM predictions p LEFT JOIN outcomes o ON o.prediction_id = p.id
+            WHERE o.prediction_id IS NULL AND p.lean <> 'no_call'
+            ORDER BY p.as_of DESC, p.ticker
+        """)
+
+    def closes_since(self, since: date) -> pd.DataFrame:
+        """Closing prices for every stock and the benchmark from `since` onwards."""
+        rows = self._all("SELECT ticker, date, close FROM prices WHERE date >= %s ORDER BY ticker, date", (since,))
+        prices = pd.DataFrame(rows, columns=["ticker", "date", "close"])
+        prices["date"] = pd.to_datetime(prices["date"])
+        return prices
+
     def ledger_count(self, ticker: str | None = None) -> int:
         row = self._all(
             "SELECT count(*) AS n FROM predictions WHERE %(ticker)s::text IS NULL OR ticker = %(ticker)s",

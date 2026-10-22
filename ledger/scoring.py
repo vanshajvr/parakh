@@ -72,3 +72,34 @@ def score(pending: pd.DataFrame, prices: pd.DataFrame, horizon: int = config.HOR
             "hit": None if p.lean == "no_call" else (p.lean == "bullish") == beat,
         })
     return pd.DataFrame(rows)
+
+
+def progress(open_calls: pd.DataFrame, prices: pd.DataFrame, horizon: int = config.HORIZON) -> dict[int, list[dict]]:
+    """How each unscored call has done so far: one entry per completed session, up to `horizon`.
+
+    Uses the same session counting as `score`, so a call's last entry matches the outcome it gets.
+    `open_calls` has columns id, ticker, as_of; `prices` has ticker, date, close. A call published
+    after the latest close has an empty path.
+    """
+    closes = {t: g.set_index("date")["close"].sort_index() for t, g in prices.groupby("ticker")}
+    index = closes.get(config.BENCHMARK)
+    paths = {}
+    for c in open_calls.itertuples():
+        as_of = pd.Timestamp(c.as_of)
+        stock = closes.get(c.ticker)
+        path = []
+        if stock is not None and index is not None and as_of in stock.index and as_of in index.index:
+            s_pos, i_pos = stock.index.get_loc(as_of), index.index.get_loc(as_of)
+            for k in range(1, horizon + 1):
+                if s_pos + k >= len(stock) or i_pos + k >= len(index):
+                    break
+                stock_return = stock.iloc[s_pos + k] / stock.iloc[s_pos] - 1
+                index_return = index.iloc[i_pos + k] / index.iloc[i_pos] - 1
+                path.append({
+                    "date": stock.index[s_pos + k].date(),
+                    "stock_return": float(stock_return),
+                    "index_return": float(index_return),
+                    "excess_return": float(stock_return - index_return),
+                })
+        paths[int(c.id)] = path
+    return paths

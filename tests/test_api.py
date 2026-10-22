@@ -55,6 +55,17 @@ class FakeRepository:
     def close(self):
         pass
 
+    def open_calls(self):
+        return [{k: c[k] for k in ("id", "ticker", "as_of", "lean", "confidence", "p_outperform")}
+                for c in self.calls if c["beat_index"] is None and c["lean"] != "no_call"]
+
+    def closes_since(self, since):
+        # Two sessions after DAY2: TCS +3% then +1%, INFY -1% then -2%, the index +1% then +1%.
+        days = pd.to_datetime([DAY2, DAY2 + timedelta(days=1), DAY2 + timedelta(days=2)])
+        closes = {"TCS.NS": [100, 103, 104], "INFY.NS": [100, 99, 98], "^NSEI": [100, 101, 102]}
+        return pd.DataFrame([{"ticker": t, "date": d, "close": c}
+                             for t, cs in closes.items() for d, c in zip(days, cs)])
+
     def latest_calls(self):
         if not self.calls:
             return []
@@ -105,6 +116,18 @@ def client():
     with TestClient(app) as c:
         yield c
     del app.state.repo
+
+
+def test_today_lists_open_calls_with_progress_against_the_index(client):
+    body = client.get("/api/today").json()
+    calls = {c["symbol"]: c for c in body["open_calls"]}
+    assert set(calls) == {"TCS", "INFY"}  # scored calls and "No call" aren't open
+    tcs, infy = calls["TCS"], calls["INFY"]
+    assert tcs["sessions_done"] == 2 and tcs["horizon"] == 5
+    assert tcs["stock_return"] == pytest.approx(0.04) and tcs["index_return"] == pytest.approx(0.02)
+    assert tcs["on_track"] is True  # bullish and beating the index
+    assert infy["excess_return"] == pytest.approx(-0.04) and infy["on_track"] is True  # bearish and lagging
+    assert [p["date"] for p in tcs["path"]] == [str(DAY2 + timedelta(days=1)), str(DAY2 + timedelta(days=2))]
 
 
 def test_today_shows_latest_calls_most_confident_first(client):
