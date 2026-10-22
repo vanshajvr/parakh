@@ -1,15 +1,15 @@
-import { render, screen, within } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import type { Today } from '../api/client'
 import fixture from '../fixtures/today.json'
+import { renderPage } from '../test/render'
 import { TodayView } from './Today'
 
 const data = fixture as Today
 
 function renderToday(d: Today = data) {
-  return render(<MemoryRouter><TodayView data={d} /></MemoryRouter>)
+  return renderPage(<TodayView data={d} />)
 }
 
 describe('Today', () => {
@@ -47,9 +47,12 @@ describe('Today', () => {
   it('shows the NIFTY 50 and what the rule sees, with details closed until tapped', async () => {
     renderToday()
     expect(screen.getByRole('heading', { name: 'NIFTY 50' })).toBeInTheDocument()
-    // The index chart opens on daily candles, with a line view one tap away.
-    expect(screen.getByRole('button', { name: 'candles', pressed: true })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'line', pressed: false })).toBeInTheDocument()
+    // The index chart shows its whole history as candles with the 20-day trend, once loaded.
+    expect(await screen.findByRole('button', { name: 'All', pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Candles', pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '20-day average', pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Close line', pressed: false })).toBeInTheDocument()
+    expect(screen.getByText(/^Latest day:/).parentElement).toHaveTextContent('so the candle is')
     const rule = screen.getByRole('button', { name: /What the rule sees/ })
     expect(rule).toHaveAttribute('aria-expanded', 'false')
     const ranking = screen.getByRole('list', { name: 'Stocks ranked by last week against the others', hidden: true })

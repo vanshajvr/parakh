@@ -2,7 +2,8 @@ import { Link } from 'react-router'
 import type { Today } from '../api/client'
 import { closeLabel, dayLabel, pct, signedPct } from '../lib/format'
 import { Disclosure } from './Disclosure'
-import { CandleKey, PriceChart } from './PriceChart'
+import { ChartKey } from './ChartKey'
+import { LazyCandleChart as CandleChart } from './LazyCandleChart'
 import { Card } from './States'
 import { LeanPill } from './LeanPill'
 
@@ -33,14 +34,14 @@ export function IndexCard({ market, height }: { market: Market; height: number }
           ))}
         </div>
       </div>
-      <PriceChart name="NIFTY 50" points={market.index_candles ?? []} height={height} defaultRange="3M" defaultStyle="candles" format={points} />
+      <CandleChart symbol="NIFTY50" name="NIFTY 50" height={height} defaultRange="All" format={points} />
       <Disclosure buttonClassName="min-h-11" summary={<span className="text-sm font-medium text-link">How to read this chart</span>}>
         <div className="flex flex-col gap-2 pt-1 text-xs text-ink-2">
           <p className="m-0 leading-relaxed">
-            Each candle is one trading day. The thin line runs from the day's lowest price to its highest; the box runs from
-            where it opened to where it closed. Tap or hover a day to read it in words.
+            Each candle is one trading day since 2016. The thin line runs from the day's lowest price to its highest; the box runs
+            from where it opened to where it closed.
           </p>
-          <div className="flex flex-wrap gap-x-4 gap-y-2"><CandleKey /></div>
+          <ChartKey />
           <Link to="/learn#candles" className="font-medium no-underline">How to read a candle →</Link>
         </div>
       </Disclosure>

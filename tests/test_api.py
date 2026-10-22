@@ -216,9 +216,13 @@ def test_market_snapshot_ranks_stocks_by_last_week_against_the_others(client):
     # Average of the stocks' weeks is 0%, so INFY (-10%) leads the list: the rule's top bullish candidate.
     assert [s["symbol"] for s in market["stocks"]] == ["INFY", "TCS"]
     assert market["stocks"][0]["vs_peers_5d"] == pytest.approx(-0.10)
-    # Index candles come from stored daily prices, rounded, and never run past the snapshot's date.
-    assert market["index_candles"] == [{"date": str(DAY2), "open": 100.12, "high": 101.0, "low": 99.0,
-                                        "close": 100.46, "volume": 1e6}]
+
+
+def test_history_serves_every_stored_candle_for_stocks_and_the_index(client):
+    expected = [{"date": str(DAY2), "open": 100.12, "high": 101.0, "low": 99.0, "close": 100.46, "volume": 1e6}]
+    assert client.get("/api/history/NIFTY50").json() == expected
+    assert client.get("/api/history/tcs").json() == expected
+    assert client.get("/api/history/NOPE").status_code == 404
 
 
 def test_today_includes_recent_testing_calls(client):

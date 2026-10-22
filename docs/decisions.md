@@ -4,6 +4,21 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-029 · An interactive chart library, standard candle colours, full history
+**Date:** 2026-10-22
+**Decision:**
+- The NIFTY 50 and stock charts use TradingView's open-source `lightweight-charts` (Apache-2.0, pinned to 5.2.1). It is loaded lazily, so it doesn't slow the first screen, and it shows the library's small attribution logo.
+- Charts show every stored daily candle from 2016, served by `/api/history/{symbol}` (`NIFTY50` for the index).
+- You can scroll or pinch to zoom and drag to pan, with 1M to All range buttons.
+- A crosshair tooltip next to the candle shows open, high, low, close, the change from the day before and the 20-day average. The plain-words reading stays underneath.
+- Candles use the standard green and red. A close line and a 20-day moving average can each be switched on and off.
+- On stock pages, past calls are dots in their lean colour, marked ✓ or ✗ once scored, and can be hidden.
+**Why:** After trying the hand-drawn version, the user found it too static and hard to read. A chart beginners will recognise from broker apps, and can zoom into, teaches more than a fixed picture. Over about 2,600 candles, zoom and pan were not worth building by hand.
+**Supersedes:** D-020 (the custom SVG chart) and D-028's hollow-and-filled colours. The plain-words readings, daily-only data (D-025) and "no indicator overlays beyond the 20-day average" still stand.
+**Trade-off:** Green and red now sit beside the blue and orange lean colours. Leans always carry an icon and a label, so they stay distinguishable without relying on colour.
+
+---
+
 ### D-028 · Daily candlestick charts, in neutral ink, as an explainer
 **Date:** 2026-10-22
 **Decision:**

@@ -5,7 +5,8 @@ import { Disclosure } from '../components/Disclosure'
 import { FactorBars } from '../components/FactorBars'
 import { ChevronLeft, Info, Warning } from '../components/Icons'
 import { LeanPill } from '../components/LeanPill'
-import { ChartLegend, PriceChart } from '../components/PriceChart'
+import { ChartKey } from '../components/ChartKey'
+import { LazyCandleChart as CandleChart } from '../components/LazyCandleChart'
 import { Card, Loading, LoadError, NotFoundState } from '../components/States'
 import { markers } from '../lib/chart'
 import { stockCaveat, stockRange } from '../lib/calls'
@@ -57,18 +58,13 @@ export function StockView({ data }: { data: StockDetail }) {
         </div>
         <Card className="flex min-w-0 flex-col gap-3 p-4 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:p-5">
           <h2 className="m-0 text-base font-semibold">Price and past calls</h2>
-          <PriceChart
-            name={stock.name}
-            points={data.prices}
-            markers={markers(data)}
-            height={isDesktop ? 300 : 200}
-          />
+          <CandleChart symbol={stock.symbol} name={stock.name} markers={markers(data)} height={isDesktop ? 340 : 260} />
           <Disclosure
             buttonClassName="min-h-11"
             summary={<span className="text-sm font-medium text-link">How to read this chart</span>}
           >
             <div className="flex flex-col gap-2 pt-1">
-              <ChartLegend candles />
+              <ChartKey calls />
               <Link to="/learn#candles" className="text-xs font-medium no-underline">How to read a candle →</Link>
             </div>
           </Disclosure>
