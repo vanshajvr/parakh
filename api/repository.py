@@ -142,6 +142,16 @@ class Repository:
         )
         return {r["ticker"]: (r["close"], r["change"]) for r in rows}
 
+    def backtest_recent(self, days: int = 14) -> list[dict]:
+        """Bullish and bearish testing calls from the last `days` calendar days of the backtest."""
+        return self._all("""
+            SELECT date, ticker, lean, confidence, excess_return,
+                   (lean = 'bullish') = beat_index AS hit
+            FROM backtest_predictions
+            WHERE lean <> 'no_call' AND date > (SELECT max(date) FROM backtest_predictions) - %s
+            ORDER BY date DESC, abs(p_outperform - 0.5) DESC
+        """, (days,))
+
     def backtest_by_ticker(self) -> list[dict]:
         """Simulated hit rate per stock, over bullish/bearish calls only.
 

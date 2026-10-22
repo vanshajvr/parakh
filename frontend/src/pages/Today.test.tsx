@@ -44,6 +44,28 @@ describe('Today', () => {
     expect(screen.queryByRole('region', { name: 'Calls in progress' })).not.toBeInTheDocument()
   })
 
+  it('shows the NIFTY 50 and what the rule sees, with details closed until tapped', async () => {
+    renderToday()
+    expect(screen.getByText(/^NIFTY 50 /)).toBeInTheDocument()
+    const rule = screen.getByRole('button', { name: /What the rule sees/ })
+    expect(rule).toHaveAttribute('aria-expanded', 'false')
+    const ranking = screen.getByRole('list', { name: 'Stocks ranked by last week against the others', hidden: true })
+    expect(ranking).not.toBeVisible()
+    await userEvent.click(rule)
+    expect(ranking).toBeVisible()
+    expect(within(ranking).getAllByRole('listitem')).toHaveLength(20)
+  })
+
+  it('labels recent testing calls as simulated until live results exist', () => {
+    renderToday()
+    const button = screen.getByRole('button', { name: /Recent calls in testing/ })
+    expect(within(button).getByText('Simulated')).toBeInTheDocument()
+    expect(within(button).getByText(/of 44 right/)).toBeInTheDocument()
+    const scored = { ...data, scoreboard: { ...data.scoreboard, live_scored: 3 } }
+    renderToday(scored)
+    expect(screen.getAllByRole('button', { name: /Recent calls in testing/ })).toHaveLength(1)
+  })
+
   it('expands a card on tap', async () => {
     renderToday()
     const titan = screen.getAllByRole('article')[0]

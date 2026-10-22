@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { useStocks } from '../api/client'
 import { LeanPill } from '../components/LeanPill'
+import { Sparkline } from '../components/Sparkline'
 import { Card, Loading, LoadError } from '../components/States'
+import { pct, price, signedPct } from '../lib/format'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 export function Stocks() {
@@ -19,7 +21,9 @@ export function Stocks() {
     <div className="flex flex-col gap-4 lg:gap-6">
       <section className="flex flex-col gap-1 px-1">
         <h1 className="m-0 font-serif text-[30px] leading-tight font-semibold tracking-[-0.015em] lg:text-[40px]">Stocks</h1>
-        <p className="m-0 text-sm text-muted">The {data.length} large NIFTY 50 companies Parakh makes calls on.</p>
+        <p className="m-0 text-sm text-muted">
+          The {data.length} large NIFTY 50 companies Parakh makes calls on. Prices are daily closes, updated each evening.
+        </p>
       </section>
       <label className="flex flex-col gap-1.5 text-sm font-medium text-ink lg:max-w-sm">
         Search
@@ -35,12 +39,27 @@ export function Stocks() {
         <ul className="m-0 list-none p-0">
           {shown.map((s) => (
             <li key={s.ticker} className="border-b border-chip last:border-0">
-              <Link to={`/stocks/${s.symbol}`} className="flex min-h-16 items-center justify-between gap-3 px-4 py-3 no-underline hover:bg-page">
-                <span className="flex min-w-0 flex-col">
-                  <span className="text-[15px] font-semibold text-ink">{s.symbol}</span>
+              <Link to={`/stocks/${s.symbol}`} className="flex min-h-16 items-center gap-3 px-4 py-3 no-underline hover:bg-page">
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="text-[15px] font-semibold text-ink">{s.symbol}</span>
+                    {s.lean && s.lean !== 'no_call' && <LeanPill lean={s.lean} />}
+                  </span>
                   <span className="truncate text-[13px] text-muted">{s.name} · {s.sector}</span>
+                  {s.sim_hit_rate != null && (
+                    <span className="text-xs text-muted">
+                      {pct(s.sim_hit_rate)} right in testing
+                      {s.sim_hit_low != null && s.sim_hit_high != null && ` (likely ${Math.round(s.sim_hit_low * 100)}–${Math.round(s.sim_hit_high * 100)}%)`}
+                    </span>
+                  )}
                 </span>
-                {s.lean ? <LeanPill lean={s.lean} /> : <span className="text-[13px] text-muted">No call yet</span>}
+                <span className="hidden sm:block">
+                  <Sparkline values={s.spark} label={`${s.symbol} closing prices over the past month`} />
+                </span>
+                <span className="flex w-28 shrink-0 flex-col items-end gap-0.5 whitespace-nowrap">
+                  <span className="text-[15px] font-semibold text-ink">{price(s.close)}</span>
+                  <span className="text-xs text-muted">{signedPct(s.change_5d, 1)} over 5 days</span>
+                </span>
               </Link>
             </li>
           ))}

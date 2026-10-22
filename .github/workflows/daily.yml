@@ -4,6 +4,10 @@ name: Daily ledger
 on:
   schedule:
     - cron: "30 12 * * 1-5" # 18:00 IST, Monday–Friday
+    # Catch-up runs in case Yahoo's NIFTY 50 close arrives late. Re-running is safe, and the
+    # publish window stays open until the next 09:15 IST open (decision D-015).
+    - cron: "30 15 * * 1-5" # 21:00 IST, Monday–Friday
+    - cron: "0 2 * * 1-6" # 07:30 IST, Monday–Saturday (the previous session's last chance)
   workflow_dispatch:
 
 concurrency:

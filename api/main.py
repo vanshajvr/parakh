@@ -18,7 +18,8 @@ from fastapi.responses import StreamingResponse
 from api.repository import Repository
 from ledger.db import database_url
 from api.schemas import (
-    CallStats, DataStatus, LedgerPage, LedgerRow, ModelInfo, OpenCall, PricePoint, Receipt, Scoreboard, Signal,
+    CallStats, DataStatus, LedgerPage, LedgerRow, MarketSnapshot, MarketStock, ModelInfo, OpenCall, PricePoint, Receipt,
+    RecentSimulatedCall, Scoreboard, Signal,
     SimulatedCall, StatusResponse, StockDetail, StockSummary, TodayResponse, TrackRecord,
 )
 from ledger.scoring import IST, progress
@@ -171,6 +172,50 @@ def open_calls(repo: Repository) -> list[OpenCall]:
     return calls
 
 
+def recent_closes(repo: Repository, days: int = 45) -> dict[str, pd.Series]:
+    """Each ticker's recent closes, oldest first (enough for a 1-month sparkline and weekly moves)."""
+    prices = repo.closes_since(datetime.now(IST).date() - timedelta(days=days))
+    return {t: g.set_index("date")["close"].sort_index() for t, g in prices.groupby("ticker")}
+
+
+def _change(closes: pd.Series, sessions: int) -> float | None:
+    return float(closes.iloc[-1] / closes.iloc[-1 - sessions] - 1) if len(closes) > sessions else None
+
+
+def market_snapshot(repo: Repository) -> MarketSnapshot | None:
+    """The latest close: the NIFTY 50 and every stock's week against the others (the rule's input)."""
+    closes = recent_closes(repo)
+    index = closes.get(config.BENCHMARK)
+    if index is None or index.empty:
+        return None
+    as_of = index.index[-1]
+    rows = []
+    for ticker in config.TICKERS:
+        # Yahoo sometimes has a stock's latest close before the index's, so align on the index.
+        c = closes.get(ticker)
+        c = c[c.index <= as_of] if c is not None else None
+        if c is None or len(c) <= config.HORIZON or c.index[-1] != as_of:
+            continue
+        rows.append((ticker, float(c.iloc[-1]), _change(c, config.HORIZON)))
+    if not rows:
+        return None
+    mean = sum(r[2] for r in rows) / len(rows)
+    stocks = [
+        MarketStock(ticker=t, symbol=t.removesuffix(".NS"), name=config.STOCKS[t][0], close=close,
+                    ret_5d=ret, vs_peers_5d=ret - mean)
+        for t, close, ret in rows
+    ]
+    return MarketSnapshot(
+        as_of=as_of.date(), index_close=float(index.iloc[-1]),
+        index_change_1d=_change(index, 1), index_change_5d=_change(index, config.HORIZON),
+        stocks=sorted(stocks, key=lambda s: s.vs_peers_5d),
+    )
+
+
+def recent_simulated(repo: Repository) -> list[RecentSimulatedCall]:
+    return [RecentSimulatedCall(**r, symbol=r["ticker"].removesuffix(".NS")) for r in repo.backtest_recent()]
+
+
 def to_ledger_rows(df: pd.DataFrame) -> list[LedgerRow]:
     records = df.astype(object).where(df.notna(), None).to_dict(orient="records")
     return [LedgerRow(**r, symbol=r["ticker"].removesuffix(".NS")) for r in records]
@@ -230,6 +275,8 @@ def today(repo: Repository = Depends(get_repo)):
         as_of=as_of,
         signals=to_signals(repo, calls),
         open_calls=open_calls(repo),
+        market=market_snapshot(repo),
+        recent_simulated=recent_simulated(repo),
         scoreboard=Scoreboard(
             live=scored_stats(ledger) if not ledger.empty else None,
             live_since=ledger["as_of"].min() if not ledger.empty else None,
@@ -246,7 +293,21 @@ def today(repo: Repository = Depends(get_repo)):
 @app.get("/api/stocks", response_model=list[StockSummary])
 def stocks(repo: Repository = Depends(get_repo)):
     latest = {c["ticker"]: c for c in repo.latest_calls()}
-    return [stock_summary(t, latest.get(t)) for t in config.TICKERS]
+    closes = recent_closes(repo)
+    tested = {r["ticker"]: r for r in repo.backtest_by_ticker()}
+    out = []
+    for t in config.TICKERS:
+        s = stock_summary(t, latest.get(t))
+        c = closes.get(t)
+        if c is not None and not c.empty:
+            s.close, s.change_5d = float(c.iloc[-1]), _change(c, config.HORIZON)
+            s.spark = [round(float(v), 2) for v in c.iloc[-22:]]
+        r = tested.get(t)
+        if r and r.get("hit_rate") is not None:
+            s.sim_hit_rate, s.sim_n_calls = float(r["hit_rate"]), int(r["n_calls"])
+            s.sim_hit_low, s.sim_hit_high = wilson_interval(s.sim_hit_rate, int(r.get("n_weeks") or r["n_calls"]))
+        out.append(s)
+    return out
 
 
 @app.get("/api/stocks/{ticker}", response_model=StockDetail)

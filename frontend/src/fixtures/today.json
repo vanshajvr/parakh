@@ -1088,5 +1088,571 @@
         }
       ]
     }
+  ],
+  "market": {
+    "as_of": "2026-10-19",
+    "index_close": 22888.94921875,
+    "index_change_1d": -0.011112049629608212,
+    "index_change_5d": 0.023502722917440932,
+    "stocks": [
+      {
+        "ticker": "AXISBANK.NS",
+        "symbol": "AXISBANK",
+        "name": "Axis Bank",
+        "close": 1236.0,
+        "ret_5d": -0.013567438148443745,
+        "vs_peers_5d": -0.03815185644819168
+      },
+      {
+        "ticker": "SUNPHARMA.NS",
+        "symbol": "SUNPHARMA",
+        "name": "Sun Pharmaceutical",
+        "close": 1743.0,
+        "ret_5d": -0.009659090909090895,
+        "vs_peers_5d": -0.034243509208838833
+      },
+      {
+        "ticker": "NTPC.NS",
+        "symbol": "NTPC",
+        "name": "NTPC",
+        "close": 309.0,
+        "ret_5d": -0.003225806451612856,
+        "vs_peers_5d": -0.027810224751360794
+      },
+      {
+        "ticker": "KOTAKBANK.NS",
+        "symbol": "KOTAKBANK",
+        "name": "Kotak Mahindra Bank",
+        "close": 442.29998779296875,
+        "ret_5d": -0.002480843749791406,
+        "vs_peers_5d": -0.027065262049539345
+      },
+      {
+        "ticker": "ASIANPAINT.NS",
+        "symbol": "ASIANPAINT",
+        "name": "Asian Paints",
+        "close": 2330.699951171875,
+        "ret_5d": -0.00012872107598671523,
+        "vs_peers_5d": -0.024713139375734654
+      },
+      {
+        "ticker": "BAJFINANCE.NS",
+        "symbol": "BAJFINANCE",
+        "name": "Bajaj Finance",
+        "close": 957.3499755859375,
+        "ret_5d": 0.00010444041361967749,
+        "vs_peers_5d": -0.02447997788612826
+      },
+      {
+        "ticker": "TITAN.NS",
+        "symbol": "TITAN",
+        "name": "Titan Company",
+        "close": 4424.2001953125,
+        "ret_5d": 0.005500044389204595,
+        "vs_peers_5d": -0.019084373910543344
+      },
+      {
+        "ticker": "LT.NS",
+        "symbol": "LT",
+        "name": "Larsen & Toubro",
+        "close": 3661.89990234375,
+        "ret_5d": 0.009483088171950316,
+        "vs_peers_5d": -0.015101330127797623
+      },
+      {
+        "ticker": "HDFCBANK.NS",
+        "symbol": "HDFCBANK",
+        "name": "HDFC Bank",
+        "close": 712.0,
+        "ret_5d": 0.010072315704399815,
+        "vs_peers_5d": -0.014512102595348124
+      },
+      {
+        "ticker": "TATASTEEL.NS",
+        "symbol": "TATASTEEL",
+        "name": "Tata Steel",
+        "close": 174.0399932861328,
+        "ret_5d": 0.01045046293289964,
+        "vs_peers_5d": -0.014133955366848298
+      },
+      {
+        "ticker": "ITC.NS",
+        "symbol": "ITC",
+        "name": "ITC",
+        "close": 260.79998779296875,
+        "ret_5d": 0.011244645076061488,
+        "vs_peers_5d": -0.01333977322368645
+      },
+      {
+        "ticker": "ULTRACEMCO.NS",
+        "symbol": "ULTRACEMCO",
+        "name": "UltraTech Cement",
+        "close": 10650.0,
+        "ret_5d": 0.012357414448669113,
+        "vs_peers_5d": -0.012227003851078826
+      },
+      {
+        "ticker": "MARUTI.NS",
+        "symbol": "MARUTI",
+        "name": "Maruti Suzuki",
+        "close": 11475.0,
+        "ret_5d": 0.014140521431727837,
+        "vs_peers_5d": -0.010443896868020101
+      },
+      {
+        "ticker": "HINDUNILVR.NS",
+        "symbol": "HINDUNILVR",
+        "name": "Hindustan Unilever",
+        "close": 1853.199951171875,
+        "ret_5d": 0.017850277844562834,
+        "vs_peers_5d": -0.0067341404551851045
+      },
+      {
+        "ticker": "ICICIBANK.NS",
+        "symbol": "ICICIBANK",
+        "name": "ICICI Bank",
+        "close": 1381.0,
+        "ret_5d": 0.030597014925373145,
+        "vs_peers_5d": 0.006012596625625206
+      },
+      {
+        "ticker": "SBIN.NS",
+        "symbol": "SBIN",
+        "name": "State Bank of India",
+        "close": 973.7000122070312,
+        "ret_5d": 0.03475027864721714,
+        "vs_peers_5d": 0.010165860347469198
+      },
+      {
+        "ticker": "RELIANCE.NS",
+        "symbol": "RELIANCE",
+        "name": "Reliance Industries",
+        "close": 1202.0,
+        "ret_5d": 0.037190417359537875,
+        "vs_peers_5d": 0.012605999059789937
+      },
+      {
+        "ticker": "BHARTIARTL.NS",
+        "symbol": "BHARTIARTL",
+        "name": "Bharti Airtel",
+        "close": 1875.199951171875,
+        "ret_5d": 0.05425310769049174,
+        "vs_peers_5d": 0.029668689390743803
+      },
+      {
+        "ticker": "INFY.NS",
+        "symbol": "INFY",
+        "name": "Infosys",
+        "close": 1130.699951171875,
+        "ret_5d": 0.10852936389399503,
+        "vs_peers_5d": 0.08394494559424709
+      },
+      {
+        "ticker": "TCS.NS",
+        "symbol": "TCS",
+        "name": "Tata Consultancy Services",
+        "close": 2460.89990234375,
+        "ret_5d": 0.16422687340017417,
+        "vs_peers_5d": 0.13964245510042622
+      }
+    ]
+  },
+  "recent_simulated": [
+    {
+      "date": "2026-10-14",
+      "ticker": "TCS.NS",
+      "symbol": "TCS",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.0791928762760421,
+      "hit": false
+    },
+    {
+      "date": "2026-10-14",
+      "ticker": "INFY.NS",
+      "symbol": "INFY",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.060210910218140734,
+      "hit": false
+    },
+    {
+      "date": "2026-10-13",
+      "ticker": "TCS.NS",
+      "symbol": "TCS",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.11643047485052671,
+      "hit": false
+    },
+    {
+      "date": "2026-10-13",
+      "ticker": "INFY.NS",
+      "symbol": "INFY",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.09577361189873068,
+      "hit": false
+    },
+    {
+      "date": "2026-10-13",
+      "ticker": "RELIANCE.NS",
+      "symbol": "RELIANCE",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": 0.032321611545493845,
+      "hit": true
+    },
+    {
+      "date": "2026-10-12",
+      "ticker": "KOTAKBANK.NS",
+      "symbol": "KOTAKBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.02598356666723234,
+      "hit": true
+    },
+    {
+      "date": "2026-10-12",
+      "ticker": "AXISBANK.NS",
+      "symbol": "AXISBANK",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": -0.03707016106588468,
+      "hit": true
+    },
+    {
+      "date": "2026-10-12",
+      "ticker": "ITC.NS",
+      "symbol": "ITC",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.012258077841379444,
+      "hit": false
+    },
+    {
+      "date": "2026-10-12",
+      "ticker": "TITAN.NS",
+      "symbol": "TITAN",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.018002678528236338,
+      "hit": false
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "KOTAKBANK.NS",
+      "symbol": "KOTAKBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.013271231834960817,
+      "hit": true
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "ASIANPAINT.NS",
+      "symbol": "ASIANPAINT",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.03086187998481771,
+      "hit": false
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "ITC.NS",
+      "symbol": "ITC",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": -0.037182185890719754,
+      "hit": true
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "TCS.NS",
+      "symbol": "TCS",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": 0.12161527062868904,
+      "hit": false
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "TATASTEEL.NS",
+      "symbol": "TATASTEEL",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.01800234949826618,
+      "hit": false
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "BHARTIARTL.NS",
+      "symbol": "BHARTIARTL",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": 0.027559518906313585,
+      "hit": false
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "TITAN.NS",
+      "symbol": "TITAN",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.019892577476081863,
+      "hit": false
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "SUNPHARMA.NS",
+      "symbol": "SUNPHARMA",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.028465480088683548,
+      "hit": false
+    },
+    {
+      "date": "2026-10-09",
+      "ticker": "AXISBANK.NS",
+      "symbol": "AXISBANK",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": -0.0032423307324653816,
+      "hit": true
+    },
+    {
+      "date": "2026-10-08",
+      "ticker": "KOTAKBANK.NS",
+      "symbol": "KOTAKBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.004664711628008522,
+      "hit": true
+    },
+    {
+      "date": "2026-10-08",
+      "ticker": "TATASTEEL.NS",
+      "symbol": "TATASTEEL",
+      "lean": "bullish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.00861497204797268,
+      "hit": false
+    },
+    {
+      "date": "2026-10-08",
+      "ticker": "BHARTIARTL.NS",
+      "symbol": "BHARTIARTL",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": -0.0070603533125044304,
+      "hit": true
+    },
+    {
+      "date": "2026-10-08",
+      "ticker": "MARUTI.NS",
+      "symbol": "MARUTI",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.015108171340907361,
+      "hit": false
+    },
+    {
+      "date": "2026-10-08",
+      "ticker": "ICICIBANK.NS",
+      "symbol": "ICICIBANK",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": -0.004486726823884402,
+      "hit": true
+    },
+    {
+      "date": "2026-10-08",
+      "ticker": "AXISBANK.NS",
+      "symbol": "AXISBANK",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": 0.00010329797776376104,
+      "hit": false
+    },
+    {
+      "date": "2026-10-07",
+      "ticker": "KOTAKBANK.NS",
+      "symbol": "KOTAKBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.005301128469722083,
+      "hit": true
+    },
+    {
+      "date": "2026-10-07",
+      "ticker": "TATASTEEL.NS",
+      "symbol": "TATASTEEL",
+      "lean": "bullish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.007416731306212232,
+      "hit": false
+    },
+    {
+      "date": "2026-10-07",
+      "ticker": "TITAN.NS",
+      "symbol": "TITAN",
+      "lean": "bullish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.01443800555221908,
+      "hit": true
+    },
+    {
+      "date": "2026-10-07",
+      "ticker": "ICICIBANK.NS",
+      "symbol": "ICICIBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.014791952462929081,
+      "hit": true
+    },
+    {
+      "date": "2026-10-07",
+      "ticker": "BHARTIARTL.NS",
+      "symbol": "BHARTIARTL",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": -0.022299048783233966,
+      "hit": true
+    },
+    {
+      "date": "2026-10-06",
+      "ticker": "KOTAKBANK.NS",
+      "symbol": "KOTAKBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.018816514258349737,
+      "hit": false
+    },
+    {
+      "date": "2026-10-06",
+      "ticker": "TITAN.NS",
+      "symbol": "TITAN",
+      "lean": "bullish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.0114686444589579,
+      "hit": false
+    },
+    {
+      "date": "2026-10-06",
+      "ticker": "TATASTEEL.NS",
+      "symbol": "TATASTEEL",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.018272792202095434,
+      "hit": false
+    },
+    {
+      "date": "2026-10-06",
+      "ticker": "MARUTI.NS",
+      "symbol": "MARUTI",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.030310662655814835,
+      "hit": false
+    },
+    {
+      "date": "2026-10-05",
+      "ticker": "KOTAKBANK.NS",
+      "symbol": "KOTAKBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.07439536298848282,
+      "hit": false
+    },
+    {
+      "date": "2026-10-05",
+      "ticker": "TITAN.NS",
+      "symbol": "TITAN",
+      "lean": "bullish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.030771316998657428,
+      "hit": false
+    },
+    {
+      "date": "2026-10-05",
+      "ticker": "INFY.NS",
+      "symbol": "INFY",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.008040037141042067,
+      "hit": false
+    },
+    {
+      "date": "2026-10-05",
+      "ticker": "TCS.NS",
+      "symbol": "TCS",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": 0.013543350894335893,
+      "hit": false
+    },
+    {
+      "date": "2026-10-05",
+      "ticker": "HINDUNILVR.NS",
+      "symbol": "HINDUNILVR",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.0010979840041241973,
+      "hit": false
+    },
+    {
+      "date": "2026-10-05",
+      "ticker": "TATASTEEL.NS",
+      "symbol": "TATASTEEL",
+      "lean": "bullish",
+      "confidence": "Slight edge",
+      "excess_return": -0.024589990769400494,
+      "hit": false
+    },
+    {
+      "date": "2026-10-01",
+      "ticker": "KOTAKBANK.NS",
+      "symbol": "KOTAKBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.04974823707521092,
+      "hit": false
+    },
+    {
+      "date": "2026-10-01",
+      "ticker": "AXISBANK.NS",
+      "symbol": "AXISBANK",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": 0.030115241207672838,
+      "hit": false
+    },
+    {
+      "date": "2026-10-01",
+      "ticker": "INFY.NS",
+      "symbol": "INFY",
+      "lean": "bearish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.015600722697672986,
+      "hit": true
+    },
+    {
+      "date": "2026-10-01",
+      "ticker": "TITAN.NS",
+      "symbol": "TITAN",
+      "lean": "bullish",
+      "confidence": "Stronger edge",
+      "excess_return": -0.027800282743258964,
+      "hit": false
+    },
+    {
+      "date": "2026-10-01",
+      "ticker": "ASIANPAINT.NS",
+      "symbol": "ASIANPAINT",
+      "lean": "bearish",
+      "confidence": "Slight edge",
+      "excess_return": -0.03260236552703322,
+      "hit": true
+    }
   ]
 }

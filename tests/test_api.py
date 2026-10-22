@@ -59,6 +59,10 @@ class FakeRepository:
         return [{k: c[k] for k in ("id", "ticker", "as_of", "lean", "confidence", "p_outperform")}
                 for c in self.calls if c["beat_index"] is None and c["lean"] != "no_call"]
 
+    def backtest_recent(self, days=14):
+        return [{"date": DAY2, "ticker": "TCS.NS", "lean": "bearish", "confidence": "Slight edge",
+                 "excess_return": -0.012, "hit": True}]
+
     def closes_since(self, since):
         # Two sessions after DAY2: TCS +3% then +1%, INFY -1% then -2%, the index +1% then +1%.
         days = pd.to_datetime([DAY2, DAY2 + timedelta(days=1), DAY2 + timedelta(days=2)])
@@ -197,6 +201,35 @@ def test_ledger_pagination_and_csv(client):
     assert csv.headers["content-type"].startswith("text/csv")
     assert csv.text.splitlines()[0].startswith("id,ticker,as_of")
     assert len(csv.text.splitlines()) == 7
+
+
+def test_market_snapshot_ranks_stocks_by_last_week_against_the_others(client):
+    app.state.repo.closes_since = lambda since: pd.DataFrame([
+        {"ticker": t, "date": pd.Timestamp(TODAY) - pd.Timedelta(days=6 - i), "close": c}
+        for t, closes in {"TCS.NS": [100] * 6 + [110], "INFY.NS": [100] * 6 + [90],
+                          "^NSEI": [100] * 6 + [101]}.items()
+        for i, c in enumerate(closes)
+    ])
+    market = client.get("/api/today").json()["market"]
+    assert market["as_of"] == str(TODAY)
+    assert market["index_change_5d"] == pytest.approx(0.01)
+    # Average of the stocks' weeks is 0%, so INFY (-10%) leads the list: the rule's top bullish candidate.
+    assert [s["symbol"] for s in market["stocks"]] == ["INFY", "TCS"]
+    assert market["stocks"][0]["vs_peers_5d"] == pytest.approx(-0.10)
+
+
+def test_today_includes_recent_testing_calls(client):
+    recent = client.get("/api/today").json()["recent_simulated"]
+    assert recent == [{"date": str(DAY2), "ticker": "TCS.NS", "symbol": "TCS", "lean": "bearish",
+                       "confidence": "Slight edge", "excess_return": -0.012, "hit": True}]
+
+
+def test_stocks_list_has_prices_and_testing_record(client):
+    stocks = {s["symbol"]: s for s in client.get("/api/stocks").json()}
+    tcs = stocks["TCS"]
+    assert tcs["close"] == 104 and tcs["spark"] == [100, 103, 104]
+    assert tcs["sim_hit_rate"] == 0.471 and tcs["sim_hit_low"] < 0.471 < tcs["sim_hit_high"]
+    assert stocks["HDFCBANK"]["close"] is None  # no prices: shown as unknown
 
 
 def test_empty_ledger_is_a_valid_state(client):

@@ -287,6 +287,40 @@ export interface components {
             /** Hit */
             hit: boolean | null;
         };
+        /**
+         * MarketSnapshot
+         * @description The latest close, whether or not calls have been published for it.
+         */
+        MarketSnapshot: {
+            /**
+             * As Of
+             * Format: date
+             */
+            as_of: string;
+            /** Index Close */
+            index_close: number;
+            /** Index Change 1D */
+            index_change_1d: number | null;
+            /** Index Change 5D */
+            index_change_5d: number | null;
+            /** Stocks */
+            stocks: components["schemas"]["MarketStock"][];
+        };
+        /** MarketStock */
+        MarketStock: {
+            /** Ticker */
+            ticker: string;
+            /** Symbol */
+            symbol: string;
+            /** Name */
+            name: string;
+            /** Close */
+            close: number;
+            /** Ret 5D */
+            ret_5d: number;
+            /** Vs Peers 5D */
+            vs_peers_5d: number;
+        };
         /** ModelInfo */
         ModelInfo: {
             /** Version */
@@ -419,6 +453,29 @@ export interface components {
              */
             stock_clearly_below: boolean;
         };
+        /** RecentSimulatedCall */
+        RecentSimulatedCall: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Ticker */
+            ticker: string;
+            /** Symbol */
+            symbol: string;
+            /**
+             * Lean
+             * @enum {string}
+             */
+            lean: "bullish" | "bearish" | "no_call";
+            /** Confidence */
+            confidence: string;
+            /** Excess Return */
+            excess_return: number;
+            /** Hit */
+            hit: boolean;
+        };
         /** Scoreboard */
         Scoreboard: {
             live: components["schemas"]["CallStats"] | null;
@@ -539,6 +596,26 @@ export interface components {
             lean: ("bullish" | "bearish" | "no_call") | null;
             /** Confidence */
             confidence: string | null;
+            /** Close */
+            close?: number | null;
+            /** Change 5D */
+            change_5d?: number | null;
+            /**
+             * Spark
+             * @default []
+             */
+            spark: number[];
+            /** Sim Hit Rate */
+            sim_hit_rate?: number | null;
+            /** Sim Hit Low */
+            sim_hit_low?: number | null;
+            /** Sim Hit High */
+            sim_hit_high?: number | null;
+            /**
+             * Sim N Calls
+             * @default 0
+             */
+            sim_n_calls: number;
         };
         /** TodayResponse */
         TodayResponse: {
@@ -551,6 +628,12 @@ export interface components {
              * @default []
              */
             open_calls: components["schemas"]["OpenCall"][];
+            market?: components["schemas"]["MarketSnapshot"] | null;
+            /**
+             * Recent Simulated
+             * @default []
+             */
+            recent_simulated: components["schemas"]["RecentSimulatedCall"][];
             scoreboard: components["schemas"]["Scoreboard"];
             status: components["schemas"]["DataStatus"];
         };

@@ -23,6 +23,7 @@ Beginners in India get stock ideas from Telegram groups, finfluencers and YouTub
 - **Shows the receipt on every call:** for example, "Slight edge · 51.8% right in testing". That line never collapses away.
 - **Explains in plain words:** what the call rests on, for example "over the past week it did 8.4% better than the average of the 20 stocks".
 - **Shows calls in progress:** every earlier call is tracked day by day against the NIFTY 50 until it's scored, so the record visibly builds instead of appearing a week later. Once a day, from closing prices: no live tickers ([D-025](docs/decisions.md)).
+- **Shows what the rule is looking at:** every stock's last 5 days against the others, the NIFTY 50, prices and a 1-month sparkline per stock, and the latest testing calls (labelled simulated) while live results build up ([D-026](docs/decisions.md)).
 - **Keeps a public ledger:** calls are published before the market opens, and the database refuses any edit or deletion. Anyone can download the whole ledger as a CSV.
 - **Warns where the model has struggled, with a range:** for example, "On ASIANPAINT: 47.4% in testing, below a coin flip (likely 41–54%)", so a user can see how much of that could be chance.
 
@@ -81,7 +82,7 @@ flowchart LR
 - **ML:** a reversal rule, logistic regression and LightGBM (15 price and volume features, SHAP explanations) compared by daily rank IC under pre-registered rules; the simplest model that clears the bar wins. Platt calibration on out-of-fold scores, with each day's calls centred on 50%. Explanations are fixed sentence templates.
 - **Ledger:** calls and outcomes live in separate append-only tables. Every call records the model version that made it, and stored versions are never overwritten.
 - **App:** React, TypeScript and Tailwind, with types generated from the API's schema. It installs as a PWA and works offline with the last saved calls.
-- **Quality:** 36 Python tests (including look-ahead checks and live scoring matching the training label) and 24 frontend tests, all run in CI.
+- **Quality:** 39 Python tests (including look-ahead checks and live scoring matching the training label) and 27 frontend tests, all run in CI.
 
 Setup and deployment: [development guide](docs/development.md).
 
