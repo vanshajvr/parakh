@@ -15,6 +15,8 @@ export type View = {
   /** The number the list is sorted by; rows without one are left out. */
   metric: (r: Row, tf: Timeframe) => number | null | undefined
   descending: boolean
+  /** For the short movers lists only: e.g. a stock that fell isn't shown as a top gainer. The screener sorts everything. */
+  include?: (r: Row, tf: Timeframe) => boolean
   show: (r: Row, tf: Timeframe) => string
   usesTimeframe?: boolean
   coveredOnly?: boolean
@@ -25,8 +27,10 @@ export const crore = (rupees: number) => `₹${Math.round(rupees / 1e7).toLocale
 
 export const VIEWS: View[] = [
   { id: 'gainers', label: 'Gainers', metric: (r, tf) => CHANGE[tf](r), descending: true, usesTimeframe: true,
+    include: (r, tf) => (CHANGE[tf](r) ?? 0) > 0,
     show: (r, tf) => signedPct(CHANGE[tf](r), 1), note: 'Biggest rises over the period.' },
   { id: 'losers', label: 'Losers', metric: (r, tf) => CHANGE[tf](r), descending: false, usesTimeframe: true,
+    include: (r, tf) => (CHANGE[tf](r) ?? 0) < 0,
     show: (r, tf) => signedPct(CHANGE[tf](r), 1), note: 'Biggest falls over the period.' },
   { id: 'active', label: 'Most active', metric: (r) => r.value_traded, descending: true,
     show: (r) => crore(r.value_traded),
@@ -47,10 +51,11 @@ export const VIEWS: View[] = [
 
 export const viewById = (id: string | null): View => VIEWS.find((v) => v.id === id) ?? VIEWS[0]
 
-/** Rows for a view, filtered and sorted; `limit` keeps the top few for the Today card. */
+/** Rows for a view, filtered and sorted; `limit` keeps the top few (genuine movers only) for the Today card. */
 export function rank(rows: Row[], view: View, tf: Timeframe, sector: string | null, limit?: number): Row[] {
   const ranked = rows
-    .filter((r) => (!view.coveredOnly || r.covered) && (!sector || r.sector === sector) && view.metric(r, tf) != null)
+    .filter((r) => (!view.coveredOnly || r.covered) && (!sector || r.sector === sector) && view.metric(r, tf) != null
+      && (!limit || !view.include || view.include(r, tf)))
     .sort((a, b) => (view.descending ? 1 : -1) * (view.metric(b, tf)! - view.metric(a, tf)!))
   return limit ? ranked.slice(0, limit) : ranked
 }

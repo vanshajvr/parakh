@@ -88,10 +88,14 @@ function MoverRow({ row, view, tf }: { row: Row; view: View; tf: Timeframe }) {
   return (
     <li className="flex items-center gap-3 border-b border-chip py-2.5 last:border-0">
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="flex flex-wrap items-center gap-2">
+        <span className="flex items-center gap-2 whitespace-nowrap">
           <Link to={`/stocks/${row.symbol}`} className="text-[15px] font-semibold text-ink no-underline">{row.symbol}</Link>
           {row.covered && row.lean && row.lean !== 'no_call' && <LeanPill lean={row.lean} />}
-          {!row.covered && <span className="rounded-full border border-dashed border-line-2 px-2 py-0.5 text-[11px] text-muted">No Parakh calls</span>}
+          {!row.covered && (
+            <span title="Parakh makes no calls on this stock" className="rounded-full border border-dashed border-line-2 px-1.5 py-px text-[10px] text-muted">
+              No calls
+            </span>
+          )}
         </span>
         <span className="truncate text-xs text-muted">{row.name} · {price(row.close)}</span>
       </span>
