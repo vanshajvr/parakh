@@ -4,6 +4,7 @@ import { useToday, type Signal, type Today as TodayData } from '../api/client'
 import { CallCard } from '../components/CallCard'
 import { Disclosure } from '../components/Disclosure'
 import { Info, Minus, Warning } from '../components/Icons'
+import { MarketStrip, RecentTesting, RuleView } from '../components/Market'
 import { OpenCalls } from '../components/OpenCalls'
 import { Loading, LoadError } from '../components/States'
 import { closeLabel, count, pct } from '../lib/format'
@@ -46,6 +47,7 @@ export function TodayView({ data }: { data: TodayData }) {
         {data.as_of && (
           <p className="m-0 text-sm text-muted">{closeLabel(data.as_of)} · looking 5 trading days ahead</p>
         )}
+        {data.market && <MarketStrip market={data.market} callsAsOf={data.as_of} />}
       </section>
 
       {questionOpen && (
@@ -82,10 +84,13 @@ export function TodayView({ data }: { data: TodayData }) {
           )}
           {/* Today's calls are the cards above; this tracks the earlier ones still running. */}
           <OpenCalls calls={(data.open_calls ?? []).filter((c) => c.as_of !== data.as_of)} />
+          {data.market && <RuleView market={data.market} />}
+          {/* Until live calls have results, the latest testing calls show what a scored call looks like. */}
+          {data.scoreboard.live_scored === 0 && <RecentTesting calls={data.recent_simulated ?? []} />}
         </div>
         {/* On the phone the live record sits above the calls; on desktop it's the sidebar. */}
         <aside className="order-first flex min-w-0 flex-col gap-4 lg:order-none lg:flex-1">
-          <LiveRecord data={data} defaultOpen={isDesktop} />
+          <LiveRecord data={data} />
           {isDesktop && <HowToRead />}
         </aside>
       </div>
@@ -171,13 +176,11 @@ function HowToRead() {
   )
 }
 
-function LiveRecord({ data, defaultOpen }: { data: TodayData; defaultOpen: boolean }) {
+function LiveRecord({ data }: { data: TodayData }) {
   const { live_days, live_published, live_scored, live, simulated } = data.scoreboard
   return (
     <section className="overflow-hidden rounded-2xl border border-line bg-surface">
       <Disclosure
-        key={String(defaultOpen)}
-        defaultOpen={defaultOpen}
         buttonClassName="min-h-13 px-3.5 py-3"
         summary={
           <span className="flex items-center gap-2.5 text-sm text-ink">

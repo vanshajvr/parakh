@@ -34,6 +34,16 @@ export function yearsBelowCoinFlip(rows: YearRow[]): number {
   return rows.filter((r) => r.hit_rate != null && r.hit_rate < 0.5).length
 }
 
+/** Whether "Stronger edge" calls have actually done better than "Slight edge" ones. */
+export function confidenceVerdict(bands: Record<string, CallStats>): string {
+  const strong = bands['Stronger edge']?.hit_rate, slight = bands['Slight edge']?.hit_rate
+  if (strong == null || slight == null) return ''
+  const gap = (strong - slight) * 100
+  if (gap >= 0.5) return 'Yes, a little. The confidence labels mean something, but not much.'
+  if (gap > -0.5) return 'Not really: the two levels have done about the same.'
+  return 'No: stronger-edge calls have done slightly worse, so treat the labels with caution.'
+}
+
 /** Gap between how bullish-lean and bearish-lean stocks did against the index, per 5 days. */
 export function edgeSpread(s: CallStats): number | null {
   if (s.avg_excess_after_bullish == null || s.avg_excess_after_bearish == null) return null

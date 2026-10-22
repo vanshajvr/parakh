@@ -5,14 +5,12 @@ import { Disclosure } from '../components/Disclosure'
 import { Card } from '../components/States'
 import { count, pct, shortDate } from '../lib/format'
 import { chosenSummary, ROUND_TRIP_COST, type SimulatedMetrics } from '../lib/metrics'
-import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 const MODEL_CARD_URL = 'https://github.com/vanshajvr/signalforge-live/blob/main/docs/model-card.md'
 
 export function Learn() {
   useDocumentTitle('How it works')
-  const isDesktop = useMediaQuery(DESKTOP)
   const { hash } = useLocation()
   const model = useModel().data
   const rule = model?.kind === 'reversal'
@@ -26,7 +24,7 @@ export function Learn() {
   const topic = (id: string, title: string, body: ReactNode) => (
     <Card className="scroll-mt-20 overflow-hidden" key={id}>
       <div id={id}>
-        <Disclosure key={`${id}-${isDesktop}-${hash}`} defaultOpen={isDesktop || hash === `#${id}`} buttonClassName="min-h-14 px-4 py-3.5 lg:px-5"
+        <Disclosure key={`${id}-${hash}`} defaultOpen={hash === `#${id}`} buttonClassName="min-h-14 px-4 py-3.5 lg:px-5"
           summary={<h2 className="m-0 text-base font-semibold text-ink">{title}</h2>}>
           <div className="flex flex-col gap-3 px-4 pb-4 text-[15px] leading-relaxed text-ink-2 lg:px-5 lg:pb-5">{body}</div>
         </Disclosure>

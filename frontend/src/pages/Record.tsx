@@ -1,13 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
-import { apiUrl, useLedger, useStocks, useTrackRecord, type LedgerRow, type TrackRecord } from '../api/client'
+import { apiUrl, useLedger, useStocks, useToday, useTrackRecord, type LedgerRow, type TrackRecord } from '../api/client'
 import { Disclosure } from '../components/Disclosure'
 import { Download } from '../components/Icons'
+import { RecentTesting } from '../components/Market'
 import { CalibrationChart, DotStrip, YearBars } from '../components/RecordCharts'
 import { Card, Loading, LoadError } from '../components/States'
 import { count, pct, shortDate, signedPct } from '../lib/format'
-import { chosenSummary, edgeSpread, ROUND_TRIP_COST, worstYear, yearsBelowCoinFlip, type SimulatedMetrics } from '../lib/metrics'
-import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
+import { chosenSummary, confidenceVerdict, edgeSpread, ROUND_TRIP_COST, worstYear, yearsBelowCoinFlip, type SimulatedMetrics } from '../lib/metrics'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 export function Record() {
@@ -19,8 +19,8 @@ export function Record() {
 
 export function RecordView({ data }: { data: TrackRecord }) {
   useDocumentTitle('Track record')
-  const isDesktop = useMediaQuery(DESKTOP)
   const sim = data.simulated as SimulatedMetrics | null
+  const recent = useToday().data?.recent_simulated ?? []
   return (
     <div className="flex flex-col gap-4 lg:gap-6">
       <section className="flex max-w-2xl flex-col gap-1.5 px-1">
@@ -32,10 +32,11 @@ export function RecordView({ data }: { data: TrackRecord }) {
 
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start lg:gap-6">
         <LiveCard data={data} />
-        {sim && <TestingCard sim={sim} defaultOpen={isDesktop} />}
+        {sim && <TestingCard sim={sim} />}
       </div>
 
-      {sim && <SimulatedDetails sim={sim} defaultOpen={isDesktop} />}
+      {sim && <SimulatedDetails sim={sim} />}
+      <RecentTesting calls={recent} />
       <Ledger />
     </div>
   )
@@ -71,6 +72,8 @@ function LiveCard({ data }: { data: TrackRecord }) {
         <Tile value={count(live_scored)} label="scored" />
         <Tile value={live && live.n_calls > 0 ? pct(live.hit_rate) : '—'} label="right so far" />
       </div>
+      <Disclosure buttonClassName="min-h-11" summary={<span className="text-sm font-medium text-link">How the live record works</span>}>
+        <div className="flex flex-col gap-3 pt-1">
       <p className="m-0 text-sm leading-relaxed text-ink-2">
         {live_scored === 0
           ? 'The first results arrive 5 trading days after the first calls. '
@@ -85,11 +88,13 @@ function LiveCard({ data }: { data: TrackRecord }) {
       <a href={apiUrl('/api/ledger.csv')} className="inline-flex items-center gap-1.5 self-start text-sm font-medium no-underline">
         <Download size={15} /> Download every call (CSV)
       </a>
+        </div>
+      </Disclosure>
     </Card>
   )
 }
 
-function TestingCard({ sim, defaultOpen }: { sim: SimulatedMetrics; defaultOpen: boolean }) {
+function TestingCard({ sim }: { sim: SimulatedMetrics }) {
   const s = chosenSummary(sim)
   const bands = Object.entries(s.by_confidence).sort(([a]) => (a === 'Stronger edge' ? -1 : 1))
   return (
@@ -102,7 +107,7 @@ function TestingCard({ sim, defaultOpen }: { sim: SimulatedMetrics; defaultOpen:
         <span className="font-serif text-[44px] leading-none font-semibold tracking-[-0.02em] lg:text-[52px]">{pct(s.hit_rate)}</span>
         <span className="text-sm text-ink-2">of {count(s.n_calls)} calls were right</span>
       </div>
-      <Disclosure key={String(defaultOpen)} defaultOpen={defaultOpen} buttonClassName="min-h-11"
+      <Disclosure buttonClassName="min-h-11"
         summary={<span className="text-sm font-medium text-link">Compare with a coin flip</span>}>
         <div className="flex flex-col gap-3 pt-1">
           <DotStrip hitRate={s.hit_rate ?? 0.5} baseRate={s.base_rate_beat_index} />
@@ -114,7 +119,7 @@ function TestingCard({ sim, defaultOpen }: { sim: SimulatedMetrics; defaultOpen:
                 <span><strong className="font-semibold">{pct(b.hit_rate)}</strong> <span className="text-muted">· {count(b.n_calls)} calls</span></span>
               </div>
             ))}
-            <span className="text-[13px] text-muted">Slightly, yes. The confidence labels mean something, but not much.</span>
+            <span className="text-[13px] text-muted">{confidenceVerdict(s.by_confidence)}</span>
           </div>
         </div>
       </Disclosure>
@@ -122,7 +127,7 @@ function TestingCard({ sim, defaultOpen }: { sim: SimulatedMetrics; defaultOpen:
   )
 }
 
-function SimulatedDetails({ sim, defaultOpen }: { sim: SimulatedMetrics; defaultOpen: boolean }) {
+function SimulatedDetails({ sim }: { sim: SimulatedMetrics }) {
   const s = chosenSummary(sim)
   const worst = worstYear(sim.yearly)
   const below = yearsBelowCoinFlip(sim.yearly)
@@ -130,7 +135,7 @@ function SimulatedDetails({ sim, defaultOpen }: { sim: SimulatedMetrics; default
   const worthIt = spread != null && spread > ROUND_TRIP_COST
   const section = (title: string, summary: string, body: ReactNode) => (
     <Card className="min-w-0 self-start overflow-hidden">
-      <Disclosure key={String(defaultOpen)} defaultOpen={defaultOpen} buttonClassName="min-h-14 px-4 py-3.5 lg:px-5"
+      <Disclosure buttonClassName="min-h-14 px-4 py-3.5 lg:px-5"
         summary={
           <span className="flex flex-col gap-0.5">
             <span className="text-base font-semibold text-ink">{title}</span>

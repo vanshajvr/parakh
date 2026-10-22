@@ -4,6 +4,22 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-026 · Fill the wait with data we already hold; every section starts closed
+**Date:** 2026-10-22
+**Decision:**
+- Today shows a NIFTY 50 strip (last close, the day's move, the 5-day move) and "What the rule sees": all 20 stocks ranked by their last 5 days against the average of the 20, which is the reversal rule's only input.
+- Until live calls have results, Today also shows the latest testing calls and how they turned out, under a dashed *Simulated* badge. Track record always shows them.
+- The Stocks list shows each stock's last close, 5-day move, a 1-month sparkline, and its testing hit rate with a likely range.
+- Every section starts closed, on desktop too, and opens on tap. Summary lines keep the key number, receipt or warning visible (an update to D-018).
+- The daily job also runs at 21:00 and 07:30 IST. On 21 Oct, Yahoo had the stocks' closes hours before the NIFTY 50's, and the 18:00 run alone missed the publish window.
+**Why:**
+- Before the first results, the app only showed what Parakh had published, which was nothing. The stored prices and the backtest already answer "what is the rule looking at?" and "what does a scored call look like?" without any new data source.
+- A third-party "real-time NSE" API was considered and rejected: it wraps Yahoo's unofficial endpoints (the same source as yfinance), and its public instance is a bare IP over plain HTTP with no stated terms. Licensed real-time NSE data needs a paid vendor (D-025).
+- Recent testing calls are shown even when they look bad (15 of 44 right in early October), because hiding a bad patch would be cherry-picking.
+**Alternatives:** Intraday prices (D-025); keeping desktop sections open (more visible, but the user found long open pages harder to scan).
+
+---
+
 ### D-025 · Show calls in progress, once a day; no live prices
 **Date:** 2026-10-22
 **Decision:**
@@ -93,7 +109,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 - One responsive web app that can be installed as a PWA on phones and on Windows/Mac. No native apps.
 - A calm, editorial look: IBM Plex Serif and Sans (Plex has a matching Devanagari typeface for the planned Hindi version).
 - Blue for bullish and orange for bearish, always with an icon and a label, never colour alone.
-- Progressive disclosure on the phone: cards and sections show a summary and expand on tap.
+- Progressive disclosure on the phone: cards and sections show a summary and expand on tap. (Since D-026 this applies on desktop too.)
 - The receipt line and any per-stock warning never collapse.
 **Why:**
 - Beginners discover stocks on their phones, while recruiters and researchers use laptops; one codebase serves both.

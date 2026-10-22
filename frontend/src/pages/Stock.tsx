@@ -64,8 +64,6 @@ export function StockView({ data }: { data: StockDetail }) {
             height={isDesktop ? 300 : 200}
           />
           <Disclosure
-            key={`legend-${isDesktop}`}
-            defaultOpen={isDesktop}
             buttonClassName="min-h-11"
             summary={<span className="text-sm font-medium text-link">How to read this chart</span>}
           >
@@ -75,8 +73,6 @@ export function StockView({ data }: { data: StockDetail }) {
         {latest && latest.lean !== 'no_call' && latest.factors.length > 0 && (
           <Card className="min-w-0 overflow-hidden lg:col-start-2 lg:row-start-2">
             <Disclosure
-              key={`why-${isDesktop}`}
-              defaultOpen={isDesktop}
               buttonClassName="min-h-14 px-4 py-3.5"
               summary={
                 <span className="flex flex-col gap-0.5">
@@ -99,7 +95,7 @@ export function StockView({ data }: { data: StockDetail }) {
         )}
       </div>
 
-      <StockRecord data={data} defaultOpen={isDesktop} />
+      <StockRecord data={data} />
     </div>
   )
 }
@@ -175,7 +171,7 @@ function history(data: StockDetail, n: number): HistoryRow[] {
   return [...live, ...simulated].sort((a, b) => b.date.localeCompare(a.date)).slice(0, n)
 }
 
-function StockRecord({ data, defaultOpen }: { data: StockDetail; defaultOpen: boolean }) {
+function StockRecord({ data }: { data: StockDetail }) {
   const { stock, simulated_stats: sim, simulated_past_year_stats: year, live_stats: live } = data
   const below = sim?.hit_rate != null && sim.hit_rate < 0.5
   const receipt = data.latest?.receipt
@@ -186,8 +182,6 @@ function StockRecord({ data, defaultOpen }: { data: StockDetail; defaultOpen: bo
   return (
     <Card className="overflow-hidden">
       <Disclosure
-        key={`record-${defaultOpen}`}
-        defaultOpen={defaultOpen}
         buttonClassName="min-h-14 px-4 py-3.5 lg:px-5"
         summary={
           <span className="flex flex-col gap-1">

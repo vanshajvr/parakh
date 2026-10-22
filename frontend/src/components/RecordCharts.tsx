@@ -29,7 +29,10 @@ export function DotStrip({ hitRate, baseRate }: { hitRate: number; baseRate: num
 /** Hit rate per year as bars above or below the 50% line. */
 export function YearBars({ rows }: { rows: YearRow[] }) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
-  const height = 150, mid = 72, scale = 11 // px per percentage point
+  const height = 150, mid = 72
+  // Px per percentage point: 11 at most, less if a big year would run into the labels.
+  const maxDev = Math.max(...rows.map((r) => Math.abs(((r.hit_rate ?? 0.5) - 0.5) * 100)), 0.1)
+  const scale = Math.min(11, (mid - 18) / maxDev, (height - 18 - mid - 14) / maxDev)
   const left = 28 // room for the 50% label
   const slot = (width - left) / rows.length
   const bar = Math.min(32, slot * 0.68)
