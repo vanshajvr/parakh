@@ -14,7 +14,8 @@ from psycopg_pool import ConnectionPool
 
 CACHE_SECONDS = 300
 # Neon suspends idle compute after ~5 minutes and drops its connections. Extra pooled connections
-# are closed before then; the pool's one permanent connection can still go stale (see _all).
+# are closed before then; the pool's one permanent connection can still go stale, so every
+# connection is checked on checkout (one cheap round trip) and dead ones are replaced.
 MAX_IDLE_SECONDS = 240
 
 LEDGER_COLUMNS = """
@@ -33,6 +34,7 @@ class Repository:
         self.pool = ConnectionPool(
             url, min_size=1, max_size=5, open=False, configure=_read_only,
             kwargs={"autocommit": True, "row_factory": dict_row}, max_idle=MAX_IDLE_SECONDS,
+            check=ConnectionPool.check_connection,
         )
         self._cache: dict[str, tuple[float, list[dict]]] = {}
 
