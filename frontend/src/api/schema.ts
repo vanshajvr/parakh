@@ -58,6 +58,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/screener": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Screener View
+         * @description Every NIFTY 50 member's moves at the latest index close: the movers lists and the screener.
+         */
+        get: operations["screener_view_api_screener_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stocks/{ticker}": {
         parameters: {
             query?: never;
@@ -325,23 +345,6 @@ export interface components {
             index_change_5d: number | null;
             /** Index Change 20D */
             index_change_20d?: number | null;
-            /** Stocks */
-            stocks: components["schemas"]["MarketStock"][];
-        };
-        /** MarketStock */
-        MarketStock: {
-            /** Ticker */
-            ticker: string;
-            /** Symbol */
-            symbol: string;
-            /** Name */
-            name: string;
-            /** Close */
-            close: number;
-            /** Ret 5D */
-            ret_5d: number;
-            /** Vs Peers 5D */
-            vs_peers_5d: number;
         };
         /** ModelInfo */
         ModelInfo: {
@@ -373,6 +376,23 @@ export interface components {
             metrics: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * NextWeek
+         * @description How the past week's top gainers and losers among Parakh's 20 did against the index next week.
+         */
+        NextWeek: {
+            /** Weeks */
+            weeks: number;
+            /**
+             * Since
+             * Format: date
+             */
+            since: string;
+            /** Gainers Lagged */
+            gainers_lagged: number;
+            /** Losers Beat */
+            losers_beat: number;
         };
         /**
          * OpenCall
@@ -518,6 +538,70 @@ export interface components {
              */
             coin_flip_hit_rate: number;
         };
+        /** ScreenerResponse */
+        ScreenerResponse: {
+            /** As Of */
+            as_of: string | null;
+            /** Stocks */
+            stocks: components["schemas"]["ScreenerRow"][];
+            next_week: components["schemas"]["NextWeek"] | null;
+        };
+        /** ScreenerRow */
+        ScreenerRow: {
+            /** Ticker */
+            ticker: string;
+            /** Symbol */
+            symbol: string;
+            /** Name */
+            name: string;
+            /** Sector */
+            sector: string;
+            /** Lean */
+            lean: ("bullish" | "bearish" | "no_call") | null;
+            /** Confidence */
+            confidence: string | null;
+            /**
+             * Covered
+             * @default true
+             */
+            covered: boolean;
+            /** Close */
+            close?: number | null;
+            /** Change 5D */
+            change_5d?: number | null;
+            /**
+             * Spark
+             * @default []
+             */
+            spark: number[];
+            /** Sim Hit Rate */
+            sim_hit_rate?: number | null;
+            /** Sim Hit Low */
+            sim_hit_low?: number | null;
+            /** Sim Hit High */
+            sim_hit_high?: number | null;
+            /**
+             * Sim N Calls
+             * @default 0
+             */
+            sim_n_calls: number;
+            /** Change 1D */
+            change_1d: number | null;
+            /** Change 20D */
+            change_20d: number | null;
+            /** Value Traded */
+            value_traded: number;
+            /** Volume Ratio */
+            volume_ratio: number | null;
+            /** High 52W */
+            high_52w: number;
+            /** Low 52W */
+            low_52w: number;
+            /** Pos 52W */
+            pos_52w: number | null;
+            /** Vs Peers 5D */
+            vs_peers_5d: number | null;
+        };
         /** Signal */
         Signal: {
             /** Ticker */
@@ -618,6 +702,11 @@ export interface components {
             lean: ("bullish" | "bearish" | "no_call") | null;
             /** Confidence */
             confidence: string | null;
+            /**
+             * Covered
+             * @default true
+             */
+            covered: boolean;
             /** Close */
             close?: number | null;
             /** Change 5D */
@@ -768,6 +857,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StockSummary"][];
+                };
+            };
+        };
+    };
+    screener_view_api_screener_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScreenerResponse"];
                 };
             };
         };

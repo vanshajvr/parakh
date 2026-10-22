@@ -4,7 +4,8 @@ import { useToday, type Signal, type Today as TodayData } from '../api/client'
 import { CallCard } from '../components/CallCard'
 import { Disclosure } from '../components/Disclosure'
 import { Info, Minus, Warning } from '../components/Icons'
-import { IndexCard, RecentTesting, RuleView } from '../components/Market'
+import { IndexCard, RecentTesting } from '../components/Market'
+import { Movers } from '../components/Movers'
 import { OpenCalls } from '../components/OpenCalls'
 import { Loading, LoadError } from '../components/States'
 import { closeLabel, count, pct } from '../lib/format'
@@ -85,7 +86,7 @@ export function TodayView({ data }: { data: TodayData }) {
           )}
           {/* Today's calls are the cards above; this tracks the earlier ones still running. */}
           <OpenCalls calls={(data.open_calls ?? []).filter((c) => c.as_of !== data.as_of)} />
-          {data.market && <RuleView market={data.market} />}
+          <Movers />
           {/* Until live calls have results, the latest testing calls show what a scored call looks like. */}
           {data.scoreboard.live_scored === 0 && <RecentTesting calls={data.recent_simulated ?? []} />}
         </div>

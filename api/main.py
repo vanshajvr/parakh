@@ -15,11 +15,12 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
+from api import screener
 from api.repository import Repository
 from ledger.db import database_url
 from api.schemas import (
-    CallStats, DataStatus, LedgerPage, LedgerRow, MarketSnapshot, MarketStock, ModelInfo, OpenCall, PricePoint, Receipt,
-    RecentSimulatedCall, Scoreboard, Signal,
+    CallStats, DataStatus, LedgerPage, LedgerRow, MarketSnapshot, ModelInfo, NextWeek, OpenCall, PricePoint,
+    Receipt, RecentSimulatedCall, Scoreboard, ScreenerResponse, ScreenerRow, Signal,
     SimulatedCall, StatusResponse, StockDetail, StockSummary, TodayResponse, TrackRecord,
 )
 from ledger.scoring import IST, progress
@@ -86,15 +87,15 @@ def _clean(obj):
 
 def resolve_ticker(ticker: str) -> str:
     full = ticker.upper() if ticker.upper().endswith(".NS") else f"{ticker.upper()}.NS"
-    if full not in config.STOCKS:
+    if full not in config.MARKET:
         raise HTTPException(404, f"Unknown ticker: {ticker}")
     return full
 
 
 def stock_summary(ticker: str, call: dict | None = None) -> StockSummary:
-    name, sector = config.STOCKS[ticker]
+    name, sector = config.MARKET[ticker]
     return StockSummary(
-        ticker=ticker, symbol=ticker.removesuffix(".NS"), name=name, sector=sector,
+        ticker=ticker, symbol=ticker.removesuffix(".NS"), name=name, sector=sector, covered=ticker in config.STOCKS,
         lean=call["lean"] if call else None, confidence=call["confidence"] if call else None,
     )
 
@@ -141,7 +142,7 @@ def to_signals(repo: Repository, rows: list[dict]) -> list[Signal]:
     closes = repo.closes_on(rows[0]["as_of"])
     signals = []
     for row in rows:
-        name, sector = config.STOCKS[row["ticker"]]
+        name, sector = config.MARKET[row["ticker"]]
         close, change = closes.get(row["ticker"], (None, None))
         signals.append(Signal(
             **row, symbol=row["ticker"].removesuffix(".NS"), name=name, sector=sector,
@@ -183,34 +184,14 @@ def _change(closes: pd.Series, sessions: int) -> float | None:
 
 
 def market_snapshot(repo: Repository) -> MarketSnapshot | None:
-    """The latest close: the NIFTY 50 and every stock's week against the others (the rule's input)."""
-    closes = recent_closes(repo)
-    index = closes.get(config.BENCHMARK)
+    """The NIFTY 50 at its latest close, with its 1-day, 5-day and 1-month moves."""
+    index = recent_closes(repo).get(config.BENCHMARK)
     if index is None or index.empty:
         return None
-    as_of = index.index[-1]
-    rows = []
-    for ticker in config.TICKERS:
-        # Yahoo sometimes has a stock's latest close before the index's, so align on the index.
-        c = closes.get(ticker)
-        c = c[c.index <= as_of] if c is not None else None
-        if c is None or len(c) <= config.HORIZON or c.index[-1] != as_of:
-            continue
-        rows.append((ticker, float(c.iloc[-1]), _change(c, config.HORIZON)))
-    if not rows:
-        return None
-    mean = sum(r[2] for r in rows) / len(rows)
-    stocks = [
-        MarketStock(ticker=t, symbol=t.removesuffix(".NS"), name=config.STOCKS[t][0], close=close,
-                    ret_5d=ret, vs_peers_5d=ret - mean)
-        for t, close, ret in rows
-    ]
     return MarketSnapshot(
-        as_of=as_of.date(), index_close=float(index.iloc[-1]),
+        as_of=index.index[-1].date(), index_close=float(index.iloc[-1]),
         index_change_1d=_change(index, 1), index_change_5d=_change(index, config.HORIZON),
         index_change_20d=_change(index, 20),
-
-        stocks=sorted(stocks, key=lambda s: s.vs_peers_5d),
     )
 
 
@@ -310,6 +291,43 @@ def stocks(repo: Repository = Depends(get_repo)):
             s.sim_hit_low, s.sim_hit_high = wilson_interval(s.sim_hit_rate, int(r.get("n_weeks") or r["n_calls"]))
         out.append(s)
     return out
+
+
+_next_week_cache: dict[date, NextWeek | None] = {}
+
+
+def next_week(repo: Repository, as_of: date) -> NextWeek | None:
+    """Computed from the full history once per trading day per process; it only changes after a close."""
+    if as_of not in _next_week_cache:
+        prices = repo.market_prices(date(2000, 1, 1), config.TICKERS + [config.BENCHMARK])
+        result = screener.what_happened_next(prices)
+        _next_week_cache.clear()
+        _next_week_cache[as_of] = NextWeek(**result) if result else None
+    return _next_week_cache[as_of]
+
+
+@app.get("/api/screener", response_model=ScreenerResponse)
+def screener_view(repo: Repository = Depends(get_repo)):
+    """Every NIFTY 50 member's moves at the latest index close: the movers lists and the screener."""
+    prices = repo.market_prices(datetime.now(IST).date() - timedelta(days=PRICE_HISTORY_DAYS + 30))
+    index = prices[prices["ticker"] == config.BENCHMARK]
+    if index.empty:
+        return ScreenerResponse(as_of=None, stocks=[], next_week=None)
+    # Align on the index's latest close: Yahoo sometimes has the stocks' closes first (D-026).
+    as_of = index["date"].max()
+    latest = {c["ticker"]: c for c in repo.latest_calls()}
+    tested = {r["ticker"]: r for r in repo.backtest_by_ticker()}
+    rows = []
+    for r in screener.stock_rows(prices, as_of):
+        base = stock_summary(r["ticker"], latest.get(r["ticker"])).model_dump()
+        closes = prices[(prices["ticker"] == r["ticker"]) & (prices["date"] <= as_of)]["close"]
+        base.update(close=r["close"], change_5d=r["change_5d"], spark=[round(float(v), 2) for v in closes.iloc[-22:]])
+        t = tested.get(r["ticker"])
+        if t and t.get("hit_rate") is not None:
+            base.update(sim_hit_rate=float(t["hit_rate"]), sim_n_calls=int(t["n_calls"]))
+            base["sim_hit_low"], base["sim_hit_high"] = wilson_interval(base["sim_hit_rate"], int(t.get("n_weeks") or t["n_calls"]))
+        rows.append(ScreenerRow(**{**base, **{k: v for k, v in r.items() if k not in ("ticker", "close", "change_5d")}}))
+    return ScreenerResponse(as_of=as_of.date(), stocks=rows, next_week=next_week(repo, as_of.date()))
 
 
 @app.get("/api/stocks/{ticker}", response_model=StockDetail)

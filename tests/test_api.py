@@ -59,6 +59,17 @@ class FakeRepository:
         return [{k: c[k] for k in ("id", "ticker", "as_of", "lean", "confidence", "p_outperform")}
                 for c in self.calls if c["beat_index"] is None and c["lean"] != "no_call"]
 
+    def market_prices(self, since, tickers=None):
+        days = pd.bdate_range(end=pd.Timestamp(TODAY), periods=25)
+        rows = []
+        for t, base in {"TCS.NS": 100.0, "ADANIENT.NS": 50.0, "^NSEI": 1000.0}.items():
+            if tickers is not None and t not in tickers:
+                continue
+            rows += [{"ticker": t, "date": d, "high": base * 1.01, "low": base * 0.99,
+                      "close": base * (1.1 if i == 24 and t == "TCS.NS" else 1.0), "volume": 1000.0}
+                     for i, d in enumerate(days)]
+        return pd.DataFrame(rows)
+
     def backtest_recent(self, days=14):
         return [{"date": DAY2, "ticker": "TCS.NS", "lean": "bearish", "confidence": "Slight edge",
                  "excess_return": -0.012, "hit": True}]
@@ -203,19 +214,15 @@ def test_ledger_pagination_and_csv(client):
     assert len(csv.text.splitlines()) == 7
 
 
-def test_market_snapshot_ranks_stocks_by_last_week_against_the_others(client):
+def test_market_snapshot_reports_the_index_at_its_latest_close(client):
     app.state.repo.closes_since = lambda since: pd.DataFrame([
-        {"ticker": t, "date": pd.Timestamp(TODAY) - pd.Timedelta(days=6 - i), "close": c}
-        for t, closes in {"TCS.NS": [100] * 6 + [110], "INFY.NS": [100] * 6 + [90],
-                          "^NSEI": [100] * 6 + [101]}.items()
-        for i, c in enumerate(closes)
+        {"ticker": "^NSEI", "date": pd.Timestamp(TODAY) - pd.Timedelta(days=6 - i), "close": c}
+        for i, c in enumerate([100] * 6 + [101])
     ])
     market = client.get("/api/today").json()["market"]
     assert market["as_of"] == str(TODAY)
-    assert market["index_change_5d"] == pytest.approx(0.01)
-    # Average of the stocks' weeks is 0%, so INFY (-10%) leads the list: the rule's top bullish candidate.
-    assert [s["symbol"] for s in market["stocks"]] == ["INFY", "TCS"]
-    assert market["stocks"][0]["vs_peers_5d"] == pytest.approx(-0.10)
+    assert market["index_close"] == 101
+    assert market["index_change_1d"] == pytest.approx(0.01) and market["index_change_5d"] == pytest.approx(0.01)
 
 
 def test_history_serves_every_stored_candle_for_stocks_and_the_index(client):
@@ -223,6 +230,21 @@ def test_history_serves_every_stored_candle_for_stocks_and_the_index(client):
     assert client.get("/api/history/NIFTY50").json() == expected
     assert client.get("/api/history/tcs").json() == expected
     assert client.get("/api/history/NOPE").status_code == 404
+
+
+def test_screener_lists_every_member_with_coverage_marked(client):
+    body = client.get("/api/screener").json()
+    rows = {r["symbol"]: r for r in body["stocks"]}
+    assert body["as_of"] == str(pd.bdate_range(end=pd.Timestamp(TODAY), periods=1)[0].date())
+    assert rows["TCS"]["covered"] is True and rows["TCS"]["change_1d"] == pytest.approx(0.10)
+    assert rows["TCS"]["sim_hit_rate"] == 0.471  # the testing record rides along for covered stocks
+    assert rows["ADANIENT"]["covered"] is False and rows["ADANIENT"]["sector"] == "Metals & Mining"
+    assert rows["ADANIENT"]["vs_peers_5d"] is None
+
+
+def test_uncovered_member_has_a_stock_page_without_calls(client):
+    body = client.get("/api/stocks/ADANIENT").json()
+    assert body["stock"]["covered"] is False and body["latest"] is None
 
 
 def test_today_includes_recent_testing_calls(client):

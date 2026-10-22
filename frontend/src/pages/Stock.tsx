@@ -54,7 +54,7 @@ export function StockView({ data }: { data: StockDetail }) {
       {/* Phone order: call, chart, why. Desktop: chart on the left, call and why on the right. */}
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr] lg:items-start lg:gap-6">
         <div className="min-w-0 lg:col-start-2 lg:row-start-1">
-          <TodaysCall stock={data} latest={latest ?? null} />
+          {stock.covered !== false ? <TodaysCall stock={data} latest={latest ?? null} /> : <NotCovered name={stock.name} />}
         </div>
         <Card className="flex min-w-0 flex-col gap-3 p-4 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:p-5">
           <h2 className="m-0 text-base font-semibold">Price and past calls</h2>
@@ -94,7 +94,7 @@ export function StockView({ data }: { data: StockDetail }) {
         )}
       </div>
 
-      <StockRecord data={data} />
+      {stock.covered !== false && <StockRecord data={data} />}
     </div>
   )
 }
@@ -109,6 +109,20 @@ function callSentence(name: string, s: Signal): string {
   if (s.lean === 'bullish') return `${pct(s.p_outperform)} chance ${name} does better than a NIFTY 50 index fund over the next 5 trading days.`
   if (s.lean === 'bearish') return `${pct(1 - s.p_outperform)} chance ${name} does worse than a NIFTY 50 index fund over the next 5 trading days.`
   return `No clear edge on ${name} today.`
+}
+
+/** NIFTY 50 members outside Parakh's 20: prices and chart, but no calls and no testing record. */
+function NotCovered({ name }: { name: string }) {
+  return (
+    <Card className="flex flex-col gap-2 p-4 lg:p-5">
+      <span className="text-xs font-semibold tracking-wider text-muted uppercase">No Parakh calls</span>
+      <p className="m-0 text-sm leading-relaxed text-ink-2">
+        {name} is in the NIFTY 50, so its prices are shown here, but it isn't one of the 20 stocks Parakh's method was
+        tested on. Parakh makes no calls on it and has no track record for it.
+      </p>
+      <Link to="/stocks?covered=1" className="text-sm font-medium no-underline">See the 20 stocks Parakh covers →</Link>
+    </Card>
+  )
 }
 
 function TodaysCall({ stock, latest }: { stock: StockDetail; latest: Signal | null }) {

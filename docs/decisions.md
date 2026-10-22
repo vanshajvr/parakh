@@ -4,6 +4,27 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-030 · Market movers and a screener across the whole NIFTY 50
+**Date:** 2026-10-22
+**Decision:**
+- Today has a Market movers card covering all 50 NIFTY 50 stocks:
+  - gainers and losers over 1 day, 5 days or 1 month;
+  - most active by value traded (shares × price), not by share count;
+  - unusual volume (the latest day against the stock's own 20-day average);
+  - near the 52-week high or low;
+  - "Vs the others", the reversal rule's own input, which replaces the separate "What the rule sees" card;
+  - a sector filter, and the top 5 per view.
+- The Stocks page becomes the full screener, with the same views, search, a "Parakh's 20 only" filter, sortable columns on desktop, and filters kept in the URL.
+- The 30 members Parakh doesn't cover are fetched daily for prices only, from a separate download and cache, so they can never reach the model. They are labelled "No Parakh calls", and their stock pages say so instead of promising a call.
+- Under gainers and losers, a note computed from Parakh's own history says what happened next: across 528 weeks since 2016, the 5 biggest weekly gainers among Parakh's 20 lagged the NIFTY 50 the next week 53% of the time, and the biggest losers beat it 50% of the time.
+- The daily job stores the extra prices inside a savepoint, so a failed download is logged and never costs a day of calls.
+**Why:**
+- A movers list is the first thing beginners check in any market app. Ranking by share count misleads them, because cheap stocks trade more shares. Ranking by value is a small, genuine lesson.
+- Gainer lists feed the FOMO that tips channels exploit. Pairing them with what actually happened next, from our own data, keeps the list honest: chasing gainers hasn't paid, and a bounce-back isn't reliable either.
+**Alternatives:** Movers on Parakh's 20 only (thin lists); a separate movers card alongside "What the rule sees" (two cards saying the same thing).
+
+---
+
 ### D-029 · An interactive chart library, standard candle colours, full history
 **Date:** 2026-10-22
 **Decision:**

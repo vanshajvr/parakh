@@ -92,6 +92,18 @@ class Repository:
             ORDER BY p.as_of DESC, p.ticker
         """)
 
+    def market_prices(self, since: date, tickers: list[str] | None = None) -> pd.DataFrame:
+        """Daily high, low, close and volume from `since`, for all tickers or just `tickers`."""
+        rows = self._all(
+            "SELECT ticker, date, high, low, close, volume FROM prices"
+            " WHERE date >= %(since)s AND (%(tickers)s::text[] IS NULL OR ticker = ANY(%(tickers)s))"
+            " ORDER BY ticker, date",
+            {"since": since, "tickers": tickers},
+        )
+        prices = pd.DataFrame(rows, columns=["ticker", "date", "high", "low", "close", "volume"])
+        prices["date"] = pd.to_datetime(prices["date"])
+        return prices
+
     def closes_since(self, since: date) -> pd.DataFrame:
         """Closing prices for every stock and the benchmark from `since` onwards."""
         rows = self._all("SELECT ticker, date, close FROM prices WHERE date >= %s ORDER BY ticker, date", (since,))

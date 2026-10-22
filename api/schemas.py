@@ -109,16 +109,6 @@ class OpenCall(BaseModel):
     path: list[ProgressPoint]
 
 
-class MarketStock(BaseModel):
-    ticker: str
-    symbol: str
-    name: str
-    close: float
-    ret_5d: float
-    # Last week's return minus the average of the 20 stocks: the reversal rule's only input.
-    vs_peers_5d: float
-
-
 class MarketSnapshot(BaseModel):
     """The latest close, whether or not calls have been published for it."""
 
@@ -127,7 +117,6 @@ class MarketSnapshot(BaseModel):
     index_change_1d: float | None
     index_change_5d: float | None
     index_change_20d: float | None = None
-    stocks: list[MarketStock]
 
 
 class RecentSimulatedCall(BaseModel):
@@ -157,6 +146,8 @@ class StockSummary(BaseModel):
     sector: str
     lean: Lean | None
     confidence: str | None
+    # False for NIFTY 50 members Parakh shows prices for but makes no calls on.
+    covered: bool = True
     # Filled in on the Stocks list only.
     close: float | None = None
     change_5d: float | None = None
@@ -165,6 +156,32 @@ class StockSummary(BaseModel):
     sim_hit_low: float | None = None
     sim_hit_high: float | None = None
     sim_n_calls: int = 0
+
+
+class ScreenerRow(StockSummary):
+    change_1d: float | None
+    change_20d: float | None
+    value_traded: float
+    volume_ratio: float | None
+    high_52w: float
+    low_52w: float
+    pos_52w: float | None
+    vs_peers_5d: float | None
+
+
+class NextWeek(BaseModel):
+    """How the past week's top gainers and losers among Parakh's 20 did against the index next week."""
+
+    weeks: int
+    since: date
+    gainers_lagged: float
+    losers_beat: float
+
+
+class ScreenerResponse(BaseModel):
+    as_of: date | None
+    stocks: list[ScreenerRow]
+    next_week: NextWeek | None
 
 
 class PricePoint(BaseModel):
