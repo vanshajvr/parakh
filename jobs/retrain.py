@@ -11,22 +11,24 @@ import argparse
 from ledger import db
 from ml import config
 from ml.data import load_prices
-from ml.evaluate import run_walk_forward, summary_metrics
+from ml.evaluate import IC_MARGIN, passes, run_walk_forward, split_metrics
 from ml.features import FEATURE_COLUMNS, build_features
 from ml.labels import add_labels
 from ml.model import MODEL_KINDS, SignalModel
 from ml.predict import latest_signals, model_version, save_model
 from ml.report import plot_calibration, write_metrics, write_model_card
 
-# Brier differences smaller than this are treated as a tie, and the simpler model wins.
-BRIER_TIE = 1e-5
-
-
 def choose_model(results: dict) -> str:
-    """Lowest out-of-sample Brier score; MODEL_KINDS is ordered simplest first."""
+    """The simplest model unless a more complex one clearly beats it on the research window.
+
+    MODEL_KINDS is ordered simplest first. A later model replaces the current choice only if it
+    passes the pre-registered bar and its rank IC is at least IC_MARGIN higher (decision D-022).
+    The holdout years play no part.
+    """
     best = MODEL_KINDS[0]
     for kind in MODEL_KINDS[1:]:
-        if results[kind]["metrics"]["brier"] < results[best]["metrics"]["brier"] - BRIER_TIE:
+        r = results[kind]["research"]
+        if passes(r) and r["ic"] >= results[best]["research"]["ic"] + IC_MARGIN:
             best = kind
     return best
 
@@ -51,9 +53,10 @@ def main(refresh: bool, publish_to_db: bool) -> None:
     results = {}
     for kind in MODEL_KINDS:
         oos = run_walk_forward(labeled, kind)
-        results[kind] = {"oos": oos, "metrics": summary_metrics(oos)}
-        m = results[kind]["metrics"]
-        print(f"{kind:9s} hit rate {m['hit_rate']:.3f}  AUC {m['auc']:.3f}  Brier {m['brier']:.4f}")
+        results[kind] = {"oos": oos, **split_metrics(oos)}
+        r = results[kind]["research"]
+        print(f"{kind:9s} research IC {r['ic']:+.4f} (t {r['ic_t']:+.2f})  "
+              f"{'passes' if passes(r) else 'fails'}  hit rate {r['hit_rate']:.3f}")
 
     chosen = choose_model(results)
     model = SignalModel(chosen).fit(labeled)

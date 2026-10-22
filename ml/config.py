@@ -40,8 +40,9 @@ HORIZON = 5
 # Walk-forward: each calendar year from FIRST_TEST_YEAR onwards is one out-of-sample fold.
 FIRST_TEST_YEAR = 2019
 
-# Share of each training window (latest dates) held out to fit probability calibration.
-CALIBRATION_FRACTION = 0.2
+# Walk-forward test years used to choose between models (decision D-022). Later years are the
+# holdout: reported, never used to choose.
+LAST_RESEARCH_YEAR = 2024
 
 # Share of stock-days the model should make a call on. The "No call" band around 50% is sized
 # on each model's calibration slice to hit this coverage (decision D-010).

@@ -4,6 +4,53 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-024 · Publish the reversal rule; show per-stock ranges
+**Date:** 2026-10-22
+**Decision:**
+- Parakh's calls now come from the one-line reversal rule (`reversal-20261012`), not LightGBM.
+- The weekly retrain applies the D-022 rules automatically: the simplest model wins unless a more complex one passes the bar and beats its research-window IC by at least 0.005. The research window stays fixed at 2019–2024.
+- Each stock's testing hit rate is shown with a 95% range. It counts one result per stock-week, because calls on the same stock in the same week share most of their price move.
+**Why:**
+- Research years 2019–2024: the rule passed (IC 0.029, t 2.39, 1 negative year). LightGBM failed (IC 0.034, t 1.80). Logistic regression failed (IC 0.010, t 1.05).
+- Of the pre-registered LightGBM features, only NIFTY 50 volatility reached t ≥ 2 (t 2.01). Its IC beat the rule's by 0.0046, under the 0.005 margin. Reversal × volatility (t 1.27), volume shock (t 1.29) and all three together (t 1.72) failed.
+- 10- and 20-day horizons were weaker than 5 days for both the rule and LightGBM.
+- Holdout 2025–26, checked once: the rule had IC 0.018 (t 0.98) and 48.8% of calls right; LightGBM had IC 0.037 (t 1.22) and 52.1%. Neither is significant. Switching on this result would have meant choosing on the holdout, so the pre-registered choice stands, and the model card reports the holdout as it came out.
+- Per-stock spread was mostly noise. Under the rule, no stock's range is wholly below 50%, and the old model's worst stock (ICICI Bank, 44.2%) is at 55.0%. The D-019 warning stays, now with the range and a note on whether it includes 50%.
+**Alternatives:** Ship LightGBM and log a deviation (better holdout numbers, but no clean test left); publish both and let the live ledger decide (needs a second set of calls in the ledger).
+**Supersedes:** D-012 (selection by Brier score).
+
+### D-023 · Calibrate on out-of-fold scores; abstain rather than invert
+**Date:** 2026-10-22
+**Decision:**
+- The calibrator is fitted on out-of-fold scores: each year of the training window is scored by a model trained only on earlier years, with a 5-day gap.
+- Scores are converted to within-day z-scores before calibrating, so the out-of-fold models and the final model are on the same scale.
+- If the calibrator's slope is zero or negative, the model abstains (every stock gets "No call") instead of reversing its ranking.
+**Why:**
+- The old calibrator was fitted on the latest 20% of each window, about one year of noisy data. In the 2021 fold its slope came out at −0.03, which turned a model with a positive IC (+0.063) into the published −0.054. The model card's "worst year" was this bug.
+- Without the z-scores, the "No call" band was sized on differently spread scores, and coverage fell from the 25% target to 8%.
+- Models stored before this change keep their original calibration: a flag on the model records which method it uses, and the stored `lightgbm-20261012` gives identical calls under the new code.
+**Alternatives:** Only clipping the slope at zero (removes the inversion but still calibrates on one noisy year); isotonic calibration (needs more data than this edge supports).
+
+---
+
+### D-022 · Modelling pass: evaluation rules fixed before any experiment
+**Date:** 2026-10-22
+**Decision:**
+- **Research window:** walk-forward test years 2019–2024 only. **Holdout:** 2025 onwards is evaluated once, at the end, for the chosen setup, and reported as it comes out. It is not used to pick or tune anything.
+- **Primary metric:** daily rank IC, the Spearman correlation between each day's probabilities and the stocks' 5-day excess returns, averaged over days. Its t-stat uses every 5th trading day so that overlapping 5-day outcomes aren't counted as independent.
+- **A candidate passes if:**
+  - IC t-stat ≥ 2.0;
+  - at most 1 of the 6 research years has a negative IC;
+  - calibration error ≤ 2%.
+- **Baseline:** a one-line short-term reversal rule (last week's biggest losers lean bullish). An ML model is chosen only if it passes and its IC beats the rule's by at least 0.005. Otherwise the simpler rule is published.
+- **Experiments are listed in advance:** calibration fix; reversal × volatility, volume shock and market-regime features; 10- and 20-day horizons (research only). Anything not on this list needs a new entry.
+**Why:**
+- Diagnostics on the published backtest showed the edge was not statistically distinguishable from zero (IC 0.021, t ≈ 1.1).
+- With an edge this small, trying many variants and keeping the best one would produce a lucky result rather than a real one. Writing the rules down first, and keeping a holdout, is what makes the outcome believable.
+**Alternatives:** Tuning on the full 2019–2026 history (more data, but no untouched test); judging by hit rate on calls (depends on the coverage setting and is noisier than IC).
+
+---
+
 ### D-021 · Offline: show the last saved calls, never stale data silently
 **Date:** 2026-10-22
 **Decision:** The PWA precaches the app itself and caches API responses network-first (6-second timeout, kept for 3 days). When the device is offline, a banner says the calls shown are the last ones saved on this device. The CSV download is never cached.
@@ -22,6 +69,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 **Why:** Transparency is the product. Quietly dropping weak stocks would make the overall record look better than it is, which is the cherry-picking Parakh exists to oppose. Users can weigh the call themselves.
 **Alternatives:** Suppressing calls on stocks below 50% (more protective, but it hides information and flatters the scoreboard).
 **Finding:** 8 of the 20 stocks are below 50% in testing (lowest: ICICI Bank at 44.2%; highest: UltraTech Cement at 58.2%). With roughly 300–450 calls per stock, much of that spread could be chance, so the expanded card says "part of that gap from 50% may be chance" rather than implying the model is reliably wrong on those stocks.
+**Update:** Per-stock ranges added in D-024; most of the spread was chance.
 **Follow-up:** Revisit in a modelling pass before adding more stocks: per-stock or per-sector behaviour, regime features, and whether the repeated "short-term trend below longer-term trend" explanation (3 of 5 calls on 19 Oct) points to a feature that dominates too much.
 
 ### D-018 · Installable web app (PWA), calm editorial design, details on demand

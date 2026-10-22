@@ -50,3 +50,27 @@ def calibration_table(rows: pd.DataFrame, n_bins: int = 10) -> pd.DataFrame:
         n=("label", "size"), predicted=("p_up", "mean"), actual=("label", "mean")
     )
     return table.reset_index(drop=True)
+
+
+def rank_ic(rows: pd.DataFrame, step: int = 5) -> dict:
+    """Daily rank IC: how well each day's probabilities ordered the stocks by excess return.
+
+    The t-stat uses every `step`-th trading day, because 5-day outcomes on neighbouring days
+    overlap and would otherwise count the same price move several times (decision D-022).
+    A day where every probability is equal (the model abstained) counts as an IC of zero.
+    """
+    def day_ic(day: pd.DataFrame) -> float:
+        if day["p_up"].nunique() < 2 or day["excess_return"].nunique() < 2:
+            return 0.0
+        return float(day["p_up"].rank().corr(day["excess_return"].rank()))
+
+    daily = rows.groupby("date")[["p_up", "excess_return"]].apply(day_ic).sort_index()
+    sampled = daily.iloc[::step]
+    sd = sampled.std()
+    by_year = daily.groupby(daily.index.year).mean()
+    return {
+        "ic": float(daily.mean()),
+        "ic_t": float(sampled.mean() / sd * np.sqrt(len(sampled))) if sd > 0 else 0.0,
+        "ic_by_year": {int(y): float(v) for y, v in by_year.items()},
+        "negative_years": int((by_year < 0).sum()),
+    }

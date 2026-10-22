@@ -1,7 +1,7 @@
 """Plain-English reasons for each call, built from per-feature contributions (decision D-007).
 
-Contributions are SHAP values for LightGBM and coefficient x scaled value for logistic
-regression. Because the call is relative to other stocks, each contribution is centred on that
+Contributions are SHAP values for LightGBM, coefficient x scaled value for logistic
+regression, and last week's return against the other stocks for the reversal rule. Because the call is relative to other stocks, each contribution is centred on that
 day's average, so a reason reads as "compared with the other stocks today".
 """
 
@@ -64,13 +64,26 @@ def phrase(feature: str, value: float) -> str:
             return f"the NIFTY 50 is {'up' if up else 'down'} {_pct(value)} over the past week"
         case "mkt_ret_20d":
             return f"the NIFTY 50 is {'up' if up else 'down'} {_pct(value)} over the past month"
+        case "ret_5d_vs_peers":
+            return f"over the past week it did {_pct(value)} {'better' if up else 'worse'} than the average of the 20 stocks"
         case "rel_strength_20d":
             return f"it has {'outperformed' if up else 'underperformed'} the NIFTY 50 by {_pct(value)} over the past month"
     raise KeyError(feature)
 
 
+def explanation_values(model: SignalModel, X: pd.DataFrame) -> pd.DataFrame:
+    """The values the reasons describe: the model's inputs, plus any derived ones it explains with."""
+    values = X[FEATURE_COLUMNS].copy()
+    if model.kind == "reversal":
+        values["ret_5d_vs_peers"] = X["ret_5d"] - X["ret_5d"].groupby(X["date"]).transform("mean")
+    return values
+
+
 def contributions(model: SignalModel, X: pd.DataFrame) -> pd.DataFrame:
     """Per-feature contribution to each prediction, centred within each date."""
+    if model.kind == "reversal":
+        # The rule leans towards last week's laggards, so a stock's push is minus its relative return.
+        return -explanation_values(model, X)[["ret_5d_vs_peers"]]
     features = X[FEATURE_COLUMNS]
     if model.kind == "lightgbm":
         with warnings.catch_warnings():
@@ -99,12 +112,13 @@ def reason(lean: str, contrib: pd.Series, values: pd.Series, n: int = 2) -> str:
     if not clauses:
         return f"Leaning towards {direction} the NIFTY 50, with no single standout factor."
     factors = "; ".join(c[0].upper() + c[1:] for c in clauses)
-    return f"Leaning towards {direction} the NIFTY 50. Biggest factors: {factors}."
+    label = "Biggest factors" if len(clauses) > 1 else "Main factor"
+    return f"Leaning towards {direction} the NIFTY 50. {label}: {factors}."
 
 
 def top_factors(contrib: pd.Series, values: pd.Series, n: int = 3) -> list[dict]:
     """The strongest factors either way, for the 'Why' breakdown on the stock page."""
-    strongest = contrib.abs().sort_values(ascending=False).head(n).index
+    strongest = contrib[contrib != 0].abs().sort_values(ascending=False).head(n).index
     return [
         {
             "feature": f,

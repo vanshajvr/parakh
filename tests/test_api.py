@@ -93,7 +93,7 @@ class FakeRepository:
 
     def backtest_by_ticker(self):
         return [{"ticker": "INFY.NS", "n_calls": 300, "hit_rate": 0.53},
-                {"ticker": "TCS.NS", "n_calls": 340, "hit_rate": 0.471}]
+                {"ticker": "TCS.NS", "n_calls": 340, "n_weeks": 150, "hit_rate": 0.471}]
 
     def recent_runs(self, limit=10):
         return [{"job": "daily", "started_at": PUBLISHED, "status": "ok", "detail": "published"}][:limit]
@@ -127,6 +127,9 @@ def test_every_call_carries_its_receipt(client):
 
     assert tcs["band_hit_rate"] == 0.505 and tcs["band_n_calls"] == 60
     assert tcs["stock_hit_rate"] == 0.471 and tcs["stock_below_coin_flip"] is True
+    # 150 independent weeks can't rule out 50%, so the stock isn't flagged as clearly worse.
+    assert tcs["stock_hit_low"] < 0.471 < 0.5 < tcs["stock_hit_high"]
+    assert tcs["stock_clearly_below"] is False
     assert infy["stock_below_coin_flip"] is False
     # A band or stock with no simulated history gets an empty receipt, not an error.
     assert itc["band_hit_rate"] is None and itc["stock_hit_rate"] is None

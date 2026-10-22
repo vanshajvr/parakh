@@ -51,7 +51,7 @@ Beginners can't separate signal from noise, so they trust whoever sounds most co
 | How often we make a call | About 25% of stock-days, with *Slight* / *Stronger edge* labels | The model's edge is small; fixed thresholds would almost never trigger (D-010) |
 | Publishing cadence | Daily, after market close, before the next open | Calls are locked in before the outcome is known |
 | Track record | Live ledger kept separate from the simulated backtest | Never mix simulated results with real out-of-sample results |
-| Explanations | SHAP values turned into fixed sentence templates | Deterministic; a reason can't be made up |
+| Explanations | The model's own factors (the rule's single input, or SHAP values for ML models) turned into fixed sentence templates | Deterministic; a reason can't be made up |
 
 See [decisions.md](decisions.md) for the full decision log.
 
@@ -111,7 +111,7 @@ See [model-card.md](model-card.md) for current numbers.
 
 | Risk | Mitigation |
 |---|---|
-| The model is barely better than random (confirmed in Phase 1: 51.2% hit rate, an edge smaller than trading costs) | The product's value is honesty; the scoreboard and model card show the truth either way |
+| The model is barely better than random (Phase 6: a one-line reversal rule beat ML under pre-registered rules, then fell to 48.8% on the 2025–26 holdout; D-024) | The product's value is honesty; the scoreboard and model card show the truth either way |
 | Explanations that sound illogical (the model often bets on reversals) | "Biggest factors" wording, plus a plain-words explainer on How it works (D-013) |
 | yfinance outages or rate limits | Cache data in the database; show a "data delayed" state |
 | Being perceived as investment advice | Lean wording, disclaimers, educational framing, no personalisation |
@@ -127,7 +127,8 @@ See [model-card.md](model-card.md) for current numbers.
 | 3 | FastAPI read-only API |
 | 4 | Frontend: Today, Stock, Track record, How it works |
 | 5 | Ship: deployment, CI, case-study README |
-| 6 | Later ideas (see above) |
+| 6 | Modelling pass: pre-registered evaluation, calibration fix, reversal rule vs ML (D-022 to D-024) |
+| 7 | Later ideas (see above) |
 
 ## 10. Disclaimer
 

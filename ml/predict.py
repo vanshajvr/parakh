@@ -4,7 +4,7 @@ import joblib
 import pandas as pd
 
 from ml import config
-from ml.explain import contributions, reason, top_factors
+from ml.explain import contributions, explanation_values, reason, top_factors
 from ml.features import FEATURE_COLUMNS
 from ml.model import SignalModel
 from ml.signals import LEAN_LABELS, confidence_band, lean_from_prob
@@ -31,6 +31,7 @@ def latest_signals(model: SignalModel, data: pd.DataFrame) -> list[dict]:
     latest = complete[complete["date"] == complete["date"].max()]
     p_up = model.predict_proba(latest)
     contrib = contributions(model, latest)
+    values = explanation_values(model, latest)
 
     signals = []
     for (idx, row), p in zip(latest.iterrows(), p_up):
@@ -42,8 +43,8 @@ def latest_signals(model: SignalModel, data: pd.DataFrame) -> list[dict]:
             "lean": lean,
             "lean_label": LEAN_LABELS[lean],
             "confidence": confidence_band(p, model.margin, model.strong_margin),
-            "reason": reason(lean, contrib.loc[idx], row[FEATURE_COLUMNS]),
-            "factors": top_factors(contrib.loc[idx], row[FEATURE_COLUMNS]),
+            "reason": reason(lean, contrib.loc[idx], values.loc[idx]),
+            "factors": top_factors(contrib.loc[idx], values.loc[idx]),
             "model_version": model_version(model),
         })
     return sorted(signals, key=lambda s: -abs(s["p_outperform"] - 0.5))

@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from ml import config
-from ml.evaluate import coverage_table, yearly_table
-from ml.features import FEATURE_INFO
+from ml.evaluate import coverage_table, passes, yearly_table
+from ml.features import FEATURE_COLUMNS, FEATURE_INFO, model_features
 from ml.metrics import calibration_table
 
 IMG_DIR = config.DOCS_DIR / "img"
@@ -31,6 +31,9 @@ def write_metrics(results: dict, chosen: str, version: str) -> dict:
         "model_version": version,
         "chosen_model": chosen,
         "models": {kind: r["metrics"] for kind, r in results.items()},
+        "research": {kind: r["research"] for kind, r in results.items()},
+        "holdout": {kind: r["holdout"] for kind, r in results.items()},
+        "last_research_year": config.LAST_RESEARCH_YEAR,
         "yearly": yearly_table(results[chosen]["oos"]).to_dict(orient="records"),
         "calibration": calibration_table(results[chosen]["oos"]).to_dict(orient="records"),
         "coverage_tradeoff": coverage_table(results[chosen]["oos"]).to_dict(orient="records"),
@@ -57,24 +60,49 @@ def plot_calibration(oos: pd.DataFrame) -> None:
     plt.close(fig)
 
 
+MODEL_NAMES = {
+    "reversal": "Reversal rule",
+    "logreg": "Logistic regression",
+    "lightgbm": "LightGBM",
+}
+MODEL_DESCRIPTIONS = {
+    "reversal": "stocks that did worst over the past week, compared with the "
+                "other stocks, lean towards beating the index over the next week. Nothing is learned "
+                "except how strong that tendency has been (the calibration)",
+    "logreg": "logistic regression on the 15 price and volume features",
+    "lightgbm": "LightGBM, a collection of small decision trees, on the 15 price and volume features",
+}
+
+
+def _ic_row(kind: str, r: dict, chosen: str) -> str:
+    verdict = "passes" if passes(r) else "fails"
+    name = f"**{MODEL_NAMES[kind]}** (chosen)" if kind == chosen else MODEL_NAMES[kind]
+    return (f"| {name} | {r['ic']:+.4f} | {r['ic_t']:+.2f} | {r['negative_years']} of {len(r['ic_by_year'])} | "
+            f"{_p(r['ece'])} | {_p(r['hit_rate'])} | {verdict} |")
+
+
 def write_model_card(results: dict, chosen: str, version: str, n_rows: int) -> None:
     m = results[chosen]["metrics"]
+    research = results[chosen]["research"]
+    holdout = results[chosen]["holdout"]
     oos = results[chosen]["oos"]
     cost = config.ROUND_TRIP_COST
     spread = m["avg_excess_after_bullish"] - m["avg_excess_after_bearish"]
+    last = config.LAST_RESEARCH_YEAR
 
-    comparison = "\n".join(
-        f"| {kind} | {_p(r['metrics']['hit_rate'])} | {r['metrics']['auc']:.3f} | "
-        f"{r['metrics']['brier']:.4f} | {_p(r['metrics']['ece'])} | {_p(r['metrics']['coverage'], 0)} |"
-        for kind, r in results.items()
+    selection = "\n".join(_ic_row(kind, r["research"], chosen) for kind, r in results.items())
+    holdout_rows = "\n".join(
+        f"| {MODEL_NAMES[kind]}{' (chosen)' if kind == chosen else ''} | {h['ic']:+.4f} | {h['ic_t']:+.2f} | "
+        f"{_p(h['hit_rate'])} | {h['n_calls']:,} | {_bp(h['avg_excess_after_bullish'])} | {_bp(h['avg_excess_after_bearish'])} |"
+        for kind, r in results.items() if (h := r["holdout"])
     )
     by_conf = "\n".join(
         f"| {band} | {s['n_calls']:,} | {_p(s['hit_rate'])} |"
         for band, s in sorted(m["by_confidence"].items(), key=lambda kv: kv[0] != "Slight edge")
     )
     yearly = "\n".join(
-        f"| {int(r.year)} | {_p(r.coverage, 0)} | {_p(r.hit_rate)} | {r.auc:.3f} | "
-        f"{_bp(r.avg_excess_after_bullish)} | {_bp(r.avg_excess_after_bearish)} |"
+        f"| {int(r.year)}{' (holdout)' if r.year > last else ''} | {_p(r.coverage, 0)} | {_p(r.hit_rate)} | "
+        f"{m['ic_by_year'][int(r.year)]:+.3f} | {_bp(r.avg_excess_after_bullish)} | {_bp(r.avg_excess_after_bearish)} |"
         for r in yearly_table(oos).itertuples()
     )
     tradeoff = "\n".join(
@@ -82,8 +110,23 @@ def write_model_card(results: dict, chosen: str, version: str, n_rows: int) -> N
         f"{_bp(r.avg_excess_after_bullish)} | {_bp(r.avg_excess_after_bearish)} |"
         for r in coverage_table(oos).itertuples()
     )
-    features = "\n".join(f"| `{f}` | {desc} |" for f, desc in FEATURE_INFO.items())
-    worst = yearly_table(oos).sort_values("hit_rate").iloc[0]
+    used = model_features(chosen)
+    features = "\n".join(f"| `{f}` | {FEATURE_INFO[f]} |" for f in used)
+    candidates = "\n".join(f"| `{f}` | {FEATURE_INFO[f]} |" for f in FEATURE_COLUMNS)
+
+    if passes(research):
+        edge = (f"In the research years ({config.FIRST_TEST_YEAR}–{last}) the model passed the bar set in advance: "
+                f"a rank IC of {research['ic']:+.3f} with a t-stat of {research['ic_t']:.2f}. That is a **small but "
+                f"real-looking edge**, not a large one.")
+    else:
+        edge = (f"In the research years ({config.FIRST_TEST_YEAR}–{last}) the model did **not** pass the bar set in "
+                f"advance (rank IC {research['ic']:+.3f}, t-stat {research['ic_t']:.2f}), so we can't tell its edge "
+                f"apart from chance.")
+    if holdout:
+        verdict = "held up" if holdout["ic"] > 0 and holdout["hit_rate"] >= 0.5 else "did not hold up well"
+        edge += (f" On the holdout ({holdout['period'][0]} to {holdout['period'][1]}), which played no part in "
+                 f"choosing, it {verdict}: rank IC {holdout['ic']:+.3f} (t-stat {holdout['ic_t']:.2f}) and "
+                 f"{_p(holdout['hit_rate'])} of {holdout['n_calls']:,} calls right.")
 
     card = f"""# Model Card
 
@@ -106,35 +149,64 @@ probability into a *Bullish lean* (likely to outperform), a *Bearish lean* (like
 - {n_rows:,} labelled stock-days after indicator warm-up.
 - Universe: {", ".join(t.removesuffix(".NS") for t in config.TICKERS)}.
 
-## Features
+## The model
 
-| Feature | Meaning |
+**{MODEL_NAMES[chosen]}:** {MODEL_DESCRIPTIONS[chosen]}.
+
+| Input | Meaning |
 |---|---|
 {features}
 
-Three more features (12-month momentum, distance from the 52-week high, sector-relative return)
-were tested and dropped because they didn't improve out-of-sample results (decision D-009).
+## How it was chosen
 
-## Method
+The rules were written down before the experiments were run (decision D-022):
 
-- **Model:** {chosen}, chosen over the alternatives by out-of-sample Brier score, preferring the simpler
-  model on a tie (decision D-012).
-- **Calibration:** Platt scaling fitted on the most recent {int(config.CALIBRATION_FRACTION * 100)}% of each training
-  window, with a {config.HORIZON}-day gap. Probabilities are centred on 50% within each day (decision D-011).
-- **"No call" band:** sized on the calibration slice so that about {int(config.TARGET_COVERAGE * 100)}% of stock-days
+- **Research years:** {config.FIRST_TEST_YEAR}–{last}. Each year is predicted by a model trained only on earlier data,
+  with a {config.HORIZON}-day gap so no training outcome overlaps the test year.
+- **Holdout:** {last + 1} onwards. It is reported below, but it is never used to choose or tune anything.
+- **Main measure:** daily rank IC, the correlation between each day's probabilities and how the stocks actually did
+  against the index. The t-stat uses every {config.HORIZON}th trading day, because neighbouring days share most of
+  their {config.HORIZON}-day price move.
+- **The bar:** IC t-stat of at least 2.0, at most one negative research year, and calibration error of at most 2%.
+- **Simpler wins:** the models are tried simplest first. A more complex one is chosen only if it passes the bar
+  and beats the current choice's IC by at least 0.005.
+
+### Research years ({config.FIRST_TEST_YEAR}–{last})
+
+| Model | Rank IC | t-stat | Negative years | Calibration error | Hit rate on calls | Bar |
+|---|---|---|---|---|---|---|
+{selection}
+
+### Holdout ({last + 1} onwards, reported as it came out)
+
+| Model | Rank IC | t-stat | Hit rate on calls | Calls | Excess after bullish | after bearish |
+|---|---|---|---|---|---|---|
+{holdout_rows}
+
+### Also tried (decisions D-009, D-023, D-024)
+
+- Extra features for LightGBM: 12-month momentum, distance from the 52-week high and sector-relative return (D-009);
+  last week's relative return scaled by volatility, a 1-week vs 3-month volume shock, and NIFTY 50 volatility (D-024).
+  None cleared the bar by enough to beat the reversal rule.
+- Ranking every feature against the other stocks each day: worse in 4 of 6 research years.
+- 10- and 20-day horizons: weaker than 5 days for both the rule and LightGBM.
+
+The 15 price and volume features the ML candidates used:
+
+| Feature | Meaning |
+|---|---|
+{candidates}
+
+## Calibration and "No call"
+
+- **Calibration:** Platt scaling fitted on out-of-fold scores. Each year of the training window is scored by a model
+  trained only on earlier years, and each day's scores are standardised before calibrating. If the scores haven't
+  lined up with outcomes, the model abstains instead of flipping its ranking (decision D-023). Probabilities are
+  centred on 50% within each day (decision D-011).
+- **"No call" band:** sized on those out-of-fold scores so that about {int(config.TARGET_COVERAGE * 100)}% of stock-days
   get a call. The more confident half of calls is labelled *Stronger edge*, the rest *Slight edge* (decision D-010).
-- **Evaluation:** walk-forward. Each year from {config.FIRST_TEST_YEAR} is predicted by a model trained only on earlier
-  data, with a {config.HORIZON}-day gap so no training label overlaps the test year.
 
-## Results (out-of-sample, {m["period"][0]} to {m["period"][1]})
-
-### Models compared
-
-| Model | Hit rate on calls | AUC | Brier | Calibration error | Coverage |
-|---|---|---|---|---|---|
-{comparison}
-| *Coin flip* | 50.0% | 0.500 | 0.2500 | — | 100% |
-| *Always "beats index"* | {_p(m["base_rate_beat_index"])} | 0.500 | {m["brier_constant"]:.4f} | — | 100% |
+## Results, all years ({m["period"][0]} to {m["period"][1]})
 
 ### Do more confident calls do better?
 
@@ -146,11 +218,9 @@ were tested and dropped because they didn't improve out-of-sample results (decis
 
 ### Year by year
 
-| Year | Coverage | Hit rate | AUC | Avg excess return after bullish | after bearish |
+| Year | Coverage | Hit rate | Rank IC | Avg excess return after bullish | after bearish |
 |---|---|---|---|---|---|
 {yearly}
-
-Worst year: **{int(worst.year)}**, with a hit rate of {_p(worst.hit_rate)}.
 
 ### Fewer vs more calls (what-if)
 
@@ -160,12 +230,14 @@ Worst year: **{int(worst.year)}**, with a hit rate of {_p(worst.hit_rate)}.
 
 ## Honest summary
 
-- The model has a **small edge**: {_p(m["hit_rate"])} of its calls were right, against 50% for a coin flip, and it is
-  well calibrated (calibration error {_p(m["ece"])}).
+- {edge}
+- Across all years, {_p(m["hit_rate"])} of calls were right, against 50% for a coin flip, with a calibration error
+  of {_p(m["ece"])}.
 - Over {config.HORIZON} days, stocks with a bullish lean did {_bp(m["avg_excess_after_bullish"])} relative to the index on average,
   and stocks with a bearish lean did {_bp(m["avg_excess_after_bearish"])}. The gap ({_bp(spread)}) is **smaller than a typical
   round-trip trading cost of about {_p(cost, 2)}**, so trading on these signals alone would not be expected to make money.
-- The edge varies from year to year and has been negative in some years (see the table above).
+- Per-stock hit rates are shown with a likely range. With a few hundred overlapping calls per stock, most of the
+  spread between stocks is within what chance alone produces.
 
 ## Limitations
 

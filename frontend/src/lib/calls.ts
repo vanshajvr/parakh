@@ -33,6 +33,22 @@ export function looksLikeReversal(signal: Signal): boolean {
   return false
 }
 
+type Receipt = Signal['receipt']
+
+/** "likely 41–53%": the range the stock's true hit rate probably sits in, or null if unknown. */
+export function stockRange(r: Receipt): string | null {
+  if (r.stock_hit_low == null || r.stock_hit_high == null) return null
+  return `likely ${Math.round(r.stock_hit_low * 100)}–${Math.round(r.stock_hit_high * 100)}%`
+}
+
+/** What a below-50% record on one stock does and doesn't tell you (decision D-024). */
+export function stockCaveat(r: Receipt): string {
+  if (r.stock_clearly_below) {
+    return 'Even allowing for chance, that is below 50%, so weigh this call with it in mind.'
+  }
+  return 'That range includes 50%, so the gap may be chance rather than a real weakness on this stock.'
+}
+
 /** Short receipt that stays visible on a collapsed card. */
 export function receiptShort(signal: Signal): string | null {
   const r = signal.receipt
@@ -47,10 +63,9 @@ export function receiptLong(signal: Signal): string {
     parts.push(`${signal.confidence} calls were right ${pct(r.band_hit_rate)} of the time across ${count(r.band_n_calls)} testing calls.`)
   }
   if (r.stock_hit_rate != null) {
-    parts.push(`On ${signal.name} specifically: ${pct(r.stock_hit_rate)} over ${count(r.stock_n_calls)} calls.`)
+    const range = stockRange(r)
+    parts.push(`On ${signal.name} specifically: ${pct(r.stock_hit_rate)} over ${count(r.stock_n_calls)} calls${range ? ` (${range})` : ''}.`)
   }
-  if (r.stock_below_coin_flip) {
-    parts.push('With this few calls, part of that gap from 50% may be chance, but weigh this call with it in mind.')
-  }
+  if (r.stock_below_coin_flip) parts.push(stockCaveat(r))
   return parts.join(' ')
 }

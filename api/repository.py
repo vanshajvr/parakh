@@ -127,10 +127,15 @@ class Repository:
         return {r["ticker"]: (r["close"], r["change"]) for r in rows}
 
     def backtest_by_ticker(self) -> list[dict]:
-        """Simulated hit rate per stock, over bullish/bearish calls only."""
+        """Simulated hit rate per stock, over bullish/bearish calls only.
+
+        Calls on the same stock in the same week share most of their 5-day price move, so
+        `n_weeks` (weeks with at least one call) is the number of roughly independent results.
+        """
         return self._all("""
             SELECT ticker,
                    count(*) AS n_calls,
+                   count(DISTINCT (date - DATE '2000-01-03') / 7) AS n_weeks,
                    avg(CASE WHEN (lean = 'bullish') = beat_index THEN 1.0 ELSE 0.0 END) AS hit_rate
             FROM backtest_predictions WHERE lean <> 'no_call'
             GROUP BY ticker
