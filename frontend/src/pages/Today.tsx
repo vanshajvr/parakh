@@ -29,6 +29,23 @@ export function TodayView({ data }: { data: TodayData }) {
   const calls = data.signals.filter((s) => s.lean !== 'no_call')
   const noCall = data.signals.filter((s) => s.lean === 'no_call')
   const shown = filter === 'calls' ? calls : calls.filter((s) => s.lean === filter)
+  const hasCalls = data.signals.length > 0
+
+  const marketBlock = (
+    <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch lg:gap-6">
+      {data.market && <div className="min-w-0 lg:col-span-2 [&>*]:h-full"><IndexCard market={data.market} height={isDesktop ? 400 : 200} /></div>}
+      <div className="min-w-0 [&>*]:h-full"><Movers /></div>
+    </div>
+  )
+  const callsBlock = hasCalls ? (
+    <section aria-label="Today's calls" className="flex flex-col gap-3">
+      <FilterChips calls={calls} filter={filter} onChange={setFilter} />
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+        {shown.map((s) => <CallCard key={s.ticker} signal={s} />)}
+      </div>
+      {noCall.length > 0 && <NoCall stocks={noCall} />}
+    </section>
+  ) : <FirstCalls />
 
   return (
     <div className="flex flex-col gap-4 lg:gap-6">
@@ -69,31 +86,21 @@ export function TodayView({ data }: { data: TodayData }) {
         </p>
       )}
 
-      {data.market && <IndexCard market={data.market} height={isDesktop ? 240 : 180} />}
+      <KeyNumbers data={data} />
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-        <div className="flex min-w-0 flex-col gap-4 lg:flex-[2]">
-          {data.signals.length === 0 ? (
-            <FirstCalls />
-          ) : (
-            <>
-              <FilterChips calls={calls} filter={filter} onChange={setFilter} />
-              <div className="grid gap-3 lg:grid-cols-2 lg:gap-4">
-                {shown.map((s) => <CallCard key={s.ticker} signal={s} />)}
-              </div>
-              {noCall.length > 0 && <NoCall stocks={noCall} />}
-            </>
-          )}
+      {/* Adaptive order (D-031): the market leads until live calls exist, then today's calls move to the top. */}
+      {hasCalls ? <>{callsBlock}{marketBlock}</> : <>{marketBlock}{callsBlock}</>}
+
+      <div className="grid gap-4 lg:grid-cols-3 lg:items-start lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
           {/* Today's calls are the cards above; this tracks the earlier ones still running. */}
           <OpenCalls calls={(data.open_calls ?? []).filter((c) => c.as_of !== data.as_of)} />
-          <Movers />
           {/* Until live calls have results, the latest testing calls show what a scored call looks like. */}
           {data.scoreboard.live_scored === 0 && <RecentTesting calls={data.recent_simulated ?? []} />}
         </div>
-        {/* On the phone the live record sits above the calls; on desktop it's the sidebar. */}
-        <aside className="order-first flex min-w-0 flex-col gap-4 lg:order-none lg:flex-1">
+        <aside className="flex min-w-0 flex-col gap-4">
           <LiveRecord data={data} />
-          {isDesktop && <HowToRead />}
+          <HowToRead />
         </aside>
       </div>
     </div>
@@ -226,6 +233,44 @@ function FirstCalls() {
         ones appear, you can see how the method did in testing.
       </p>
       <Link to="/record" className="text-sm font-medium no-underline">See the track record →</Link>
+    </section>
+  )
+}
+
+/** The four numbers that say where Parakh stands, each linking to its detail. */
+function KeyNumbers({ data }: { data: TodayData }) {
+  const { live_days, live_published, live_scored, live, simulated } = data.scoreboard
+  const calls = data.signals.filter((s) => s.lean !== 'no_call')
+  const bullish = calls.filter((s) => s.lean === 'bullish').length
+  const tiles: { label: string; value: string; detail: string; to: string }[] = [
+    {
+      label: 'Live record', value: live_days > 0 ? `Day ${live_days}` : 'Starting',
+      detail: `${count(live_published)} published · ${count(live_scored)} scored`, to: '/record',
+    },
+    {
+      label: 'Right so far', value: live && live.n_calls > 0 ? pct(live.hit_rate) : '—',
+      detail: live && live.n_calls > 0 ? `Across ${count(live.n_calls)} scored live calls` : 'First results 5 trading days after the first calls',
+      to: '/record',
+    },
+    {
+      label: 'In testing', value: simulated ? pct(simulated.hit_rate) : '—',
+      detail: 'Of calls right, 2019–2026 · a coin flip gets 50%', to: '/record',
+    },
+    {
+      label: "Today's calls", value: calls.length > 0 ? String(calls.length) : 'Soon',
+      detail: calls.length > 0 ? `${bullish} bullish · ${calls.length - bullish} bearish · ${data.signals.length - calls.length} no call` : 'Published after each close, before the next open',
+      to: calls.length > 0 ? '/' : '/learn#how',
+    },
+  ]
+  return (
+    <section aria-label="Key numbers" className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+      {tiles.map((t) => (
+        <Link key={t.label} to={t.to} className="flex flex-col gap-1 rounded-2xl border border-line bg-surface px-4 py-3 no-underline hover:border-line-2">
+          <span className="text-xs font-semibold tracking-wide text-muted uppercase">{t.label}</span>
+          <span className="font-serif text-[26px] leading-tight font-semibold text-ink tabular-nums">{t.value}</span>
+          <span className="text-xs leading-snug text-muted">{t.detail}</span>
+        </Link>
+      ))}
     </section>
   )
 }

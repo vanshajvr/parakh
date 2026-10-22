@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { cleanup, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import type { Today } from '../api/client'
@@ -60,7 +60,7 @@ describe('Today', () => {
     const rows = within(gainers).getAllByRole('listitem')
     expect(rows).toHaveLength(5)
     expect(rows[0]).toHaveTextContent('JSWSTEEL')
-    expect(within(gainers).getAllByText('No Parakh calls').length).toBeGreaterThan(0)
+    expect(within(gainers).getAllByText('No calls').length).toBeGreaterThan(0)
     expect(screen.getByText(/went on to lag the NIFTY 50 the next week 53% of the time/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'See all in the screener →' })).toHaveAttribute('href', '/stocks?view=gainers&tf=1D')
   })
@@ -69,7 +69,7 @@ describe('Today', () => {
     renderToday()
     await userEvent.click(await screen.findByRole('button', { name: 'Vs the others' }))
     const list = screen.getByRole('list', { name: 'Vs the others' })
-    expect(within(list).queryByText('No Parakh calls')).not.toBeInTheDocument()
+    expect(within(list).queryByText('No calls')).not.toBeInTheDocument()
     expect(screen.getByText(/only input to Parakh's calls/)).toBeInTheDocument()
   })
 
@@ -81,6 +81,23 @@ describe('Today', () => {
     const scored = { ...data, scoreboard: { ...data.scoreboard, live_scored: 3 } }
     renderToday(scored)
     expect(screen.getAllByRole('button', { name: /Recent calls in testing/ })).toHaveLength(1)
+  })
+
+  it('leads with the market until live calls exist, then with the calls', () => {
+    const before = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+    renderToday()
+    const chart = screen.getByRole('heading', { name: 'NIFTY 50' })
+    expect(before(screen.getByRole('region', { name: "Today's calls" }), chart)).toBe(true)
+    cleanup()
+    renderToday({ ...data, signals: [] })
+    expect(before(screen.getByRole('heading', { name: 'NIFTY 50' }), screen.getByText('Our first calls are on their way'))).toBe(true)
+  })
+
+  it('sums up where Parakh stands in four key numbers', () => {
+    renderToday()
+    const strip = screen.getByRole('region', { name: 'Key numbers' })
+    expect(within(strip).getByText('Day 1')).toBeInTheDocument()
+    expect(within(strip).getByText("Today's calls").parentElement).toHaveTextContent('2 bullish · 3 bearish · 15 no call')
   })
 
   it('expands a card on tap', async () => {

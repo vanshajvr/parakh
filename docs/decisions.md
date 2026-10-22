@@ -4,6 +4,19 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-031 · An adaptive landing page: market first until there are calls
+**Date:** 2026-10-22
+**Decision:**
+- Today opens with four key numbers: the live record (day, published, scored), how many live calls have been right so far, the testing hit rate against a coin flip, and today's calls.
+- Before any live calls exist, the NIFTY 50 chart (two-thirds width) and Market movers (one-third) come first, with the first-calls notice below them.
+- Once calls are published, today's calls (three across) move to the top and the market row follows.
+- Calls in progress and the recent testing calls sit beside the live record and "How to read a call".
+- Short movers lists only show genuine moves: a stock that fell isn't listed as a top gainer. The screener still sorts every stock.
+**Why:** The old layout stacked the chart above everything and left the sidebar half empty. With no live calls yet, the market data is what makes the page worth opening. Once calls flow daily, they are the reason to visit, so they lead.
+**Alternatives:** Market-first always (calls get buried once they exist); calls-first always (an empty-looking page until the first calls).
+
+---
+
 ### D-030 · Market movers and a screener across the whole NIFTY 50
 **Date:** 2026-10-22
 **Decision:**
