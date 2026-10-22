@@ -4,7 +4,7 @@ import { useToday, type Signal, type Today as TodayData } from '../api/client'
 import { CallCard } from '../components/CallCard'
 import { Disclosure } from '../components/Disclosure'
 import { Info, Minus, Warning } from '../components/Icons'
-import { MarketStrip, RecentTesting, RuleView } from '../components/Market'
+import { IndexCard, RecentTesting, RuleView } from '../components/Market'
 import { OpenCalls } from '../components/OpenCalls'
 import { Loading, LoadError } from '../components/States'
 import { closeLabel, count, pct } from '../lib/format'
@@ -47,7 +47,6 @@ export function TodayView({ data }: { data: TodayData }) {
         {data.as_of && (
           <p className="m-0 text-sm text-muted">{closeLabel(data.as_of)} · looking 5 trading days ahead</p>
         )}
-        {data.market && <MarketStrip market={data.market} callsAsOf={data.as_of} />}
       </section>
 
       {questionOpen && (
@@ -68,6 +67,8 @@ export function TodayView({ data }: { data: TodayData }) {
           Data may be delayed: these calls are from {closeLabel(data.as_of)}.
         </p>
       )}
+
+      {data.market && <IndexCard market={data.market} height={isDesktop ? 240 : 180} />}
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
         <div className="flex min-w-0 flex-col gap-4 lg:flex-[2]">

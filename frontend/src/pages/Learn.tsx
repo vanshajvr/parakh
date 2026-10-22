@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useModel } from '../api/client'
+import { CandleDiagram } from '../components/CandleDiagram'
 import { Disclosure } from '../components/Disclosure'
 import { Card } from '../components/States'
 import { count, pct, shortDate } from '../lib/format'
@@ -55,6 +56,31 @@ export function Learn() {
           <p className="m-0">
             It also keeps the calls fair: when the whole market rises or falls, that affects every stock, so it isn't counted
             as the model being right or wrong.
+          </p>
+        </>
+      ))}
+
+      {topic('candles', 'How to read a candle', (
+        <>
+          <p className="m-0">
+            Price charts often draw each trading day as a <strong className="font-semibold text-ink">candle</strong>. It packs four
+            prices into one shape: where the price opened, its highest and lowest points during the day, and where it closed.
+          </p>
+          <CandleDiagram />
+          <ul className="m-0 flex list-disc flex-col gap-1.5 pl-5">
+            <li><strong className="font-semibold text-ink">The body</strong> runs from the open to the close.</li>
+            <li><strong className="font-semibold text-ink">The wicks</strong> show how far the price went beyond that, up to the day's high and down to its low.</li>
+            <li><strong className="font-semibold text-ink">Hollow</strong> means it closed above where it opened; <strong className="font-semibold text-ink">filled</strong> means it closed below.</li>
+          </ul>
+          <p className="m-0">
+            One catch: a candle compares the close with <em>that day's</em> open, not with the day before. A stock can open higher
+            after good news, drift down all day, and still close up on yesterday, which shows as a filled candle on a day it rose.
+            Tap any candle on Parakh's charts to read both.
+          </p>
+          <p className="m-0">
+            Tips channels often name candle shapes, like "hammer", "doji" or "engulfing", as signs of what comes next. Parakh's calls
+            don't use them. Whether they predict anything is something we're testing on 10 years of data, and we'll publish the
+            answer here either way.
           </p>
         </>
       ))}

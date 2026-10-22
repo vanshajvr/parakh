@@ -46,7 +46,10 @@ describe('Today', () => {
 
   it('shows the NIFTY 50 and what the rule sees, with details closed until tapped', async () => {
     renderToday()
-    expect(screen.getByText(/^NIFTY 50 /)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'NIFTY 50' })).toBeInTheDocument()
+    // The index chart opens on daily candles, with a line view one tap away.
+    expect(screen.getByRole('button', { name: 'candles', pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'line', pressed: false })).toBeInTheDocument()
     const rule = screen.getByRole('button', { name: /What the rule sees/ })
     expect(rule).toHaveAttribute('aria-expanded', 'false')
     const ranking = screen.getByRole('list', { name: 'Stocks ranked by last week against the others', hidden: true })

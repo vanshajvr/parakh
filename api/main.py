@@ -205,9 +205,13 @@ def market_snapshot(repo: Repository) -> MarketSnapshot | None:
                     ret_5d=ret, vs_peers_5d=ret - mean)
         for t, close, ret in rows
     ]
+    candles = repo.prices(config.BENCHMARK, datetime.now(IST).date() - timedelta(days=PRICE_HISTORY_DAYS))
     return MarketSnapshot(
         as_of=as_of.date(), index_close=float(index.iloc[-1]),
         index_change_1d=_change(index, 1), index_change_5d=_change(index, config.HORIZON),
+        index_change_20d=_change(index, 20),
+        index_candles=[PricePoint(**{k: round(v, 2) if k in ("open", "high", "low", "close") else v for k, v in c.items()})
+                       for c in candles if c["date"] <= as_of.date()],
         stocks=sorted(stocks, key=lambda s: s.vs_peers_5d),
     )
 

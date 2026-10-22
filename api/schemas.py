@@ -126,6 +126,9 @@ class MarketSnapshot(BaseModel):
     index_close: float
     index_change_1d: float | None
     index_change_5d: float | None
+    index_change_20d: float | None = None
+    # A year of daily candles for the index chart on Today.
+    index_candles: list["PricePoint"] = []
     stocks: list[MarketStock]
 
 

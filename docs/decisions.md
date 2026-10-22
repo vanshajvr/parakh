@@ -4,6 +4,22 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-028 · Daily candlestick charts, in neutral ink, as an explainer
+**Date:** 2026-10-22
+**Decision:**
+- Today opens with a NIFTY 50 card: a year of daily candles (3 months shown first), the latest open, high, low and close, the 1-day, 5-day and 1-month moves, and a plain-words reading of any candle you tap or hover.
+- Stock charts get a Line/Candles toggle; past-call markers sit above the candles.
+- How it works explains how to read a candle, including the common trap that a candle compares the close with that day's open, not with the day before.
+- Candles are neutral: hollow when the day closed above its open, filled when it closed below. They are not green and red.
+- Still daily candles from stored closes (D-025). There are no indicator overlays, drawing tools or intraday candles.
+**Why:**
+- Candlesticks are the first chart a beginner sees in any broker app, and almost no one explains them. Reading one in words is genuinely educational, and it makes the landing screen show real data from the first visit.
+- Blue and orange already mean bullish and bearish *lean* across Parakh. Green and red candles would add a second colour language on the same screen. Hollow and filled is the classic alternative, and it is colour-blind safe.
+- Indicators and pattern tools are what make an app feel like a trading terminal, and they invite pattern-chasing. Whether common candle patterns predict anything goes into the research pass as a pre-registered test, rather than being implied by the UI.
+**Alternatives:** TradingView's `lightweight-charts` (quicker to add, but it brings the trader look and a dependency, as in D-020); green and red candles (familiar, but they clash with the lean colours).
+
+---
+
 ### D-026 · Fill the wait with data we already hold; every section starts closed
 **Date:** 2026-10-22
 **Decision:**
