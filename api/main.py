@@ -18,10 +18,10 @@ from fastapi.responses import StreamingResponse
 from api.repository import Repository
 from ledger.db import database_url
 from api.schemas import (
-    CallStats, DataStatus, LedgerPage, LedgerRow, ModelInfo, PricePoint, Receipt, Scoreboard, Signal,
+    CallStats, DataStatus, LedgerPage, LedgerRow, ModelInfo, OpenCall, PricePoint, Receipt, Scoreboard, Signal,
     SimulatedCall, StatusResponse, StockDetail, StockSummary, TodayResponse, TrackRecord,
 )
-from ledger.scoring import IST
+from ledger.scoring import IST, progress
 from ml import config
 from ml.features import FEATURE_INFO, model_features
 from ml.metrics import calibration_table, call_stats
@@ -150,6 +150,27 @@ def to_signals(repo: Repository, rows: list[dict]) -> list[Signal]:
     return signals
 
 
+def open_calls(repo: Repository) -> list[OpenCall]:
+    """Calls still inside their 5 sessions, with how they've done against the index so far."""
+    rows = repo.open_calls()
+    if not rows:
+        return []
+    paths = progress(pd.DataFrame(rows), repo.closes_since(min(r["as_of"] for r in rows)))
+    calls = []
+    for row in rows:
+        path = paths.get(row["id"], [])
+        last = path[-1] if path else {}
+        excess = last.get("excess_return")
+        calls.append(OpenCall(
+            **row, symbol=row["ticker"].removesuffix(".NS"), name=config.STOCKS[row["ticker"]][0],
+            lean_label=LEAN_LABELS[row["lean"]], sessions_done=len(path), horizon=config.HORIZON,
+            stock_return=last.get("stock_return"), index_return=last.get("index_return"), excess_return=excess,
+            on_track=None if excess is None else (excess > 0) == (row["lean"] == "bullish"),
+            path=path,
+        ))
+    return calls
+
+
 def to_ledger_rows(df: pd.DataFrame) -> list[LedgerRow]:
     records = df.astype(object).where(df.notna(), None).to_dict(orient="records")
     return [LedgerRow(**r, symbol=r["ticker"].removesuffix(".NS")) for r in records]
@@ -208,6 +229,7 @@ def today(repo: Repository = Depends(get_repo)):
     return TodayResponse(
         as_of=as_of,
         signals=to_signals(repo, calls),
+        open_calls=open_calls(repo),
         scoreboard=Scoreboard(
             live=scored_stats(ledger) if not ledger.empty else None,
             live_since=ledger["as_of"].min() if not ledger.empty else None,

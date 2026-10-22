@@ -4,6 +4,21 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-025 · Show calls in progress, once a day; no live prices
+**Date:** 2026-10-22
+**Decision:**
+- The Today page lists earlier calls that are still inside their 5 trading days.
+- Each call shows "day N of 5", the stock's and the NIFTY 50's moves since the call's close, the gap between them, a small chart of that gap after each day, and "on track so far" or "off track so far".
+- It updates once a day from the closes the daily job already stores. There are no intraday prices or charts.
+- Progress uses the same session counting as scoring, so a call's day-5 figure is the outcome it gets (`ledger.scoring.progress`, tested against `score`).
+- The status is styled as provisional: a dashed chip, never the bullish/bearish colours, and the section says nothing in it is a result yet.
+**Why:**
+- Between publishing and scoring, a call used to be invisible for a week. Showing that week makes the ledger visible as it builds, which matters most in the first months, before the live hit rate means anything.
+- Live intraday prices would turn an educational tool into a trading screen. Mid-session swings mean nothing for a 5-day call and recreate the tips-group thrill Parakh is positioned against. Redistributing real-time NSE data also needs a licence.
+**Alternatives:** Live intraday prices and charts (rejected for the reasons above); a 15-minute-delayed "so far today" figure on open calls only (possible later, if users ask for it).
+
+---
+
 ### D-024 · Publish the reversal rule; show per-stock ranges
 **Date:** 2026-10-22
 **Decision:**

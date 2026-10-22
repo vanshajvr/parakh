@@ -1,4 +1,4 @@
-import type { Signal } from '../api/client'
+import type { Signal, Today } from '../api/client'
 import { capitalize, count, pct } from './format'
 
 /** The factors that pushed the call in its own direction, strongest first (as in the API's reason). */
@@ -68,4 +68,17 @@ export function receiptLong(signal: Signal): string {
   }
   if (r.stock_below_coin_flip) parts.push(stockCaveat(r))
   return parts.join(' ')
+}
+
+export type OpenCall = Today['open_calls'][number]
+
+/** "ahead of the index by 2.0%" / "behind the index by 0.8%" */
+export function gapText(excess: number): string {
+  const size = pct(Math.abs(excess))
+  return excess >= 0 ? `ahead of the index by ${size}` : `behind the index by ${size}`
+}
+
+export function statusText(call: OpenCall): string {
+  if (call.on_track == null) return 'Starts next session'
+  return call.on_track ? 'On track so far' : 'Off track so far'
 }

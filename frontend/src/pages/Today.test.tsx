@@ -26,6 +26,24 @@ describe('Today', () => {
     expect(within(titan).getByText('Biggest factors')).not.toBeVisible()
   })
 
+  it('tracks earlier calls in progress, marked as provisional', () => {
+    renderToday()
+    const section = screen.getByRole('region', { name: 'Calls in progress' })
+    const items = within(section).getAllByRole('listitem')
+    expect(items).toHaveLength(4)
+    const titan = items[0]
+    expect(within(titan).getByText('Day 4 of 5')).toBeInTheDocument()
+    expect(within(titan).getByText('behind the index by 2.1%')).toBeInTheDocument()
+    expect(within(titan).getByText('On track so far')).toBeInTheDocument() // bearish and lagging
+    expect(within(section).getByText(/Nothing here is a result yet/)).toBeInTheDocument()
+  })
+
+  it("leaves today's own calls out of the in-progress list", () => {
+    const sameDay = { ...data, open_calls: data.open_calls!.map((c) => ({ ...c, as_of: data.as_of! })) }
+    renderToday(sameDay)
+    expect(screen.queryByRole('region', { name: 'Calls in progress' })).not.toBeInTheDocument()
+  })
+
   it('expands a card on tap', async () => {
     renderToday()
     const titan = screen.getAllByRole('article')[0]

@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from ledger.scoring import IST, can_publish, complete_sessions, publish_deadline, score
+from ledger.scoring import IST, can_publish, complete_sessions, progress, publish_deadline, score
 from ml.features import build_features
 from ml.labels import add_labels
 
@@ -55,3 +55,22 @@ def test_no_call_has_no_hit(prices):
     pending = pd.DataFrame({"id": [1], "ticker": ["AAA.NS"], "as_of": [pd.Timestamp(as_of).date()],
                             "lean": ["no_call"]})
     assert score(pending, prices).iloc[0]["hit"] is None
+
+
+def test_progress_ends_where_scoring_starts(prices):
+    """A call's day-5 progress must equal the outcome it is scored with."""
+    as_of = prices["date"].drop_duplicates().sort_values().iloc[-20]
+    calls = pd.DataFrame({"id": [1, 2], "ticker": ["AAA.NS", "BBB.NS"], "as_of": [as_of.date()] * 2,
+                          "lean": ["bullish", "bearish"]})
+    paths = progress(calls, prices)
+    outcomes = score(calls, prices).set_index("prediction_id")
+    for call_id, path in paths.items():
+        assert len(path) == 5
+        assert path[-1]["excess_return"] == outcomes.loc[call_id, "excess_return"]
+        assert path[-1]["date"] == outcomes.loc[call_id, "outcome_date"]
+
+
+def test_progress_is_empty_before_the_first_session(prices):
+    last = prices["date"].max()
+    paths = progress(pd.DataFrame({"id": [1], "ticker": ["AAA.NS"], "as_of": [last.date()]}), prices)
+    assert paths == {1: []}

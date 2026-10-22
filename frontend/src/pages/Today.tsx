@@ -4,6 +4,7 @@ import { useToday, type Signal, type Today as TodayData } from '../api/client'
 import { CallCard } from '../components/CallCard'
 import { Disclosure } from '../components/Disclosure'
 import { Info, Minus, Warning } from '../components/Icons'
+import { OpenCalls } from '../components/OpenCalls'
 import { Loading, LoadError } from '../components/States'
 import { closeLabel, count, pct } from '../lib/format'
 import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
@@ -79,6 +80,8 @@ export function TodayView({ data }: { data: TodayData }) {
               {noCall.length > 0 && <NoCall stocks={noCall} />}
             </>
           )}
+          {/* Today's calls are the cards above; this tracks the earlier ones still running. */}
+          <OpenCalls calls={(data.open_calls ?? []).filter((c) => c.as_of !== data.as_of)} />
         </div>
         {/* On the phone the live record sits above the calls; on desktop it's the sidebar. */}
         <aside className="order-first flex min-w-0 flex-col gap-4 lg:order-none lg:flex-1">
