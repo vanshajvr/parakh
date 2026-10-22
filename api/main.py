@@ -23,7 +23,7 @@ from api.schemas import (
 )
 from ledger.scoring import IST
 from ml import config
-from ml.features import FEATURE_INFO
+from ml.features import FEATURE_INFO, model_features
 from ml.metrics import calibration_table, call_stats
 from ml.signals import LEAN_LABELS
 
@@ -98,6 +98,13 @@ def stock_summary(ticker: str, call: dict | None = None) -> StockSummary:
     )
 
 
+def wilson_interval(rate: float, n: int, z: float = 1.96) -> tuple[float, float]:
+    """95% range for a hit rate observed over n independent results."""
+    centre = (rate + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * math.sqrt(rate * (1 - rate) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return centre - half, centre + half
+
+
 def receipt_lookup(repo: Repository):
     """Build each call's receipt from the active model's metrics and per-stock simulated record."""
     model = repo.active_model()
@@ -107,12 +114,19 @@ def receipt_lookup(repo: Repository):
     def receipt(ticker: str, confidence: str) -> Receipt:
         band, stock = bands.get(confidence, {}), stocks.get(ticker, {})
         stock_hit = float(stock["hit_rate"]) if stock.get("hit_rate") is not None else None
+        n_independent = int(stock.get("n_weeks") or stock.get("n_calls") or 0)
+        low = high = None
+        if stock_hit is not None and n_independent:
+            low, high = wilson_interval(stock_hit, n_independent)
         return Receipt(
             band_hit_rate=_clean(band.get("hit_rate")),
             band_n_calls=band.get("n_calls", 0),
             stock_hit_rate=stock_hit,
             stock_n_calls=stock.get("n_calls", 0),
+            stock_hit_low=low,
+            stock_hit_high=high,
             stock_below_coin_flip=stock_hit is not None and stock_hit < 0.5,
+            stock_clearly_below=high is not None and high < 0.5,
         )
 
     return receipt
@@ -305,7 +319,8 @@ def model(repo: Repository = Depends(get_repo)):
     return ModelInfo(
         version=m["version"], kind=m["kind"], trained_through=m["trained_through"],
         created_at=m["created_at"], horizon_days=config.HORIZON, benchmark=config.BENCHMARK,
-        universe=[stock_summary(t) for t in config.TICKERS], features=FEATURE_INFO,
+        universe=[stock_summary(t) for t in config.TICKERS],
+        features={f: FEATURE_INFO[f] for f in model_features(m["kind"])},
         metrics=_clean(m["metrics"]),
     )
 

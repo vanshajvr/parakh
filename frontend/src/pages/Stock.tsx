@@ -8,6 +8,7 @@ import { LeanPill } from '../components/LeanPill'
 import { ChartLegend, PriceChart } from '../components/PriceChart'
 import { Card, Loading, LoadError, NotFoundState } from '../components/States'
 import { markers } from '../lib/chart'
+import { stockCaveat, stockRange } from '../lib/calls'
 import { capitalize, closeLabel, count, dayLabel, pct, price, shortDate, signedPct } from '../lib/format'
 import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -87,8 +88,10 @@ export function StockView({ data }: { data: StockDetail }) {
               <div className="flex flex-col gap-3.5 px-4 pb-4">
                 <FactorBars factors={latest.factors} />
                 <p className="m-0 text-[13px] leading-relaxed text-muted">
-                  These are the factors that moved this call most. They aren't guaranteed causes: the model often bets
-                  on reversals, and factors work in combination. <Link to="/learn#reversals" className="no-underline">How the model thinks →</Link>
+                  {latest.factors.length === 1
+                    ? "This call rests on one tendency: last week's laggards have often done a little better the following week, and leaders a little worse. "
+                    : "These are the factors that moved this call most. They aren't guaranteed causes: the model often bets on reversals, and factors work in combination. "}
+                  <Link to="/learn#reversals" className="no-underline">How the model thinks →</Link>
                 </p>
               </div>
             </Disclosure>
@@ -175,6 +178,8 @@ function history(data: StockDetail, n: number): HistoryRow[] {
 function StockRecord({ data, defaultOpen }: { data: StockDetail; defaultOpen: boolean }) {
   const { stock, simulated_stats: sim, simulated_past_year_stats: year, live_stats: live } = data
   const below = sim?.hit_rate != null && sim.hit_rate < 0.5
+  const receipt = data.latest?.receipt
+  const range = receipt ? stockRange(receipt) : null
   const rows = history(data, 8)
   const rightOf = (s: typeof year) => (s && s.hit_rate != null ? `${Math.round(s.hit_rate * s.n_calls)} of ${count(s.n_calls)}` : '—')
 
@@ -190,7 +195,7 @@ function StockRecord({ data, defaultOpen }: { data: StockDetail; defaultOpen: bo
             {sim?.hit_rate != null &&
               (below ? (
                 <span className="flex items-center gap-1.5 text-[13px] font-medium text-bear">
-                  <Warning size={15} /> {pct(sim.hit_rate)} right in testing, below a coin flip
+                  <Warning size={15} /> {pct(sim.hit_rate)} right in testing, below a coin flip{range && ` (${range})`}
                 </span>
               ) : (
                 <span className="text-[13px] text-muted">{pct(sim.hit_rate)} right in testing ({count(sim.n_calls)} calls)</span>
@@ -203,9 +208,9 @@ function StockRecord({ data, defaultOpen }: { data: StockDetail; defaultOpen: bo
             <p className="m-0 flex gap-2.5 rounded-xl bg-bear-tint p-3 text-sm leading-relaxed text-warn-ink">
               <Warning size={18} className="mt-0.5 shrink-0" />
               <span>
-                <strong className="font-semibold">This model has struggled with {stock.name}.</strong> Its testing calls were
-                right {pct(sim.hit_rate)} of the time across {count(sim.n_calls)} calls, worse than a coin flip. With this few
-                calls, part of that may be chance, but weigh today's call with it in mind.
+                <strong className="font-semibold">Below 50% on {stock.name} in testing.</strong> Its testing calls were
+                right {pct(sim.hit_rate)} of the time across {count(sim.n_calls)} calls{range ? ` (${range})` : ''}.{' '}
+                {receipt ? stockCaveat(receipt) : 'With this few calls, part of that may be chance.'}
               </span>
             </p>
           )}

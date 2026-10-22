@@ -23,7 +23,12 @@ class Receipt(BaseModel):
     band_n_calls: int
     stock_hit_rate: float | None
     stock_n_calls: int
+    # 95% range for the stock's true hit rate, given how few independent results there are.
+    stock_hit_low: float | None = None
+    stock_hit_high: float | None = None
     stock_below_coin_flip: bool
+    # True only when even the top of that range is below 50%.
+    stock_clearly_below: bool = False
 
 
 class Signal(BaseModel):

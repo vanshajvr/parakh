@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.metrics import brier_score_loss, roc_auc_score
 
 from ml import config
-from ml.metrics import calibration_table, call_stats, expected_calibration_error
+from ml.metrics import calibration_table, call_stats, expected_calibration_error, rank_ic
 from ml.model import SignalModel
 from ml.signals import confidence_band, lean_from_prob
 
@@ -64,6 +64,7 @@ def summary_metrics(oos: pd.DataFrame) -> dict:
         "brier_constant": float(brier_score_loss(y, np.full_like(p, base_rate))),
         "ece": expected_calibration_error(p, y),
         "avg_excess_all": float(oos["excess_return"].mean()),
+        **rank_ic(oos),
         **call_stats(oos),
         "by_confidence": {
             band: call_stats(g) for band, g in oos[oos["lean"] != "no_call"].groupby("confidence")
@@ -92,3 +93,25 @@ def yearly_table(oos: pd.DataFrame) -> pd.DataFrame:
             **call_stats(g),
         })
     return pd.DataFrame(rows)
+
+
+# Pass bar and margin fixed before the modelling experiments (decision D-022).
+MIN_IC_T = 2.0
+MAX_NEGATIVE_YEARS = 1
+MAX_ECE = 0.02
+IC_MARGIN = 0.005
+
+
+def passes(m: dict) -> bool:
+    """Whether a model's research-window metrics clear the pre-registered bar."""
+    return m["ic_t"] >= MIN_IC_T and m["negative_years"] <= MAX_NEGATIVE_YEARS and m["ece"] <= MAX_ECE
+
+
+def split_metrics(oos: pd.DataFrame) -> dict:
+    """Metrics for the whole period, the research window and the holdout (decision D-022)."""
+    research = oos["fold"] <= config.LAST_RESEARCH_YEAR
+    return {
+        "metrics": summary_metrics(oos),
+        "research": summary_metrics(oos[research]),
+        "holdout": summary_metrics(oos[~research]) if (~research).any() else None,
+    }

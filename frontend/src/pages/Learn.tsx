@@ -15,6 +15,7 @@ export function Learn() {
   const isDesktop = useMediaQuery(DESKTOP)
   const { hash } = useLocation()
   const model = useModel().data
+  const rule = model?.kind === 'reversal'
   const sim = model?.metrics as SimulatedMetrics | undefined
   const s = sim ? chosenSummary(sim) : undefined
 
@@ -66,16 +67,34 @@ export function Learn() {
             <strong className="font-semibold text-ink">The data:</strong> daily prices since 2016 for each stock and for the NIFTY 50,
             from Yahoo Finance.
           </p>
-          <p className="m-0"><strong className="font-semibold text-ink">The signals:</strong> {model ? Object.keys(model.features).length : 15} measurements of recent price and volume behaviour:</p>
-          {model && (
+          {rule ? (
+            <p className="m-0">
+              <strong className="font-semibold text-ink">The signal:</strong> one measurement, how each stock did over the past week
+              compared with the average of the 20 stocks.
+            </p>
+          ) : (
+            <p className="m-0"><strong className="font-semibold text-ink">The signals:</strong> {model ? Object.keys(model.features).length : 15} measurements of recent price and volume behaviour:</p>
+          )}
+          {model && !rule && (
             <ul className="m-0 flex list-disc flex-col gap-1 pl-5">
               {Object.entries(model.features).map(([key, meaning]) => <li key={key}>{meaning}</li>)}
             </ul>
           )}
           <p className="m-0">
             <strong className="font-semibold text-ink">The model:</strong>{' '}
-            {model?.kind === 'lightgbm' ? 'LightGBM, a collection of small decision trees,' : 'A machine-learning model'} trained on
-            years of past data, then adjusted ("calibrated") so that when it says 52%, it's right about 52% of the time.
+            {rule ? (
+              <>
+                a simple rule: last week's laggards lean towards beating the index over the next week, and last week's leaders
+                towards lagging it. We also tested machine-learning models on the same data; none beat this rule by enough to
+                justify the extra complexity (<Link to="/learn#model-card">model card</Link>). The rule's chances are
+                calibrated on years of past data, so when it says 52%, it's been right about 52% of the time.
+              </>
+            ) : (
+              <>
+                {model?.kind === 'lightgbm' ? 'LightGBM, a collection of small decision trees,' : 'A machine-learning model'} trained on
+                years of past data, then adjusted ("calibrated") so that when it says 52%, it's right about 52% of the time.
+              </>
+            )}
           </p>
           <p className="m-0">
             <strong className="font-semibold text-ink">No call:</strong> the model only makes a call when its chance is far enough from 50%.
@@ -102,12 +121,12 @@ export function Learn() {
         <>
           <p className="m-0">
             Over a few days, stocks that have run up sharply often cool off a little compared with the market, and stocks that
-            have fallen often recover a little. The model has learnt this pattern.
+            have fallen often recover a little. {rule ? "Parakh's calls are built on exactly this pattern." : 'The model has learnt this pattern.'}
           </p>
           <p className="m-0">
-            So a call can look backwards at first glance: a stock whose short-term trend is below its longer-term trend can get a
-            bullish lean. That's why each call lists its "biggest factors" rather than saying "because": the factors are what
-            moved the model most, and they work in combination, not as simple causes.
+            {rule
+              ? "So a call can look backwards at first glance: a stock that fell more than the others last week gets a bullish lean. It's a tendency, not a rule the market follows: it has been right only a little more often than not."
+              : 'So a call can look backwards at first glance: a stock whose short-term trend is below its longer-term trend can get a bullish lean. That\'s why each call lists its "biggest factors" rather than saying "because": the factors are what moved the model most, and they work in combination, not as simple causes.'}
           </p>
         </>
       ))}
@@ -117,7 +136,8 @@ export function Learn() {
           <li>Calls are published after the market closes and before the next open, so no call can see its own outcome.</li>
           <li>Published calls and their results can't be edited or deleted. The database itself refuses.</li>
           <li>The live record and the simulated testing record are always shown separately.</li>
-          <li>Stocks where the model has done worse than a coin flip are flagged on their calls.</li>
+          <li>Stocks where the model has done worse than a coin flip are flagged on their calls, with a range showing how much of that could be chance.</li>
+          <li>The rules for choosing the model were written down before testing, and the most recent data was kept back as a final check.</li>
           <li>Every call is in the public ledger, which you can <Link to="/record#ledger">browse</Link> or download as a CSV.</li>
         </ul>
       ))}

@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 import type { Signal } from '../api/client'
-import { chance, drivers, headline, looksLikeReversal, receiptLong, receiptShort } from '../lib/calls'
+import { chance, drivers, headline, looksLikeReversal, receiptLong, receiptShort, stockRange } from '../lib/calls'
 import { pct, price, signedPct } from '../lib/format'
 import { Disclosure } from './Disclosure'
 import { Warning } from './Icons'
@@ -40,6 +40,7 @@ export function CallCard({ signal }: { signal: Signal }) {
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-bear">
                 <Warning size={15} />
                 On {signal.symbol}: {pct(signal.receipt.stock_hit_rate)} in testing, below a coin flip
+                {stockRange(signal.receipt) && ` (${stockRange(signal.receipt)})`}
               </span>
             )}
           </span>

@@ -349,8 +349,17 @@ export interface components {
             stock_hit_rate: number | null;
             /** Stock N Calls */
             stock_n_calls: number;
+            /** Stock Hit Low */
+            stock_hit_low?: number | null;
+            /** Stock Hit High */
+            stock_hit_high?: number | null;
             /** Stock Below Coin Flip */
             stock_below_coin_flip: boolean;
+            /**
+             * Stock Clearly Below
+             * @default false
+             */
+            stock_clearly_below: boolean;
         };
         /** Scoreboard */
         Scoreboard: {

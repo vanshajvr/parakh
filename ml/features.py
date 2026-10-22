@@ -45,7 +45,17 @@ FEATURE_INFO = {
     "mkt_ret_5d": "NIFTY 50 return over the past week",
     "mkt_ret_20d": "NIFTY 50 return over the past month",
     "rel_strength_20d": "Stock's past-month return minus the NIFTY 50's",
+    "ret_5d_vs_peers": "Return over the past week compared with the average of the 20 stocks",
 }
+
+# What each model kind looks at, for explanations and "How it works". The reversal rule ranks
+# stocks by last week's return alone, which within a day is the same as ranking by return
+# relative to the other stocks (decision D-024).
+MODEL_FEATURES = {"reversal": ["ret_5d_vs_peers"]}
+
+
+def model_features(kind: str) -> list[str]:
+    return MODEL_FEATURES.get(kind, FEATURE_COLUMNS)
 
 
 def _stock_features(df: pd.DataFrame) -> pd.DataFrame:

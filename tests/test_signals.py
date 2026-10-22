@@ -1,7 +1,7 @@
 import pandas as pd
 
 from ml.explain import phrase, reason
-from ml.features import FEATURE_COLUMNS, FEATURE_INFO
+from ml.features import FEATURE_COLUMNS, FEATURE_INFO, MODEL_FEATURES
 from ml.signals import confidence_band, lean_from_prob
 
 
@@ -18,8 +18,9 @@ def test_confidence_band():
 
 
 def test_every_feature_has_a_description_and_phrase():
-    assert set(FEATURE_INFO) == set(FEATURE_COLUMNS)
-    for f in FEATURE_COLUMNS:
+    explained = set(FEATURE_COLUMNS) | {f for fs in MODEL_FEATURES.values() for f in fs}
+    assert set(FEATURE_INFO) == explained
+    for f in explained:
         for value in (-0.5, 0.5, 50.0):
             assert phrase(f, value)
 
