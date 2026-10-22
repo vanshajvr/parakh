@@ -2,50 +2,29 @@
 
 *Parakh (परख): to test something's true worth, the way a jeweller tests gold on a touchstone.*
 
-**ML stock signals with receipts.** An installable web app for beginner Indian investors. Every call shows its track record, its confidence and its reasoning. It says "No call" when the data isn't clear, and it admits when its edge is too small to trade on.
+**Stock signals with receipts, for beginner Indian investors.** Every call shows its track record, its confidence and its reasoning, says "No call" when the data isn't clear, and admits when its edge is too small to trade on.
 
-**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Model card](docs/model-card.md) · [Decision log](docs/decisions.md) · [PRD](docs/PRD.md)
+**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Model card](docs/model-card.md) · [Decision log](docs/decisions.md) (27 decisions) · [PRD](docs/PRD.md)
 
-<p>
-  <img src="docs/img/screen-today-phone.png" alt="Parakh's Today screen on a phone: five calls, each with a lean, a confidence label and its testing hit rate, and a warning on Titan" width="260">
-  &nbsp;
-  <img src="docs/img/screen-stock-desktop.png" alt="Titan's stock page on a laptop: a price chart with past calls marked right or wrong, today's bearish call, and the factors behind it" width="560">
-</p>
+> **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. With rules written down before testing, a one-line rule matched a tuned LightGBM model, and on two years of data held back until the end, neither was reliably better than a coin flip. So the product doesn't compete on accuracy. It competes on honesty: every number Parakh shows can be checked, and nothing it publishes can be edited afterwards.
 
 ## The problem
 
 Beginners in India get stock ideas from Telegram groups, finfluencers and YouTube. Those tips come with **no track record, no stated confidence and no reasoning**, so the loudest voice wins. SEBI's recent action against unregistered finfluencers shows how common this is.
 
-## What Parakh does instead
+Parakh's bet: if a source showed its receipts (how often it has been right, how sure it is, and why), a beginner could judge it. The first source to hold to that standard should be Parakh itself.
 
-- **Asks one honest question:** will this stock do better than a NIFTY 50 index fund over the next 5 trading days? For most beginners, the index fund is the real alternative.
-- **Gives a lean, not an instruction:** *Bullish lean*, *Bearish lean*, or *No call*, with a confidence label.
-- **Shows the receipt on every call:** for example, "Slight edge · 51.8% right in testing". That line never collapses away.
-- **Explains in plain words:** what the call rests on, for example "over the past week it did 8.4% better than the average of the 20 stocks".
-- **Shows calls in progress:** every earlier call is tracked day by day against the NIFTY 50 until it's scored, so the record visibly builds instead of appearing a week later. Once a day, from closing prices: no live tickers ([D-025](docs/decisions.md)).
-- **Shows what the rule is looking at:** every stock's last 5 days against the others, the NIFTY 50, prices and a 1-month sparkline per stock, and the latest testing calls (labelled simulated) while live results build up ([D-026](docs/decisions.md)).
-- **Keeps a public ledger:** calls are published before the market opens, and the database refuses any edit or deletion. Anyone can download the whole ledger as a CSV.
-- **Warns where the model has struggled, with a range:** for example, "On ASIANPAINT: 47.4% in testing, below a coin flip (likely 41–54%)", so a user can see how much of that could be chance.
+## What happened
 
-## Product decisions
+**1. The first model looked like it worked.** LightGBM on 15 price and volume features was right on 51.2% of its calls in a walk-forward test, and its probabilities were well calibrated. It was a small edge, and I designed the product around stating it honestly.
 
-Each of these is written up in the [decision log](docs/decisions.md), with alternatives and trade-offs.
+**2. A closer look said the edge wasn't real yet.** Measured properly, as a daily rank correlation counted only on non-overlapping weeks, the edge was statistically indistinguishable from zero (t ≈ 1.1). The model's "worst year" turned out to be a bug: in 2021 the calibration step had flipped the model's ranking upside down, so a model that was slightly right published calls that were slightly wrong ([D-023](docs/decisions.md)).
 
-| Decision | Why |
-|---|---|
-| **Compete on honesty, not accuracy** ([D-001](docs/decisions.md)) | Short-term direction of large stocks can't be predicted much better than chance with public data. A product that promises accuracy invites overclaiming. |
-| **Predict "beats the index", not "price goes up"** ([D-008](docs/decisions.md)) | On "price goes up" the model had no edge (AUC 0.50), and its calls followed the market mood: bullish on 98% of stock-days in 2024. Measuring against the index removed that and matches the beginner's real choice. |
-| **Size "No call" by coverage, not a fixed 55% threshold** ([D-010](docs/decisions.md)) | A weak, honest model rarely reaches 55%, so a fixed threshold would make the app say "No call" almost every day. |
-| **"Biggest factors", never "because"** ([D-013](docs/decisions.md)) | The model often bets on reversals. "Bearish because it's up 10.9% this week" sounds illogical; "biggest factors" is faithful without implying simple causes. |
-| **Receipts enforced by the database** ([D-015](docs/decisions.md)) | Append-only triggers and a strict publish window. A missed window stays a visible gap instead of being backfilled. |
-| **Warn about weak stocks rather than hide them** ([D-019](docs/decisions.md)) | Quietly dropping the stocks below 50% would flatter the scoreboard, which is the cherry-picking Parakh exists to oppose. |
-| **Write the rules down before testing, and keep a holdout** ([D-022](docs/decisions.md)) | With an edge this small, trying variants until one looks good produces luck, not signal. The bar, the metric and a 2025–26 holdout were fixed before any experiment. |
-| **Ship a one-line rule over ML** ([D-024](docs/decisions.md)) | LightGBM didn't beat "last week's laggards beat the index" by the agreed margin, so the simpler rule ships, even though LightGBM looked better on the holdout. Choosing on the holdout would have spent the only clean test. |
-| **An installable web app, details on demand** ([D-018](docs/decisions.md)) | One codebase for phones and laptops with no app store. User feedback on the first mockups ("too open and detailed") moved detail behind taps, but the receipts stayed visible. |
+**3. I wrote the rules down before running anything else** ([D-022](docs/decisions.md)): one metric, a pass bar, a margin a complex model must win by, a list of the experiments allowed, and 2025–26 held back as a one-time final test. With an edge this small, trying variants until one looks good produces luck, not signal.
 
-## Results, honestly
+**4. A one-line rule beat the ML** ([D-024](docs/decisions.md)). "Last week's laggards tend to beat the index next week" passed the bar on 2019–24 (t = 2.39). LightGBM didn't (t = 1.80), and none of the pre-listed features, targets or horizons changed that.
 
-Walk-forward test: each year is predicted by a model trained only on earlier years. The model was chosen on 2019–2024; 2025–26 was kept back and checked once at the end.
+**5. Then the holdout didn't hold up.** On 2025–26 the rule was right on 48.8% of calls, and LightGBM on 52.1%; neither is statistically significant. Switching to LightGBM on that basis would have meant choosing on the only clean test, so the rule ships, and the model card prints the holdout as it came out.
 
 | | Research years 2019–24 | Holdout 2025–26 | Coin flip |
 |---|---|---|---|
@@ -53,16 +32,46 @@ Walk-forward test: each year is predicted by a model trained only on earlier yea
 | Rank IC (t-stat) | 0.029 (2.39) | 0.018 (0.98) | 0 |
 | Calibration error | 0.8 points | 0.6 points | — |
 
-The edge passed the bar set in advance, then **didn't hold up on the holdout**: 2025 was fine (52.3%), 2026 was not (44.4%). The model card says so, and the live ledger will settle it.
+**Is it worth trading on? No.** Across all years, stocks with a bullish lean beat the index by 0.09% over 5 days on average, and bearish-lean stocks lagged it by 0.10%. That gap is smaller than typical trading costs (about 0.25%), and the app says so on its Track record screen.
 
-**What the modelling pass found** ([model card](docs/model-card.md)):
-- The old model's worst year (2021) was a calibration bug, not a bad model. The calibrator's slope came out negative and flipped the ranking. Calibration now uses several years of out-of-fold scores and abstains instead of inverting ([D-023](docs/decisions.md)).
-- LightGBM with 15 features wasn't clearly better than one line of logic, and none of the extra features, alternative targets or longer horizons changed that.
-- Per-stock "weak spots" were mostly noise: the old model's worst stock (ICICI Bank, 44.2%) is at 55.0% under the rule.
+## What the product does with that
 
-**Is it worth trading on? No.** Across all years, stocks with a bullish lean beat the index by 0.09% over 5 days on average, and bearish-lean stocks lagged it by 0.10%. That gap is smaller than typical trading costs (about 0.25%). The product says so on its Track record screen. The real test is the **live ledger**: calls published every trading day and scored in public, with no way to edit them afterwards.
+<p>
+  <img src="docs/img/screen-today-phone.png" alt="Parakh's Today screen on a phone: five calls, each with a lean, a confidence label and its testing hit rate, and a warning on Titan" width="260">
+  &nbsp;
+  <img src="docs/img/screen-stock-desktop.png" alt="Titan's stock page on a laptop: a price chart with past calls marked right or wrong, today's bearish call, and the factors behind it" width="560">
+</p>
+
+- **Asks one honest question:** will this stock do better than a NIFTY 50 index fund over the next 5 trading days? For most beginners, the index fund is the real alternative.
+- **Gives a lean, not an instruction:** *Bullish lean*, *Bearish lean*, or *No call*, with a confidence label.
+- **Shows the receipt on every call:** for example, "Slight edge · 51.8% right in testing". That line never collapses away.
+- **Warns where it has struggled, with a range:** for example, "On ASIANPAINT: 47.4% in testing, below a coin flip (likely 41–54%)", so a user can see how much of that could be chance.
+- **Keeps a public ledger:** calls are published after the close and before the next open, and the database refuses any edit or deletion. Anyone can download the whole ledger as a CSV.
+- **Shows calls in progress and what the rule sees:** each open call tracked day by day against the NIFTY 50, and every stock's last week against the others, from daily closes. There are no live tickers, on purpose ([D-025](docs/decisions.md)).
 
 <img src="docs/img/screen-record-desktop.png" alt="The Track record screen: the live record next to the simulated testing record, a year-by-year chart, a calibration chart and an honest answer to whether the edge is worth trading" width="820">
+
+## Product decisions
+
+Each is written up in the [decision log](docs/decisions.md), with the alternatives considered.
+
+| Decision | Why |
+|---|---|
+| **Compete on honesty, not accuracy** ([D-001](docs/decisions.md)) | Short-term moves of large stocks can't be predicted much better than chance with public data. A product that promises accuracy invites overclaiming. |
+| **Predict "beats the index", not "price goes up"** ([D-008](docs/decisions.md)) | On "price goes up" the model just followed the market mood (bullish on 98% of stock-days in 2024). The index comparison removes that and matches the beginner's real choice. |
+| **Receipts enforced by the database** ([D-015](docs/decisions.md)) | Append-only triggers and a strict publish window. A missed window stays a visible gap instead of being backfilled. |
+| **Warn about weak stocks rather than hide them** ([D-019](docs/decisions.md)) | Quietly dropping stocks below 50% would flatter the scoreboard, which is the cherry-picking Parakh exists to oppose. |
+| **Rules before results, and a holdout** ([D-022](docs/decisions.md)) | The only way to trust a small edge is to fix the test before seeing the answer. |
+| **Ship the simpler model** ([D-024](docs/decisions.md)) | The ML didn't clearly beat one line of logic. Simpler is easier to explain, and it can't hide anything. |
+| **Daily closes, no live prices** ([D-025](docs/decisions.md)) | Mid-session swings mean nothing for a 5-day call and recreate the tips-group thrill. Real-time NSE data also needs a paid licence. |
+| **An installable web app, details on demand** ([D-018](docs/decisions.md)) | One codebase for phones and laptops, with no app store. Feedback on the first mockups ("too open and detailed") moved detail behind taps, but the receipts stay visible. |
+
+## What I'd do differently
+
+- **Start from the user's job, not the model.** The PRD's job-to-be-done is "before I act on a stock idea, help me see what the data says". I built a scoreboard for Parakh's own calls first. The more useful product takes the user's tip as the input: how often has a move like that actually happened, what would it mean against an index fund, and what red flags are in the message. That works on day one, with no predictive edge needed.
+- **Test the dumbest baseline first.** A one-line rule matched all the feature engineering. Running it on day one would have set the bar much earlier.
+- **Fix the test before the first experiment, not the twentieth.** The early results looked better than they were because the metric and the evaluation were still moving.
+- **Check data access before designing around it.** Licensed real-time NSE data isn't available to a project like this, and Yahoo's index data sometimes lags the stocks by hours. Both shaped the product late rather than early.
 
 ## How it works
 
@@ -88,10 +97,9 @@ Setup and deployment: [development guide](docs/development.md).
 
 ## What's next
 
-- **Let the live ledger judge the model.** Revisit after about 6 months of live calls, with any new idea pre-registered the same way before it's tested.
+- **Let the live ledger judge the method.** The ledger starts in late October 2026 and runs on its own; a fair first verdict needs about 6 months of calls.
+- **"Check a tip":** paste a tip and see base rates, the index comparison and red flags (the job above).
 - **Hindi.** The typeface was chosen with a matching Devanagari version for this.
-- **A daily digest** (email or Telegram), to meet users where the bad tips are.
-- **"Explain this tip":** enter a stock a finfluencer mentioned and see what the data and the record say.
 
 ## Project history
 
