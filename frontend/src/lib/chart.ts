@@ -1,9 +1,30 @@
 import type { StockDetail } from '../api/client'
 
-export type Range = '1M' | '6M' | '1Y'
-export const RANGE_DAYS: Record<Range, number> = { '1M': 31, '6M': 183, '1Y': 366 }
+export type Range = '1M' | '3M' | '6M' | '1Y'
+export const RANGE_DAYS: Record<Range, number> = { '1M': 31, '3M': 92, '6M': 183, '1Y': 366 }
 
-export type Point = { date: string; close: number }
+/** A day's prices. Open, high and low are optional so a close-only series still draws as a line. */
+export type Point = { date: string; close: number; open?: number; high?: number; low?: number }
+export type Candle = Required<Point>
+
+export function hasCandles(points: Point[]): points is Candle[] {
+  return points.length > 0 && points.every((p) => p.open != null && p.high != null && p.low != null)
+}
+
+/**
+ * One day's candle in plain words. A candle's colour compares the close with that day's open, not
+ * with the day before, which is a common beginner confusion, so both are spelled out.
+ */
+export function candleReading(c: Candle, prevClose: number | null, fmt: (v: number) => string): string {
+  const body = c.close >= c.open
+    ? `closed above where it opened (${fmt(c.open)} → ${fmt(c.close)}), so the candle is hollow`
+    : `closed below where it opened (${fmt(c.open)} → ${fmt(c.close)}), so the candle is filled`
+  const range = `It traded between ${fmt(c.low)} and ${fmt(c.high)} during the day`
+  if (prevClose == null) return `${range}, and ${body}.`
+  const change = (c.close / prevClose - 1) * 100
+  const vsYesterday = Math.abs(change) < 0.005 ? 'unchanged from' : `${change > 0 ? 'up' : 'down'} ${Math.abs(change).toFixed(1)}% from`
+  return `${range}, and ${body}. That close was ${vsYesterday} the day before.`
+}
 export type Marker = { date: string; lean: 'bullish' | 'bearish'; hit: boolean | null; live: boolean }
 
 /** Prices within `range` of the latest date. */

@@ -303,6 +303,13 @@ export interface components {
             index_change_1d: number | null;
             /** Index Change 5D */
             index_change_5d: number | null;
+            /** Index Change 20D */
+            index_change_20d?: number | null;
+            /**
+             * Index Candles
+             * @default []
+             */
+            index_candles: components["schemas"]["PricePoint"][];
             /** Stocks */
             stocks: components["schemas"]["MarketStock"][];
         };

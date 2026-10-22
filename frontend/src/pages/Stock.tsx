@@ -67,7 +67,10 @@ export function StockView({ data }: { data: StockDetail }) {
             buttonClassName="min-h-11"
             summary={<span className="text-sm font-medium text-link">How to read this chart</span>}
           >
-            <div className="pt-1"><ChartLegend /></div>
+            <div className="flex flex-col gap-2 pt-1">
+              <ChartLegend candles />
+              <Link to="/learn#candles" className="text-xs font-medium no-underline">How to read a candle →</Link>
+            </div>
           </Disclosure>
         </Card>
         {latest && latest.lean !== 'no_call' && latest.factors.length > 0 && (

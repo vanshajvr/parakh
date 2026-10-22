@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { StockDetail } from '../api/client'
 import titan from '../fixtures/stock-titan.json'
-import { inRange, markers, nearestIndex, niceTicks } from './chart'
+import { candleReading, hasCandles, inRange, markers, nearestIndex, niceTicks } from './chart'
 
 const data = titan as StockDetail
 
@@ -37,5 +37,26 @@ describe('chart helpers', () => {
     expect(niceTicks(3650, 5250)).toEqual([4000, 4500, 5000])
     expect(nearestIndex(10, 0.52)).toBe(5)
     expect(nearestIndex(10, -1)).toBe(0)
+  })
+})
+
+describe('candleReading', () => {
+  const fmt = (v: number) => v.toFixed(0)
+  it('reads an up candle and its move from the day before', () => {
+    const text = candleReading({ date: '2026-10-19', open: 100, high: 106, low: 99, close: 105 }, 100, fmt)
+    expect(text).toContain('between 99 and 106')
+    expect(text).toContain('closed above where it opened (100 → 105), so the candle is hollow')
+    expect(text).toContain('up 5.0% from the day before')
+  })
+
+  it('explains a filled candle on a day the price still rose', () => {
+    const text = candleReading({ date: '2026-10-19', open: 110, high: 111, low: 103, close: 104 }, 100, fmt)
+    expect(text).toContain('so the candle is filled')
+    expect(text).toContain('up 4.0% from the day before')
+  })
+
+  it('only treats series with open, high and low as candles', () => {
+    expect(hasCandles([{ date: '2026-10-19', close: 1 }])).toBe(false)
+    expect(hasCandles([{ date: '2026-10-19', open: 1, high: 1, low: 1, close: 1 }])).toBe(true)
   })
 })
