@@ -1,13 +1,13 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import type { StockDetail } from '../api/client'
 import titan from '../fixtures/stock-titan.json'
 import ultracemco from '../fixtures/stock-ultracemco.json'
+import { renderPage } from '../test/render'
 import { StockView } from './Stock'
 
-const renderStock = (d: unknown) => render(<MemoryRouter><StockView data={d as StockDetail} /></MemoryRouter>)
+const renderStock = (d: unknown) => renderPage(<StockView data={d as StockDetail} />)
 
 describe('Stock page', () => {
   it("states today's call as a chance of doing worse than the index", () => {

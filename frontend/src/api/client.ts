@@ -11,6 +11,7 @@ export type LedgerRow = Schemas['LedgerRow']
 export type LedgerPage = Schemas['LedgerPage']
 export type TrackRecord = Schemas['TrackRecord']
 export type ModelInfo = Schemas['ModelInfo']
+export type PricePoint = Schemas['PricePoint']
 
 const API_URL = import.meta.env.VITE_API_URL ?? ''
 
@@ -21,7 +22,7 @@ export function apiUrl(path: string): string {
 /** Development-only: serve recorded API responses (VITE_FIXTURES=1) while the live ledger is empty. */
 async function fixture(path: string): Promise<unknown> {
   const files = import.meta.glob<{ default: unknown }>('../fixtures/*.json')
-  const name = path.replace(/^\/api\//, '').replace(/\?.*$/, '').replace('stocks/', 'stock-').toLowerCase()
+  const name = path.replace(/^\/api\//, '').replace(/\?.*$/, '').replace('stocks/', 'stock-').replace('history/', 'history-').toLowerCase()
   const load = files[`../fixtures/${name}.json`]
   if (!load) throw new Error(`No fixture for ${path}`)
   return (await load()).default
@@ -50,6 +51,15 @@ export function useStock(symbol: string) {
     queryKey: ['stock', symbol],
     queryFn: () => getJson<StockDetail>(`/api/stocks/${symbol}`),
     retry: (count, error) => !(error instanceof NotFound) && count < 1,
+  })
+}
+
+/** Every stored daily candle for a stock symbol, or 'NIFTY50' for the index. Changes once a day. */
+export function useHistory(symbol: string) {
+  return useQuery({
+    queryKey: ['history', symbol],
+    queryFn: () => getJson<PricePoint[]>(`/api/history/${symbol}`),
+    staleTime: 30 * 60_000,
   })
 }
 
