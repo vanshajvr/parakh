@@ -12,6 +12,7 @@ export type LedgerPage = Schemas['LedgerPage']
 export type TrackRecord = Schemas['TrackRecord']
 export type ModelInfo = Schemas['ModelInfo']
 export type PricePoint = Schemas['PricePoint']
+export type Screener = Schemas['ScreenerResponse']
 
 const API_URL = import.meta.env.VITE_API_URL ?? ''
 
@@ -52,6 +53,10 @@ export function useStock(symbol: string) {
     queryFn: () => getJson<StockDetail>(`/api/stocks/${symbol}`),
     retry: (count, error) => !(error instanceof NotFound) && count < 1,
   })
+}
+
+export function useScreener() {
+  return useQuery({ queryKey: ['screener'], queryFn: () => getJson<Screener>('/api/screener') })
 }
 
 /** Every stored daily candle for a stock symbol, or 'NIFTY50' for the index. Changes once a day. */

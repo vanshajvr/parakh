@@ -44,22 +44,33 @@ describe('Today', () => {
     expect(screen.queryByRole('region', { name: 'Calls in progress' })).not.toBeInTheDocument()
   })
 
-  it('shows the NIFTY 50 and what the rule sees, with details closed until tapped', async () => {
+  it('shows the NIFTY 50 chart with its whole history as candles and the 20-day trend', async () => {
     renderToday()
     expect(screen.getByRole('heading', { name: 'NIFTY 50' })).toBeInTheDocument()
-    // The index chart shows its whole history as candles with the 20-day trend, once loaded.
     expect(await screen.findByRole('button', { name: 'All', pressed: true })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Candles', pressed: true })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '20-day average', pressed: true })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Close line', pressed: false })).toBeInTheDocument()
     expect(screen.getByText(/^Latest day:/).parentElement).toHaveTextContent('so the candle is')
-    const rule = screen.getByRole('button', { name: /What the rule sees/ })
-    expect(rule).toHaveAttribute('aria-expanded', 'false')
-    const ranking = screen.getByRole('list', { name: 'Stocks ranked by last week against the others', hidden: true })
-    expect(ranking).not.toBeVisible()
-    await userEvent.click(rule)
-    expect(ranking).toBeVisible()
-    expect(within(ranking).getAllByRole('listitem')).toHaveLength(20)
+  })
+
+  it('lists the top movers across the NIFTY 50, with an honest note on what happens next', async () => {
+    renderToday()
+    const gainers = await screen.findByRole('list', { name: 'Gainers' })
+    const rows = within(gainers).getAllByRole('listitem')
+    expect(rows).toHaveLength(5)
+    expect(rows[0]).toHaveTextContent('JSWSTEEL')
+    expect(within(gainers).getAllByText('No Parakh calls').length).toBeGreaterThan(0)
+    expect(screen.getByText(/went on to lag the NIFTY 50 the next week 53% of the time/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'See all in the screener →' })).toHaveAttribute('href', '/stocks?view=gainers&tf=1D')
+  })
+
+  it("ranks only Parakh's 20 in the rule's own view", async () => {
+    renderToday()
+    await userEvent.click(await screen.findByRole('button', { name: 'Vs the others' }))
+    const list = screen.getByRole('list', { name: 'Vs the others' })
+    expect(within(list).queryByText('No Parakh calls')).not.toBeInTheDocument()
+    expect(screen.getByText(/only input to Parakh's calls/)).toBeInTheDocument()
   })
 
   it('labels recent testing calls as simulated until live results exist', () => {

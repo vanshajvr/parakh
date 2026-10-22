@@ -38,3 +38,20 @@ def load_prices(refresh: bool = False) -> pd.DataFrame:
     config.DATA_DIR.mkdir(exist_ok=True)
     prices.to_parquet(PRICES_PATH, index=False)
     return prices
+
+
+EXTRA_PRICES_PATH = config.DATA_DIR / "extra_prices.parquet"
+
+
+def load_extra_prices(refresh: bool = False) -> pd.DataFrame:
+    """Prices for the NIFTY 50 members Parakh doesn't make calls on (movers and charts only).
+
+    Kept apart from load_prices so they can never reach the model's features.
+    """
+    if EXTRA_PRICES_PATH.exists() and not refresh:
+        return pd.read_parquet(EXTRA_PRICES_PATH)
+
+    prices = download_prices(config.EXTRA_TICKERS)
+    config.DATA_DIR.mkdir(exist_ok=True)
+    prices.to_parquet(EXTRA_PRICES_PATH, index=False)
+    return prices

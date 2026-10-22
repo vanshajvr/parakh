@@ -56,6 +56,8 @@ def log_run(conn, job: str, status: str, detail: str = "") -> None:
 def upsert_prices(conn, prices: pd.DataFrame) -> None:
     """Bulk-load prices through a temp table, updating rows Yahoo has revised."""
     cols = ["ticker", "date", "open", "high", "low", "close", "volume"]
+    # Safe to call more than once per transaction (the daily job loads two price sets).
+    conn.execute("DROP TABLE IF EXISTS prices_in")
     conn.execute("CREATE TEMP TABLE prices_in (LIKE prices) ON COMMIT DROP")
     with conn.cursor().copy(f"COPY prices_in ({', '.join(cols)}) FROM STDIN") as copy:
         for row in prices[cols].itertuples(index=False):

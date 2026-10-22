@@ -4,7 +4,7 @@
 
 **Stock signals with receipts, for beginner Indian investors.** Every call shows its track record, its confidence and its reasoning, says "No call" when the data isn't clear, and admits when its edge is too small to trade on.
 
-**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Model card](docs/model-card.md) · [Decision log](docs/decisions.md) (29 decisions) · [PRD](docs/PRD.md)
+**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Model card](docs/model-card.md) · [Decision log](docs/decisions.md) (30 decisions) · [PRD](docs/PRD.md)
 
 > **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. With rules written down before testing, a one-line rule matched a tuned LightGBM model, and on two years of data held back until the end, neither was reliably better than a coin flip. So the product doesn't compete on accuracy. It competes on honesty: every number Parakh shows can be checked, and nothing it publishes can be edited afterwards.
 
@@ -48,6 +48,7 @@ Parakh's bet: if a source showed its receipts (how often it has been right, how 
 - **Warns where it has struggled, with a range:** for example, "On ASIANPAINT: 47.4% in testing, below a coin flip (likely 41–54%)", so a user can see how much of that could be chance.
 - **Keeps a public ledger:** calls are published after the close and before the next open, and the database refuses any edit or deletion. Anyone can download the whole ledger as a CSV.
 - **Teaches the chart beginners see everywhere:** zoomable candlestick charts for the NIFTY 50 and every stock, back to 2016, with a 20-day trendline, a crosshair showing open, high, low and close, and each day readable in plain words ([D-029](docs/decisions.md)).
+- **Shows market movers with context:** gainers, losers, most active by value traded, unusual volume and 52-week highs and lows across all 50 NIFTY 50 stocks, plus a full screener. Next to the gainers sits what usually happened next: the week's top gainers lagged the index the following week 53% of the time ([D-030](docs/decisions.md)).
 - **Shows calls in progress and what the rule sees:** each open call tracked day by day against the NIFTY 50, and every stock's last week against the others, from daily closes. There are no live tickers, on purpose ([D-025](docs/decisions.md)).
 
 <img src="docs/img/screen-record-desktop.png" alt="The Track record screen: the live record next to the simulated testing record, a year-by-year chart, a calibration chart and an honest answer to whether the edge is worth trading" width="820">
@@ -92,7 +93,7 @@ flowchart LR
 - **ML:** a reversal rule, logistic regression and LightGBM (15 price and volume features, SHAP explanations) compared by daily rank IC under pre-registered rules; the simplest model that clears the bar wins. Platt calibration on out-of-fold scores, with each day's calls centred on 50%. Explanations are fixed sentence templates.
 - **Ledger:** calls and outcomes live in separate append-only tables. Every call records the model version that made it, and stored versions are never overwritten.
 - **App:** React, TypeScript and Tailwind, with types generated from the API's schema. It installs as a PWA and works offline with the last saved calls.
-- **Quality:** 40 Python tests (including look-ahead checks and live scoring matching the training label) and 28 frontend tests, all run in CI.
+- **Quality:** 46 Python tests (including look-ahead checks and live scoring matching the training label) and 32 frontend tests, all run in CI.
 
 Setup and deployment: [development guide](docs/development.md).
 
