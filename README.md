@@ -8,6 +8,8 @@
 
 > **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. With rules written down before testing, a one-line rule matched a tuned LightGBM model, and on two years of data held back until the end, neither was reliably better than a coin flip. So the product doesn't compete on accuracy. It competes on honesty: every number Parakh shows can be checked, and nothing it publishes can be edited afterwards.
 
+<img src="docs/img/screen-today-desktop.png" alt="Parakh's Today page on a laptop: four key numbers (live record starting, right so far, 51.4% in testing, today's calls), a zoomable NIFTY 50 candlestick chart since 2016 with a 20-day average, and a Market movers card listing the day's top gainers with a note on what usually happens next" width="860">
+
 ## The problem
 
 Beginners in India get stock ideas from Telegram groups, finfluencers and YouTube. Those tips come with **no track record, no stated confidence and no reasoning**, so the loudest voice wins. SEBI's recent action against unregistered finfluencers shows how common this is.
@@ -36,22 +38,44 @@ Parakh's bet: if a source showed its receipts (how often it has been right, how 
 
 ## What the product does with that
 
-<p>
-  <img src="docs/img/screen-today-phone.png" alt="Parakh's Today screen on a phone: five calls, each with a lean, a confidence label and its testing hit rate, and a warning on Titan" width="260">
-  &nbsp;
-  <img src="docs/img/screen-stock-desktop.png" alt="Titan's stock page on a laptop: a price chart with past calls marked right or wrong, today's bearish call, and the factors behind it" width="560">
-</p>
+### Every call shows its receipt
 
 - **Asks one honest question:** will this stock do better than a NIFTY 50 index fund over the next 5 trading days? For most beginners, the index fund is the real alternative.
 - **Gives a lean, not an instruction:** *Bullish lean*, *Bearish lean*, or *No call*, with a confidence label.
 - **Shows the receipt on every call:** for example, "Slight edge · 51.8% right in testing". That line never collapses away.
 - **Warns where it has struggled, with a range:** for example, "On ASIANPAINT: 47.4% in testing, below a coin flip (likely 41–54%)", so a user can see how much of that could be chance.
-- **Keeps a public ledger:** calls are published after the close and before the next open, and the database refuses any edit or deletion. Anyone can download the whole ledger as a CSV.
-- **Teaches the chart beginners see everywhere:** zoomable candlestick charts for the NIFTY 50 and every stock, back to 2016, with a 20-day trendline, a crosshair showing open, high, low and close, and each day readable in plain words ([D-029](docs/decisions.md)).
-- **Shows market movers with context:** gainers, losers, most active by value traded, unusual volume and 52-week highs and lows across all 50 NIFTY 50 stocks, plus a full screener. Next to the gainers sits what usually happened next: the week's top gainers lagged the index the following week 53% of the time ([D-030](docs/decisions.md)).
-- **Shows calls in progress and what the rule sees:** each open call tracked day by day against the NIFTY 50, and every stock's last week against the others, from daily closes. There are no live tickers, on purpose ([D-025](docs/decisions.md)).
+- **Tracks calls in progress:** each open call is followed day by day against the NIFTY 50 until it's scored, from daily closes. There are no live tickers, on purpose ([D-025](docs/decisions.md)).
+- **Leads with what matters now:** four key numbers up top, the market first until live calls exist, then today's calls ([D-031](docs/decisions.md)).
 
-<img src="docs/img/screen-record-desktop.png" alt="The Track record screen: the live record next to the simulated testing record, a year-by-year chart, a calibration chart and an honest answer to whether the edge is worth trading" width="820">
+### Charts a beginner can actually read
+
+<p>
+  <img src="docs/img/screen-today-phone.png" alt="Parakh's Today page on a phone: the four key numbers in a two-by-two grid above the NIFTY 50 candlestick chart" width="240">
+  &nbsp;
+  <img src="docs/img/screen-stock-desktop.png" alt="HDFC Bank's stock page: a one-year candlestick chart with a 20-day average and past calls marked right or wrong, and a crosshair tooltip showing that day's open, high, low, close, change and 20-day average" width="600">
+</p>
+
+- **Zoomable candlesticks back to 2016** for the NIFTY 50 and every stock: scroll or pinch to zoom, drag to pan, 1M to All ([D-029](docs/decisions.md)).
+- **A crosshair tooltip** with open, high, low, close, the change from the day before and the 20-day average, plus a toggleable close line and trendline.
+- **Every day readable in plain words:** "It traded between ₹722 and ₹729, and closed above where it opened, so the candle is green. That close was down 1.1% from the day before." A "How to read a candle" explainer covers the classic trap: a candle compares the close with *that day's* open, not with yesterday's close.
+- **Past calls on the chart,** in their lean colour, marked ✓ or ✗ once scored.
+
+### The whole market, with context
+
+<img src="docs/img/screen-screener-desktop.png" alt="The Stocks screener: all 50 NIFTY 50 stocks sorted by 1-day gain, with columns for price, 1-day, 5-day and 1-month change, value traded in rupees crore, volume against usual, a 52-week range bar and a one-month sparkline; stocks Parakh doesn't cover are marked No Parakh calls" width="860">
+
+- **Market movers across all 50 NIFTY 50 stocks:** gainers and losers (1 day, 5 days, 1 month), most active, unusual volume, and stocks near their 52-week high or low, filterable by sector ([D-030](docs/decisions.md)).
+- **Most active by value traded, not share count.** A ₹300 stock trades far more shares than a ₹10,000 one without being busier, and the app says so.
+- **What usually happens next:** next to the gainers, from Parakh's own history, the week's 5 biggest gainers lagged the NIFTY 50 the following week 53% of the time. A big move isn't a reason on its own to buy.
+- **A full screener** with sortable columns, search and a "Parakh's 20 only" filter. The 30 stocks Parakh doesn't make calls on are clearly marked.
+
+### A track record nobody can edit
+
+<img src="docs/img/screen-record-desktop.png" alt="The Track record page: the live record (published, scored, right so far) next to the simulated testing record of 51.4% across 9,917 calls, with a year-by-year chart whose worst year is 2026 at 44.2%, and a calibration chart" width="860">
+
+- **Two records, never mixed:** the live calls, and how the same method did in testing on years it never trained on, including its worst year.
+- **A public ledger:** calls are published after the close and before the next open, and the database refuses any edit or deletion. Anyone can download the whole ledger as a CSV.
+- **Calibration you can check:** when Parakh says 52%, it has been right about 52% of the time.
 
 ## Product decisions
 
@@ -79,9 +103,9 @@ Each is written up in the [decision log](docs/decisions.md), with the alternativ
 
 ```mermaid
 flowchart LR
-    Y[Yahoo Finance<br/>daily prices] --> D
+    Y[Yahoo Finance<br/>daily prices,<br/>all 50 NIFTY stocks] --> D
     subgraph GA[GitHub Actions]
-        D[Daily job, 18:00 IST<br/>score matured calls,<br/>publish next calls]
+        D[Daily job, 18:00 IST<br/>+ catch-up runs<br/>score matured calls,<br/>publish next calls]
         W[Weekly retrain<br/>walk-forward evaluation,<br/>new model version]
     end
     D --> DB[(Neon Postgres<br/>append-only ledger)]
@@ -92,7 +116,8 @@ flowchart LR
 
 - **ML:** a reversal rule, logistic regression and LightGBM (15 price and volume features, SHAP explanations) compared by daily rank IC under pre-registered rules; the simplest model that clears the bar wins. Platt calibration on out-of-fold scores, with each day's calls centred on 50%. Explanations are fixed sentence templates.
 - **Ledger:** calls and outcomes live in separate append-only tables. Every call records the model version that made it, and stored versions are never overwritten.
-- **App:** React, TypeScript and Tailwind, with types generated from the API's schema. It installs as a PWA and works offline with the last saved calls.
+- **Data:** daily prices for all 50 NIFTY 50 stocks and the index. Only Parakh's 20 reach the model; the other 30 are stored separately for the charts, movers and screener. Catch-up runs at 21:00 and 07:30 IST cover days when Yahoo's index close arrives late.
+- **App:** React, TypeScript and Tailwind, with types generated from the API's schema. Charts use TradingView's open-source lightweight-charts, loaded only when a chart is on screen. It installs as a PWA and works offline with the last saved calls.
 - **Quality:** 46 Python tests (including look-ahead checks and live scoring matching the training label) and 36 frontend tests, all run in CI.
 
 Setup and deployment: [development guide](docs/development.md).
