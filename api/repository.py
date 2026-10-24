@@ -104,6 +104,11 @@ class Repository:
         prices["date"] = pd.to_datetime(prices["date"])
         return prices
 
+    def sim_prices(self) -> pd.DataFrame:
+        """Every stored day's open, close and volume, for the practice simulator."""
+        rows = self._all("SELECT ticker, date, open, close, volume FROM prices ORDER BY date")
+        return pd.DataFrame(rows, columns=["ticker", "date", "open", "close", "volume"])
+
     def closes_since(self, since: date) -> pd.DataFrame:
         """Closing prices for every stock and the benchmark from `since` onwards."""
         rows = self._all("SELECT ticker, date, close FROM prices WHERE date >= %s ORDER BY ticker, date", (since,))

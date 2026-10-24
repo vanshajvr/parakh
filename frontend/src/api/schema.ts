@@ -198,6 +198,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/sim/prices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sim Prices
+         * @description Every NIFTY 50 stock and the index fund, open and close per trading day since 2016.
+         */
+        get: operations["sim_prices_api_sim_prices_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/model": {
         parameters: {
             query?: never;
@@ -697,6 +717,35 @@ export interface components {
             change_1d: number | null;
             no_call?: components["schemas"]["NoCallDetail"] | null;
         };
+        /**
+         * SimMarket
+         * @description Price history for the practice simulator, by trading day (decision D-039).
+         */
+        SimMarket: {
+            /** Dates */
+            dates: string[];
+            /** Index Fund */
+            index_fund: string;
+            /** Index */
+            index: (number | null)[];
+            /** Stocks */
+            stocks: components["schemas"]["SimStock"][];
+        };
+        /** SimStock */
+        SimStock: {
+            /** Symbol */
+            symbol: string;
+            /** Name */
+            name: string;
+            /** Sector */
+            sector: string;
+            /** Covered */
+            covered: boolean;
+            /** Open */
+            open: (number | null)[];
+            /** Close */
+            close: (number | null)[];
+        };
         /** SimulatedCall */
         SimulatedCall: {
             /**
@@ -1097,6 +1146,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sim_prices_api_sim_prices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimMarket"];
                 };
             };
         };
