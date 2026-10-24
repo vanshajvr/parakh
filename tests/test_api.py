@@ -163,13 +163,14 @@ def test_every_call_carries_its_receipt(client):
     signals = {s["symbol"]: s for s in client.get("/api/today").json()["signals"]}
     tcs, infy, itc = signals["TCS"]["receipt"], signals["INFY"]["receipt"], signals["ITC"]["receipt"]
 
-    assert tcs["band_hit_rate"] == 0.505 and tcs["band_n_calls"] == 60
+    # Every call carries the record of all testing calls, not of its confidence label (D-032).
+    assert tcs["band_hit_rate"] == 0.51 and tcs["band_n_calls"] == 100
     assert tcs["stock_hit_rate"] == 0.471 and tcs["stock_below_coin_flip"] is True
     # 150 independent weeks can't rule out 50%, so the stock isn't flagged as clearly worse.
     assert tcs["stock_hit_low"] < 0.471 < 0.5 < tcs["stock_hit_high"]
     assert tcs["stock_clearly_below"] is False
     assert infy["stock_below_coin_flip"] is False
-    # A band or stock with no simulated history gets an empty receipt, not an error.
+    # A no-call, or a stock with no simulated history, gets an empty receipt, not an error.
     assert itc["band_hit_rate"] is None and itc["stock_hit_rate"] is None
     assert itc["stock_below_coin_flip"] is False
 

@@ -12,9 +12,9 @@ def test_lean_respects_no_call_band():
 
 
 def test_confidence_band():
-    assert confidence_band(0.56, margin=0.02, strong_margin=0.05) == "Stronger edge"
-    assert confidence_band(0.47, margin=0.02, strong_margin=0.05) == "Slight edge"
-    assert confidence_band(0.50, margin=0.02, strong_margin=0.05) == "No edge"
+    assert confidence_band(0.56, margin=0.02) == "Slight edge"
+    assert confidence_band(0.47, margin=0.02) == "Slight edge"
+    assert confidence_band(0.50, margin=0.02) == "No edge"
 
 
 def test_every_feature_has_a_description_and_phrase():

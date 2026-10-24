@@ -92,7 +92,8 @@ The 15 price and volume features the ML candidates used:
   lined up with outcomes, the model abstains instead of flipping its ranking (decision D-023). Probabilities are
   centred on 50% within each day (decision D-011).
 - **"No call" band:** sized on those out-of-fold scores so that about 25% of stock-days
-  get a call. The more confident half of calls is labelled *Stronger edge*, the rest *Slight edge* (decision D-010).
+  get a call (decision D-010). Every call is labelled *Slight edge*: a *Stronger edge* tier for the more confident
+  half did no better in testing (51.0% vs 51.8%), so it was dropped (decision D-032).
 
 ## Results, all years (2019-01-02 to 2026-10-12)
 

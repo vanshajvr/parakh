@@ -108,13 +108,17 @@ def wilson_interval(rate: float, n: int, z: float = 1.96) -> tuple[float, float]
 
 
 def receipt_lookup(repo: Repository):
-    """Build each call's receipt from the active model's metrics and per-stock simulated record."""
+    """Build each call's receipt from the active model's metrics and per-stock simulated record.
+
+    Every call carries the hit rate of all testing calls, whatever its stored label: calls published
+    before decision D-032 may still say "Stronger edge", and that tier did no better.
+    """
     model = repo.active_model()
-    bands = model["metrics"]["models"][model["kind"]].get("by_confidence", {}) if model else {}
+    summary = model["metrics"]["models"][model["kind"]] if model else {}
     stocks = {r["ticker"]: r for r in repo.backtest_by_ticker()}
 
-    def receipt(ticker: str, confidence: str) -> Receipt:
-        band, stock = bands.get(confidence, {}), stocks.get(ticker, {})
+    def receipt(ticker: str, lean: str) -> Receipt:
+        band, stock = (summary if lean != "no_call" else {}), stocks.get(ticker, {})
         stock_hit = float(stock["hit_rate"]) if stock.get("hit_rate") is not None else None
         n_independent = int(stock.get("n_weeks") or stock.get("n_calls") or 0)
         low = high = None
@@ -146,7 +150,7 @@ def to_signals(repo: Repository, rows: list[dict]) -> list[Signal]:
         close, change = closes.get(row["ticker"], (None, None))
         signals.append(Signal(
             **row, symbol=row["ticker"].removesuffix(".NS"), name=name, sector=sector,
-            lean_label=LEAN_LABELS[row["lean"]], receipt=receipt(row["ticker"], row["confidence"]),
+            lean_label=LEAN_LABELS[row["lean"]], receipt=receipt(row["ticker"], row["lean"]),
             close=close, change_1d=change,
         ))
     return signals

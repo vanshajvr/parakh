@@ -111,7 +111,7 @@ function TestingCard({ sim }: { sim: SimulatedMetrics }) {
         summary={<span className="text-sm font-medium text-link">Compare with a coin flip</span>}>
         <div className="flex flex-col gap-3 pt-1">
           <DotStrip hitRate={s.hit_rate ?? 0.5} baseRate={s.base_rate_beat_index} />
-          <div className="flex flex-col gap-2 border-t border-line pt-3">
+          {bands.length > 1 && <div className="flex flex-col gap-2 border-t border-line pt-3">
             <span className="text-[13px] font-semibold">Do more confident calls do better?</span>
             {bands.map(([band, b]) => (
               <div key={band} className="flex justify-between text-sm">
@@ -120,7 +120,7 @@ function TestingCard({ sim }: { sim: SimulatedMetrics }) {
               </div>
             ))}
             <span className="text-[13px] text-muted">{confidenceVerdict(s.by_confidence)}</span>
-          </div>
+          </div>}
         </div>
       </Disclosure>
     </Card>

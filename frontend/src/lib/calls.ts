@@ -60,7 +60,7 @@ export function receiptLong(signal: Signal): string {
   const r = signal.receipt
   const parts: string[] = []
   if (r.band_hit_rate != null) {
-    parts.push(`${signal.confidence} calls were right ${pct(r.band_hit_rate)} of the time across ${count(r.band_n_calls)} testing calls.`)
+    parts.push(`Calls were right ${pct(r.band_hit_rate)} of the time across ${count(r.band_n_calls)} testing calls.`)
   }
   if (r.stock_hit_rate != null) {
     const range = stockRange(r)
