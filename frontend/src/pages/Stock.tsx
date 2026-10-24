@@ -10,6 +10,7 @@ import { ChartKey } from '../components/ChartKey'
 import { LazyCandleChart as CandleChart } from '../components/LazyCandleChart'
 import { Card, Loading, LoadError, NotFoundState } from '../components/States'
 import { markers } from '../lib/chart'
+import { en } from '../i18n/en'
 import { stockCaveat, stockRange } from '../lib/calls'
 import { capitalize, closeLabel, count, dayLabel, pct, price, shortDate, signedPct } from '../lib/format'
 import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
@@ -154,7 +155,7 @@ function TodaysCall({ stock, latest }: { stock: StockDetail; latest: Signal | nu
             <LeanPill lean={latest.lean} />
             {latest.lean !== 'no_call' && (
               <span className="inline-flex h-7 items-center rounded-full border border-line-2 px-2.5 text-[13px] font-medium text-ink-2">
-                {latest.confidence}
+                {en.confidence(latest.confidence)}
               </span>
             )}
           </div>

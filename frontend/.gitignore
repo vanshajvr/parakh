@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated before each build from the API (scripts/fetch-sim-prices.mjs)
+public/sim-prices.json

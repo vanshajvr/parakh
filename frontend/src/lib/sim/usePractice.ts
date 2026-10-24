@@ -15,7 +15,8 @@ function load(market: Market): Saved | null {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as Saved | null
     // Day numbers point into the market's calendar; if that has changed, the game can't be trusted.
-    return saved && market.dates[saved.game.start] === saved.startDate && saved.day <= saved.game.end ? saved : null
+    // The saved game must also fit inside the prices on hand (a static copy can be a day older).
+    return saved && market.dates[saved.game.start] === saved.startDate && saved.day <= saved.game.end && saved.game.end < market.dates.length ? saved : null
   } catch {
     return null
   }

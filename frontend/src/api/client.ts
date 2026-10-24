@@ -93,7 +93,25 @@ export function useNews(lang: string, symbol?: string) {
   return useQuery({ queryKey: ['news', lang, symbol], queryFn: () => getJson<NewsItem[]>(`/api/news?${params}`) })
 }
 
-/** Price history for the time machine. About 740 KB, and it only changes once a day. */
+/**
+ * Price history for the time machine. It comes from a static copy saved at build time and served
+ * by the CDN (D-044), so Practice never waits for the API to wake; the API is the fallback.
+ */
 export function useSimMarket() {
-  return useQuery({ queryKey: ['sim-market'], queryFn: () => getJson<Schemas['SimMarket']>('/api/sim/prices'), staleTime: 60 * 60_000 })
+  return useQuery({
+    queryKey: ['sim-market'],
+    queryFn: async () => {
+      try {
+        const res = await fetch('/sim-prices.json')
+        if (res.ok) {
+          const data = (await res.json()) as Schemas['SimMarket']
+          if (data.dates?.length) return data
+        }
+      } catch {
+        // No static copy (development, or the build couldn't reach the API): use the API.
+      }
+      return getJson<Schemas['SimMarket']>('/api/sim/prices')
+    },
+    staleTime: 60 * 60_000,
+  })
 }

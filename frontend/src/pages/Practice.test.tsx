@@ -104,4 +104,21 @@ describe('Practice', () => {
     await userEvent.click(screen.getByRole('button', { name: '+1 week' }))
     expect(screen.getByText('25 shares')).toBeInTheDocument()
   })
+
+  it('keeps the guide strip in place, so Play never moves under a click', async () => {
+    await startCrash()
+    expect(screen.getByText('Start with a buy')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Buy the index fund' }))
+    await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Place order' }))
+    // Same strip, new words: nothing above the Play button disappears.
+    expect(screen.getByText('Now press Play')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: '+1 week' }))
+    expect(screen.getByText('Pause any time')).toBeInTheDocument()
+  })
+
+  it('labels prices as adjusted', async () => {
+    await startCrash()
+    expect(screen.getByText(/Adjusted prices/)).toBeInTheDocument()
+  })
 })
+

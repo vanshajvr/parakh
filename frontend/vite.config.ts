@@ -41,6 +41,12 @@ export default defineConfig({
               expiration: { maxEntries: 60, maxAgeSeconds: 3 * 24 * 60 * 60 },
             },
           },
+          {
+            // The time machine's prices (D-044): instant from the cache, refreshed in the background.
+            urlPattern: ({ url }) => url.pathname === '/sim-prices.json',
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'sim-prices', expiration: { maxEntries: 1 } },
+          },
         ],
       },
     }),

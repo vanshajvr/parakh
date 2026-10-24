@@ -4,6 +4,22 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-045 · No verdict on a call until it's scored
+**Date:** 2026-10-25
+**Decision:** Calls in progress show how far ahead of or behind the index they are, and "Not a result yet", instead of "On track so far" or "Off track so far".
+**Why:** A day or two of a 5-day call is noise. Labelling it on or off track, right next to text saying nothing is a result yet, invites a beginner to read noise as a result, the habit Parakh exists to break. A reviewer pointed it out.
+**Alternatives:** Showing the verdict only from day 3 (still noise, and harder to explain).
+
+---
+
+### D-044 · The time machine's prices as a static file
+**Date:** 2026-10-25
+**Decision:** Before each build, `frontend/scripts/fetch-sim-prices.mjs` saves the price history to `public/sim-prices.json`, which Vercel's CDN serves. Practice reads that file first and only falls back to the API. The daily job triggers a Vercel rebuild (an optional deploy hook) so the file includes each new close. The PWA caches it, refreshing in the background.
+**Why:** The game runs entirely in the browser, yet it waited on the API, which sleeps on Render's free plan. A tester saw loading placeholders and a "can take up to a minute" notice. The keep-warm workflow doesn't prevent this: GitHub runs frequent schedules hours late.
+**Alternatives:** A paid always-on API host (cost); committing the file to the repository daily (2 MB of churn in the history); caching the proxied API response at the CDN (depends on Vercel's handling of external rewrites).
+
+---
+
 ### D-043 · Alerts for missed runs, and a keepalive
 **Date:** 2026-10-24
 **Decision:** The daily job and the weekly retrain each finish by pinging healthchecks.io: a success ping, or `/fail` if a step failed. healthchecks.io knows each schedule and emails if a run fails or doesn't arrive in its grace period. A monthly keepalive workflow re-enables every scheduled workflow through GitHub's API, and pings its own check. Pings are skipped until their `HEALTHCHECK_*_URL` secrets are set.
@@ -26,7 +42,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 **Decision:**
 - **Setup screen:** a three-step picture strip (buy the index fund or any stock → press Play → did you beat the index fund?), with each picture drawn from the game's own pieces.
 - **First game:** a five-step tour that dims the page and spotlights the real parts of the screen: your money against the index fund, the index fund's Buy button, Play, the interruptions and the report card. One short line per step, Skip and Back, reopened from "How to play". It's shown once per device.
-- **Nudges:** until the first order, a "Start with a buy" card at the top offers a one-tap "Buy the index fund", and the fund's Buy button pulses. Once an order is waiting, Play pulses with "Now press Play".
+- **Nudges:** until the first order, a "Start with a buy" card at the top offers a one-tap "Buy the index fund", and the fund's Buy button pulses. Once an order is waiting, Play pulses with "Now press Play". *Update, 25 Oct: the card used to disappear after the first order, moving Play up by about 90px under a tester's click. It is now one strip of fixed height whose words change (start with a buy → now press Play → pause any time).*
 - **Orders:** buy by rupees or by shares; sell any number of shares. Amounts use a text field with Indian grouping that can be empty, replacing a number field that kept a leading zero ("01000").
 **Why:** In the first real test, the player couldn't tell where to start, put about ₹1,000 into the fund, left 98.6% in cash, and got a report card about idle cash. The game's rules were fine; the first minute wasn't. Beginners learn a game by being shown its pieces in place, not by reading paragraphs.
 **Alternatives:** A written how-to page (skipped by most players); a video (heavy, and goes out of date with every change).
@@ -51,6 +67,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 - **Engine:** pure TypeScript functions (`frontend/src/lib/sim/`) from a game (start and end day, starting cash, optional SIP, and the player's orders) to everything that happened. Only the orders are saved, so a game can be resumed or replayed exactly.
 - **Trading rules:** orders placed after a day's close fill at the next day's open; whole shares only; sells fill before buys on the same morning; a stock can only be bought once it has a price (after listing); holdings are valued at each close.
 - **Charges:** a zero-brokerage broker's delivery charges (Zerodha, 2025): STT 0.1% each way on shares (0.001% on ETF sales), NSE and SEBI fees, 0.015% stamp duty on buys, 18% GST on fees, and ₹15.93 per stock sold. A ₹1 lakh round trip costs about 0.24%. No taxes in this version.
+- **Adjusted prices:** prices come from Yahoo adjusted for later splits, bonuses and dividends, so per-share prices differ from what traded at the time (HDFC Bank was about ₹895 on 13 Apr 2020; the game shows ₹417), while rupee returns, dividends included, are right. The app says so. Real traded prices can't be rebuilt from Yahoo: its split table misses some bonus issues (Bajaj Finance's 2025 bonus). That needs NSE's own daily price files, which is planned research.
 - **Index fund:** NIFTYBEES, a real NIFTY 50 ETF, because the index level leaves out dividends (in 2020 the ETF returned 15.2% against the index's 14.8%). The benchmark is the same money, at the same times, put into it and left alone.
 - **Prices:** one cached endpoint (`/api/sim/prices`) serves every stock's open and close since 2016 on a clean calendar (a day counts only if most stocks traded), about 740 KB compressed.
 - **Where it lives:** a Practice tab, second after Today. A game is saved on the device (settings and orders only), so it can be resumed later; there are no accounts (D-033).
@@ -134,7 +151,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ### D-032 · One label for every call
 **Date:** 2026-10-24
-**Decision:** Drop the *Stronger edge* tier. Every call is labelled *Slight edge*, and its receipt shows the hit rate of all testing calls (51.4%), not of its tier. Calls already published keep the label they were published with, since the ledger can't be edited.
+**Decision:** Drop the *Stronger edge* tier. Every call is labelled *Slight edge*, and its receipt shows the hit rate of all testing calls (51.4%), not of its tier. Calls already published keep the label they were published with, since the ledger can't be edited. *Update, 25 Oct: the app showed those stored labels for days, contradicting this decision, so every screen now shows one label; only the ledger table and CSV keep the stored value, with a note.*
 **Why:** The SQL analysis (`analysis/track_record_sql.ipynb`, section 2) found the tiers don't sort calls: *Stronger edge* calls were right 50.9% of the time and *Slight edge* calls 51.8%, and the top probability decile beat the index less often than the middle ones. On the Today screen, a beginner saw "Stronger edge" next to the lower number. A label that claims more confidence than the record supports breaks the product's main promise (D-001).
 **Alternatives:** Renaming the tiers to describe signal strength rather than accuracy (honest but clunky, and tells a user nothing they can act on); showing both tiers' rates on every card (transparent but confusing for a beginner).
 

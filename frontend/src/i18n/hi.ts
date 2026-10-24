@@ -43,7 +43,8 @@ function factor(feature: string, value: number): string | null {
   return null
 }
 
-const CONFIDENCE: Record<string, string> = { 'Slight edge': 'हल्की बढ़त', 'Stronger edge': 'ज़्यादा बढ़त', 'No edge': 'कोई बढ़त नहीं' }
+// "Stronger edge" was dropped (D-032); older calls that stored it read as the one remaining label.
+const CONFIDENCE: Record<string, string> = { 'Slight edge': 'हल्की बढ़त', 'Stronger edge': 'हल्की बढ़त', 'No edge': 'कोई बढ़त नहीं' }
 
 export const hi: Messages = {
   locale: 'hi-IN',
@@ -164,6 +165,8 @@ export const hi: Messages = {
     title: 'टाइम मशीन',
     intro: 'नकली पैसे के साथ बाज़ार के किसी असली दौर में वापस जाएँ। NIFTY 50 के असली stocks या index fund ख़रीदें-बेचें, समय को आगे बढ़ने दें, और देखें कि क्या आप सिर्फ़ index fund रखने से बेहतर कर पाए।',
     pickPeriod: 'एक दौर चुनें',
+    adjusted: 'भाव बाद के splits, bonus और dividends के हिसाब से adjust किए गए हैं, इसलिए कोई share उस समय की screen से सस्ता दिख सकता है। रुपयों में फ़ायदा-नुकसान, dividends समेत, उतना ही रहता है।',
+    adjustedTag: 'Adjusted भाव',
     survivors: 'यहाँ के stocks आज के NIFTY 50 हैं, इसलिए जो कंपनियाँ तब से index से बाहर हो गईं, वे इसमें नहीं हैं। इससे stocks चुनना असल से आसान दिखता है।',
     startingMoney: 'शुरुआती पैसा',
     monthlyAmount: 'हर महीने की SIP',
@@ -226,6 +229,8 @@ export const hi: Messages = {
     pendingBuyShares: (symbol, qty) => `${qty} ${symbol} ख़रीदें`,
     sell: 'बेचें',
     startHere: 'यहाँ से शुरू करें',
+    playStep: { title: 'अब चलाएँ दबाएँ', body: 'समय आगे बढ़ते ही आपका order अगली सुबह बाज़ार खुलने पर पूरा होगा।' },
+    runningTip: { title: 'कभी भी रोकें', body: 'जब चाहें ख़रीदें या बेचें। बाज़ार में बड़ी हलचल पर game ख़ुद रुकेगा।' },
     firstStep: { title: 'पहले कुछ ख़रीदें', body: 'अभी सब नकद है। कुछ ख़रीदें, फिर चलाएँ दबाएँ।', button: 'Index fund ख़रीदें', other: 'या बाज़ार से कोई stock चुनें' },
     pressPlay: 'अब चलाएँ दबाएँ',
     howToPlay: 'कैसे खेलें',
@@ -262,7 +267,7 @@ export const hi: Messages = {
       sellCharges: 'इस बिक्री पर ख़र्चे',
       confirmSell: 'बेचने का order दें',
       tooSmall: 'इस भाव पर एक share के लिए भी पैसा कम है।',
-      fills: 'Order अगले दिन बाज़ार खुलने पर पूरा होता है, इसलिए भाव पहले थोड़ा बदल सकता है।',
+      fills: 'Order अगले दिन बाज़ार खुलने पर पूरा होता है, इसलिए भाव पहले थोड़ा बदल सकता है। भाव बाद के splits, bonus और dividends के हिसाब से adjust किए गए हैं।',
       charges: 'इस ख़रीद पर ख़र्चे',
       lines: { stt: 'Securities transaction tax', exchange: 'Exchange fee', sebi: 'SEBI fee', stamp: 'Stamp duty', gst: 'Fees पर GST', dp: 'Depository charge' },
       total: 'कुल ख़र्चे',
@@ -388,8 +393,7 @@ export const hi: Messages = {
     ahead: (size) => `index से ${size} आगे`,
     behind: (size) => `index से ${size} पीछे`,
     startsNext: 'अगले session से शुरू',
-    onTrack: 'अब तक सही दिशा में',
-    offTrack: 'अब तक उल्टी दिशा में',
+    notYet: 'अभी नतीजा नहीं',
     gapAria: (summary) => `हर दिन के बाद NIFTY 50 से फ़र्क: ${summary}`,
     gapDay: (i, value) => `दिन ${i}: ${value}`,
   },
