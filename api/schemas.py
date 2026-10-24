@@ -205,6 +205,27 @@ class NewsItem(BaseModel):
     published_at: datetime
 
 
+class SimStock(BaseModel):
+    symbol: str
+    name: str
+    sector: str
+    # Parakh makes calls on it (one of the 20).
+    covered: bool
+    # One value per day in SimMarket.dates; None before it listed, or on a day it didn't trade.
+    open: list[float | None]
+    close: list[float | None]
+
+
+class SimMarket(BaseModel):
+    """Price history for the practice simulator, by trading day (decision D-039)."""
+
+    dates: list[date]
+    index_fund: str
+    # The NIFTY 50 index level each day, for reference (the index fund is what you can buy).
+    index: list[float | None]
+    stocks: list[SimStock]
+
+
 class PricePoint(BaseModel):
     date: date
     open: float

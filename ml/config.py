@@ -88,7 +88,10 @@ MARKET = {
     "ULTRACEMCO.NS": ("UltraTech Cement", "Construction Materials"),
 }
 MARKET_TICKERS = list(MARKET)
-EXTRA_TICKERS = [t for t in MARKET_TICKERS if t not in STOCKS]
+# The index fund in the practice simulator (decision D-039): a real NIFTY 50 ETF, because the index
+# itself leaves out dividends and an ETF's price includes them, minus its fees.
+INDEX_FUND = "NIFTYBEES.NS"
+EXTRA_TICKERS = [t for t in MARKET_TICKERS if t not in STOCKS] + [INDEX_FUND]
 BENCHMARK = "^NSEI"
 START_DATE = "2016-01-01"
 

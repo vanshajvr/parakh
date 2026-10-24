@@ -90,6 +90,15 @@ class FakeRepository:
         ]
         return [r for r in rows if r["lang"] == lang and ticker in (None, r["ticker"])][:limit]
 
+    def sim_prices(self):
+        days = pd.to_datetime(["2026-01-01", "2026-01-02", "2026-01-05"])
+        rows = []
+        for t in ["TCS.NS", "INFY.NS", "^NSEI", "NIFTYBEES.NS"]:
+            for i, d in enumerate(days):
+                # 1 Jan is a holiday placeholder: flat prices and no volume for everyone.
+                rows.append({"ticker": t, "date": d, "open": 100.0 + i, "close": 101.0 + i, "volume": 0 if i == 0 else 1000})
+        return pd.DataFrame(rows)
+
     def latest_calls(self):
         if not self.calls:
             return []
@@ -311,3 +320,19 @@ def test_news_is_filtered_by_language_and_stock(client):
     assert client.get("/api/news?symbol=INFY").json() == []
     assert client.get("/api/news?symbol=NOPE").status_code == 404
     assert client.get("/api/news?lang=fr").status_code == 422
+
+
+def test_sim_prices_use_a_clean_calendar(monkeypatch):
+    from api import main
+    monkeypatch.setattr(main.config, "MARKET_TICKERS", ["TCS.NS", "INFY.NS"])
+    app.state.repo = FakeRepository(CALLS)
+    with TestClient(app) as c:
+        body = c.get("/api/sim/prices").json()
+    del app.state.repo
+    assert body["dates"] == ["2026-01-02", "2026-01-05"]
+    tcs = next(s for s in body["stocks"] if s["symbol"] == "TCS")
+    assert tcs["open"] == [101.0, 102.0] and tcs["close"] == [102.0, 103.0] and tcs["covered"] is True
+    fund = next(s for s in body["stocks"] if s["symbol"] == body["index_fund"])
+    assert fund["sector"] == "Index fund"
+    # A member with no stored prices is listed with no prices rather than left out.
+    assert next(s for s in body["stocks"] if s["symbol"] == "ITC")["close"] == [None, None]

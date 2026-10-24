@@ -14,14 +14,15 @@ import pandas as pd
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import Response, StreamingResponse
 
 from api import screener
 from api.repository import Repository
 from ledger.db import database_url
 from api.schemas import (
     CallStats, DataStatus, LedgerPage, LedgerRow, MarketSnapshot, ModelInfo, NewsItem, NextWeek, NoCallDetail, OpenCall, PricePoint,
-    Receipt, RecentSimulatedCall, Scoreboard, ScreenerResponse, ScreenerRow, Signal,
+    Receipt, RecentSimulatedCall, Scoreboard, ScreenerResponse, ScreenerRow, Signal, SimMarket, SimStock,
     SimulatedCall, StatusResponse, StockDetail, StockSummary, TodayResponse, TrackRecord,
 )
 from ledger.scoring import IST, progress
@@ -58,6 +59,8 @@ app.add_middleware(
     allow_origins=os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(","),
     allow_methods=["GET"],
 )
+# The simulator's price history is about 2 MB of JSON; compressed it's a fraction of that.
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 
 @app.middleware("http")
@@ -472,6 +475,45 @@ def news(
         NewsItem(**{k: v for k, v in r.items() if k != "ticker"}, symbol=r["ticker"].removesuffix(".NS"), name=config.MARKET[r["ticker"]][0])
         for r in repo.news(lang, ticker, limit) if r["ticker"] in config.MARKET
     ]
+
+
+# The index fund isn't a NIFTY 50 member, so it gets its own name and sector here.
+INDEX_FUND_INFO = ("Nippon India ETF Nifty 50 BeES", "Index fund")
+
+
+def sim_market(prices: pd.DataFrame) -> SimMarket:
+    """Prices on a clean trading calendar: a day counts only if most stocks traded on it.
+
+    That drops placeholder rows the feed adds on market holidays (zero volume, flat prices) and
+    keeps real sessions where the index row happens to be missing (see analysis/, section 6).
+    """
+    members = prices[prices["ticker"].isin(config.MARKET_TICKERS)]
+    traded = members[members["volume"].fillna(0) > 0].groupby("date")["ticker"].nunique()
+    dates = sorted(traded[traded >= len(config.MARKET_TICKERS) / 2].index)
+    wide = {
+        col: prices[prices["date"].isin(dates)].pivot(index="date", columns="ticker", values=col).reindex(dates)
+        for col in ("open", "close")
+    }
+
+    def series(ticker: str, col: str) -> list[float | None]:
+        if ticker not in wide[col]:
+            return [None] * len(dates)
+        return [None if pd.isna(v) else round(float(v), 2) for v in wide[col][ticker]]
+
+    stocks = [
+        SimStock(symbol=t.removesuffix(".NS"), name=name, sector=sector, covered=t in config.STOCKS,
+                 open=series(t, "open"), close=series(t, "close"))
+        for t, (name, sector) in [*config.MARKET.items(), (config.INDEX_FUND, INDEX_FUND_INFO)]
+    ]
+    return SimMarket(dates=dates, index_fund=config.INDEX_FUND.removesuffix(".NS"),
+                     index=series(config.BENCHMARK, "close"), stocks=stocks)
+
+
+@app.get("/api/sim/prices", response_model=SimMarket)
+def sim_prices(response: Response, repo: Repository = Depends(get_repo)):
+    """Every NIFTY 50 stock and the index fund, open and close per trading day since 2016."""
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return sim_market(repo.sim_prices())
 
 
 @app.get("/api/model", response_model=ModelInfo)

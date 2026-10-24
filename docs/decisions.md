@@ -4,6 +4,21 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-039 · The time machine's rules and engine
+**Date:** 2026-10-24
+**Decision:**
+- **Engine:** pure TypeScript functions (`frontend/src/lib/sim/`) from a game (start and end day, starting cash, optional SIP, and the player's orders) to everything that happened. Only the orders are saved, so a game can be resumed or replayed exactly.
+- **Trading rules:** orders placed after a day's close fill at the next day's open; whole shares only; sells fill before buys on the same morning; a stock can only be bought once it has a price (after listing); holdings are valued at each close.
+- **Charges:** a zero-brokerage broker's delivery charges (Zerodha, 2025): STT 0.1% each way on shares (0.001% on ETF sales), NSE and SEBI fees, 0.015% stamp duty on buys, 18% GST on fees, and ₹15.93 per stock sold. A ₹1 lakh round trip costs about 0.24%. No taxes in this version.
+- **Index fund:** NIFTYBEES, a real NIFTY 50 ETF, because the index level leaves out dividends (in 2020 the ETF returned 15.2% against the index's 14.8%). The benchmark is the same money, at the same times, put into it and left alone.
+- **Prices:** one cached endpoint (`/api/sim/prices`) serves every stock's open and close since 2016 on a clean calendar (a day counts only if most stocks traded), about 740 KB compressed.
+- **Interruptions:** the market falling 10% within 10 trading days, rising 10% within 20, or your portfolio falling 15% from its peak; at most one every 21 trading days.
+- **Scenarios:** the 2020 crash, the 2021 rally, a flat 18 months (Oct 2021 to Mar 2023, within 5% of where it started), a SIP from 2016, and a mystery window of 250–500 trading days from a seeded random start, with the dates hidden.
+**Why:** The lesson has to come from real prices and real costs, or the game teaches the wrong thing. On the 2020 data, ₹1 lakh left in the index fund ends at ₹1,12,903 despite a 37% fall; the same money sold on 23 March and bought back on 1 June ends at ₹95,159.
+**Alternatives:** Server-side simulation (needs accounts and storage); the index level as the fund (overstates stock-picking by leaving out dividends); fractional shares (not how NSE works).
+
+---
+
 ### D-038 · A workspace for Today on laptops
 **Date:** 2026-10-24
 **Decision:**
