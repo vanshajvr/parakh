@@ -21,7 +21,7 @@ export function Glossary() {
     .sort(([, a], [, b]) => a.term.localeCompare(b.term, m.locale))
 
   return (
-    <div className="flex flex-col gap-4 lg:gap-6">
+    <div className="stagger flex flex-col gap-4 lg:gap-6">
       <section className="flex flex-col gap-1 px-1">
         <h1 className="m-0 font-serif text-[30px] leading-tight font-semibold tracking-[-0.015em] lg:text-[40px]">{m.glossary.title}</h1>
         <p className="m-0 max-w-2xl text-sm leading-relaxed text-muted">{m.glossary.intro}</p>
@@ -36,7 +36,7 @@ export function Glossary() {
       />
       <dl className="m-0 grid gap-3 md:grid-cols-2 lg:gap-4">
         {terms.map(([id, t]) => (
-          <div key={id} id={id} className="flex scroll-mt-24 flex-col gap-1.5 rounded-2xl border border-line bg-surface px-4 py-3.5 target:border-brand">
+          <div key={id} id={id} className="flex scroll-mt-24 flex-col gap-1.5 rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors duration-150 hover:border-line-2 target:border-brand">
             <dt className="text-[15px] font-semibold text-ink">{t.term}</dt>
             <dd className="m-0 text-sm leading-relaxed text-ink-2">{t.short}</dd>
             <dd className="m-0 text-[13px] leading-relaxed text-muted"><span className="font-semibold">{m.glossary.example}:</span> {t.example}</dd>

@@ -28,7 +28,7 @@ export function OpenCalls({ calls }: { calls: OpenCall[] }) {
 function OpenCallCard({ call }: { call: OpenCall }) {
   const { m } = useI18n()
   return (
-    <li className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4">
+    <li className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 transition-colors duration-150 hover:border-line-2">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           <span className="flex flex-wrap items-center gap-2">
@@ -70,7 +70,9 @@ function DayTracker({ done, total }: { done: number; total: number }) {
   return (
     <div className="flex gap-1" role="img" aria-label={m.openCalls.trackerAria(done, total)}>
       {Array.from({ length: total }, (_, i) => (
-        <span key={i} className={`h-1.5 flex-1 rounded-full ${i < done ? 'bg-ink-2' : 'bg-chip'}`} />
+        <span key={i} className="h-1.5 flex-1 overflow-hidden rounded-full bg-chip">
+          {i < done && <span className="grow-x block h-full bg-ink-2" style={{ animationDelay: `${i * 120}ms` }} />}
+        </span>
       ))}
     </div>
   )
@@ -91,7 +93,7 @@ function GapChart({ call }: { call: OpenCall }) {
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="shrink-0" role="img"
       aria-label={m.openCalls.gapAria(summary)}>
       <line x1={pad} x2={w - pad} y1={h / 2} y2={h / 2} stroke="var(--line-2)" strokeDasharray="2 3" />
-      <polyline points={points} fill="none" stroke="var(--ink-2)" strokeWidth={1.75} strokeLinejoin="round" />
+      <polyline points={points} pathLength={1} className="draw" fill="none" stroke="var(--ink-2)" strokeWidth={1.75} strokeLinejoin="round" />
       <circle cx={x(last)} cy={y(values[last])} r={2.75} fill="var(--ink)" />
     </svg>
   )

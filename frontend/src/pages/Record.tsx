@@ -5,6 +5,7 @@ import { Disclosure } from '../components/Disclosure'
 import { Download } from '../components/Icons'
 import { RecentTesting } from '../components/Market'
 import { CalibrationChart, DotStrip, YearBars } from '../components/RecordCharts'
+import { CountUp } from '../components/CountUp'
 import { Card, Loading, LoadError } from '../components/States'
 import { count, pct, shortDate, signedPct } from '../lib/format'
 import { chosenSummary, confidenceVerdict, edgeSpread, ROUND_TRIP_COST, worstYear, yearsBelowCoinFlip, type SimulatedMetrics } from '../lib/metrics'
@@ -22,7 +23,7 @@ export function RecordView({ data }: { data: TrackRecord }) {
   const sim = data.simulated as SimulatedMetrics | null
   const recent = useToday().data?.recent_simulated ?? []
   return (
-    <div className="flex flex-col gap-4 lg:gap-6">
+    <div className="stagger flex flex-col gap-4 lg:gap-6">
       <section className="flex max-w-2xl flex-col gap-1.5 px-1">
         <h1 className="m-0 font-serif text-[30px] leading-tight font-semibold tracking-[-0.015em] lg:text-[40px]">Track record</h1>
         <p className="m-0 text-sm leading-relaxed text-muted lg:text-base">
@@ -104,7 +105,7 @@ function TestingCard({ sim }: { sim: SimulatedMetrics }) {
         <Badge live={false}>Simulated · {s.period[0].slice(0, 4)}–{s.period[1].slice(0, 4)}</Badge>
       </div>
       <div className="flex items-baseline gap-2.5">
-        <span className="font-serif text-[44px] leading-none font-semibold tracking-[-0.02em] lg:text-[52px]">{pct(s.hit_rate)}</span>
+        <span className="font-serif text-[44px] leading-none font-semibold tracking-[-0.02em] lg:text-[52px]"><CountUp value={pct(s.hit_rate)} /></span>
         <span className="text-sm text-ink-2">of {count(s.n_calls)} calls were right</span>
       </div>
       <Disclosure buttonClassName="min-h-11"
@@ -228,7 +229,7 @@ function Ledger() {
         </div>
       </div>
 
-      {isPending && <Loading what="the ledger" />}
+      {isPending && <Loading what="the ledger" inline />}
       {isError && <LoadError what="the ledger" onRetry={() => refetch()} />}
       {data && data.total === 0 && (
         <p className="m-0 text-sm text-ink-2">No live calls {ticker ? `on ${ticker} ` : ''}have been published yet.</p>
@@ -247,7 +248,7 @@ function Ledger() {
               </thead>
               <tbody>
                 {data.rows.map((r) => (
-                  <tr key={r.id}>
+                  <tr key={r.id} className="hover:bg-page">
                     <td className="border-b border-chip px-2.5 py-2.5 whitespace-nowrap text-ink-2">{shortDate(r.as_of)}</td>
                     <td className="border-b border-chip px-2.5 py-2.5 font-semibold">
                       <Link to={`/stocks/${r.symbol}`} className="text-ink no-underline">{r.symbol}</Link>

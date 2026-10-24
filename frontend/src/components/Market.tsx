@@ -5,6 +5,7 @@ import { closeLabel, dayLabel, pct, signedPct } from '../lib/format'
 import { Disclosure } from './Disclosure'
 import { ChartKey } from './ChartKey'
 import { LazyCandleChart as CandleChart } from './LazyCandleChart'
+import { CountUp } from './CountUp'
 import { Card } from './States'
 import { LeanPill } from './LeanPill'
 import { Term } from './Term'
@@ -28,7 +29,7 @@ export function IndexCard({ market, height }: { market: Market; height: number }
           <span className="text-[13px] text-muted">{m.market.indexSubtitle(closeLabel(market.as_of, m))}</span>
         </div>
         <div className="flex items-baseline gap-3">
-          <span className="font-serif text-[28px] leading-none font-semibold tracking-[-0.01em] tabular-nums">{points(market.index_close)}</span>
+          <span className="font-serif text-[28px] leading-none font-semibold tracking-[-0.01em] tabular-nums"><CountUp value={points(market.index_close)} /></span>
           {moves.map(([label, v]) => (
             <span key={label} className="flex flex-col text-right text-xs text-muted">
               <span className="text-[13px] font-medium text-ink tabular-nums">{signedPct(v, 1)}</span>
@@ -77,7 +78,7 @@ export function RecentTesting({ calls }: { calls: RecentCall[] }) {
           <p className="m-0 text-sm leading-relaxed text-ink-2">{m.market.recentIntro}</p>
           <ul className="m-0 flex list-none flex-col p-0">
             {calls.slice(0, SHOWN).map((c) => (
-              <li key={`${c.date}-${c.ticker}`} className="flex items-center gap-3 border-b border-chip py-2 text-[13px] last:border-0">
+              <li key={`${c.date}-${c.ticker}`} className="-mx-2 flex items-center gap-3 rounded-lg border-b border-chip px-2 py-2 text-[13px] last:border-0 hover:bg-page">
                 <span className="w-20 shrink-0 text-muted">{dayLabel(c.date, m.locale)}</span>
                 <Link to={`/stocks/${c.symbol}`} className="w-24 shrink-0 truncate font-medium text-ink no-underline">{c.symbol}</Link>
                 <span className="hidden sm:block"><LeanPill lean={c.lean} /></span>

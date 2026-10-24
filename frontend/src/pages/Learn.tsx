@@ -34,7 +34,7 @@ export function Learn() {
   )
 
   return (
-    <div className="flex max-w-3xl flex-col gap-4 lg:gap-5">
+    <div className="stagger flex max-w-3xl flex-col gap-4 lg:gap-5">
       <section className="flex flex-col gap-2 px-1">
         <h1 className="m-0 font-serif text-[30px] leading-tight font-semibold tracking-[-0.015em] lg:text-[40px]">How it works</h1>
         <p className="m-0 text-[15px] leading-relaxed text-ink-2 lg:text-base">

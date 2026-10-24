@@ -31,7 +31,7 @@ export function StockView({ data }: { data: StockDetail }) {
   const prev = data.prices.at(-2)
 
   return (
-    <div className="flex flex-col gap-4 lg:gap-6">
+    <div className="stagger flex flex-col gap-4 lg:gap-6">
       <Link to="/" className="inline-flex items-center gap-1 self-start text-sm font-medium no-underline">
         <ChevronLeft size={16} /> Today's calls
       </Link>
@@ -245,7 +245,7 @@ function StockRecord({ data }: { data: StockDetail }) {
                 </thead>
                 <tbody>
                   {rows.map((r) => (
-                    <tr key={`${r.live}-${r.date}`}>
+                    <tr key={`${r.live}-${r.date}`} className="hover:bg-page">
                       <td className="border-b border-chip px-2 py-2.5 whitespace-nowrap">{shortDate(r.date)}</td>
                       <td className="border-b border-chip px-2 py-2.5">{capitalize(r.lean)}</td>
                       <td className="border-b border-chip px-2 py-2.5 font-medium">{r.result}</td>

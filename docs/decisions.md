@@ -4,6 +4,19 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-036 · Calm motion that makes the site feel alive, not live
+**Date:** 2026-10-24
+**Decision:**
+- Hover and press feedback everywhere: clickable cards rise slightly, static cards darken their edge, rows highlight, text links underline, buttons give a little when pressed.
+- Sections slide open instead of snapping; pages fade up in a short stagger, and page changes cross-fade.
+- Key numbers count up once, bars and day trackers fill, and sparklines draw themselves. Loading shows grey shapes in the page's layout.
+- Today shows when the next calls are due ("after Monday's close · in 2d 3h") and a "What to look at next" card built from the day's data: the clearest call, the stock that came closest to one, a call in progress, and the glossary.
+- Hovers take about 150 ms and entrances about 350 ms. Everything is off for readers who ask for reduced motion.
+**Why:** With almost no motion, the site read as a static report. Feedback on every interaction and content that changes with each day's data make it feel responsive, without pretending to be a live ticker: the data still changes once a day (D-025).
+**Alternatives:** Scrolling tickers or flashing prices (dishonest for once-a-day data); an animation library (CSS covers all of this, at no extra download).
+
+---
+
 ### D-035 · Every "No call" says why
 **Date:** 2026-10-24
 **Decision:** Under the reversal rule, each no-call stock on Today shows how far it moved against the average of the 20 last week, where that day's calls on the same side began, and a bar for how close it came. The API works this out at read time from the stored factors, so the ledger is untouched. Multi-factor models have no single line, so they keep the generic sentence.

@@ -91,6 +91,24 @@ export const en = {
     },
   },
 
+  next: {
+    in: (weekday: string, wait: string) => `Next calls after ${weekday}'s close · in ${wait}`,
+    due: 'Next calls are due: they usually appear by 18:30 IST',
+    duration: (days: number, hours: number, minutes: number) =>
+      days > 0 ? `${days}d ${hours}h` : hours > 0 ? `${hours}h ${String(minutes).padStart(2, '0')}m` : `${minutes}m`,
+  },
+
+  suggest: {
+    title: 'What to look at next',
+    strongestRule: (symbol: string, move: string, ahead: boolean, lean: string) =>
+      `${symbol} ran ${move} ${ahead ? 'ahead of' : 'behind'} the others last week. See why it has a ${lean.toLowerCase()}`,
+    strongest: (symbol: string) => `${symbol} has today's clearest call. See why`,
+    closest: (symbol: string, share: number) => `${symbol} came closest to a call without getting one (${Math.round(share * 100)}% of the way)`,
+    open: (symbol: string, gap: string, day: number, total: number) => `${symbol}'s call is ${gap} so far, day ${day} of ${total}`,
+    mover: (symbol: string, change: string, up: boolean) => `${symbol} ${up ? 'rose' : 'fell'} ${change} at the last close, the biggest move among Parakh's 20`,
+    glossary: 'New to the words? The glossary explains each one with an example',
+  },
+
   noCall: {
     title: (n: number) => `No call on ${n} stocks`,
     generic: "The signals are mixed or weak, so we'd rather say nothing than guess.",

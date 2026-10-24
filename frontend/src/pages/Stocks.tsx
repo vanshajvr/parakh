@@ -47,7 +47,7 @@ export function Stocks() {
   const v = viewById(view)
 
   return (
-    <div className="flex flex-col gap-4 lg:gap-6">
+    <div className="stagger flex flex-col gap-4 lg:gap-6">
       <section className="flex flex-col gap-1 px-1">
         <h1 className="m-0 font-serif text-[30px] leading-tight font-semibold tracking-[-0.015em] lg:text-[40px]">Stocks</h1>
         <p className="m-0 text-sm text-muted">
@@ -76,7 +76,7 @@ export function Stocks() {
           <ul className="m-0 list-none p-0">
             {rows.map((r) => (
               <li key={r.ticker} className="border-b border-chip last:border-0">
-                <Link to={`/stocks/${r.symbol}`} className="flex min-h-16 items-center gap-3 px-4 py-3 no-underline">
+                <Link to={`/stocks/${r.symbol}`} className="flex min-h-16 items-center gap-3 px-4 py-3 no-underline hover:bg-page">
                   <StockCell row={r} />
                   <span className="flex w-28 shrink-0 flex-col items-end gap-0.5 whitespace-nowrap">
                     <span className="text-[15px] font-semibold text-ink">{price(r.close)}</span>

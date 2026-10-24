@@ -17,7 +17,7 @@ export function CallCard({ signal }: { signal: Signal }) {
   const factors = drivers(signal, 2, m)
   const range = stockRange(signal.receipt, m)
   return (
-    <article className="self-start overflow-hidden rounded-2xl border border-line bg-surface">
+    <article className="lift self-start overflow-hidden rounded-2xl border border-line bg-surface">
       <Disclosure
         buttonClassName="px-4 py-3.5"
         summary={
