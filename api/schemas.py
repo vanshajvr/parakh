@@ -194,6 +194,17 @@ class ScreenerResponse(BaseModel):
     next_week: NextWeek | None
 
 
+class NewsItem(BaseModel):
+    """One headline: only what's needed to link to it (decision D-037)."""
+
+    symbol: str
+    name: str
+    title: str
+    source: str
+    url: str
+    published_at: datetime
+
+
 class PricePoint(BaseModel):
     date: date
     open: float

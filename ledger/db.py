@@ -158,3 +158,20 @@ def insert_outcomes(conn, outcomes: pd.DataFrame) -> int:
             o,
         )
     return len(outcomes)
+
+
+# --- News -----------------------------------------------------------------------------------
+
+def upsert_news(conn, rows: list[dict]) -> None:
+    """Store headlines; a headline seen again keeps its row (and its first fetch time)."""
+    with conn.cursor() as cur:
+        cur.executemany(
+            "INSERT INTO news (ticker, lang, url, title, source, published_at)"
+            " VALUES (%(ticker)s, %(lang)s, %(url)s, %(title)s, %(source)s, %(published_at)s)"
+            " ON CONFLICT (ticker, lang, url) DO NOTHING",
+            rows,
+        )
+
+
+def prune_news(conn, before) -> None:
+    conn.execute("DELETE FROM news WHERE published_at < %s", (before,))

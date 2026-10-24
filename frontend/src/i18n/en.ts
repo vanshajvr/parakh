@@ -109,6 +109,18 @@ export const en = {
     glossary: 'New to the words? The glossary explains each one with an example',
   },
 
+  news: {
+    title: 'In the news',
+    subtitle: 'Why did they move? Headlines on the biggest movers, from the past 3 days.',
+    stockTitle: 'Recent news',
+    stockSubtitle: 'Headlines from the past 3 days. Each opens on the publisher\'s site.',
+    caveat: 'By the time news reaches you, the price has usually already moved.',
+    empty: 'No headlines about this stock in the past 3 days.',
+    more: (n: number) => `+${n} more`,
+    opensIn: (source: string) => `${source}, opens in a new tab`,
+    note: 'Headlines come from Google News. Tips and price predictions are left out.',
+  },
+
   noCall: {
     title: (n: number) => `No call on ${n} stocks`,
     generic: "The signals are mixed or weak, so we'd rather say nothing than guess.",
@@ -281,6 +293,7 @@ export const en = {
       week52: { term: '52-week high and low', short: 'The highest and lowest prices of the past year. They show where today\'s price sits in its recent range.', example: 'A stock at its 52-week high has never been more expensive this year.' },
       sector: { term: 'Sector', short: 'A group of companies in the same business, such as banks, IT or cement. Stocks in a sector often move together.', example: 'TCS and Infosys are both in the IT sector.' },
       drawdown: { term: 'Drawdown', short: 'How far an investment has fallen from its highest point. It measures how painful the bad times were.', example: 'From ₹1,20,000 down to ₹90,000 is a 25% drawdown.' },
+      pricedIn: { term: 'Priced in', short: 'When news is already reflected in a stock\'s price. Prices react within minutes, so by the time you read a headline, trading on it is usually too late.', example: 'Results beat estimates at 3 p.m.; by 3:05 the share has already jumped.' },
       survivorship: { term: 'Survivorship bias', short: 'Looking only at the winners that survived, which makes the past look easier than it was. Today\'s NIFTY 50 is full of companies that did well.', example: 'Picking from today\'s 50 stocks in 2016 hides the ones that dropped out of the index.' },
     },
   },

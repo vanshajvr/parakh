@@ -8,6 +8,7 @@ import math
 import os
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
+from typing import Literal
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -19,7 +20,7 @@ from api import screener
 from api.repository import Repository
 from ledger.db import database_url
 from api.schemas import (
-    CallStats, DataStatus, LedgerPage, LedgerRow, MarketSnapshot, ModelInfo, NextWeek, NoCallDetail, OpenCall, PricePoint,
+    CallStats, DataStatus, LedgerPage, LedgerRow, MarketSnapshot, ModelInfo, NewsItem, NextWeek, NoCallDetail, OpenCall, PricePoint,
     Receipt, RecentSimulatedCall, Scoreboard, ScreenerResponse, ScreenerRow, Signal,
     SimulatedCall, StatusResponse, StockDetail, StockSummary, TodayResponse, TrackRecord,
 )
@@ -455,6 +456,21 @@ def history(symbol: str, repo: Repository = Depends(get_repo)):
     return [
         PricePoint(**{k: round(v, 2) if k in ("open", "high", "low", "close") else v for k, v in p.items()})
         for p in repo.prices(ticker, date(2000, 1, 1))
+    ]
+
+
+@app.get("/api/news", response_model=list[NewsItem])
+def news(
+    lang: Literal["en", "hi"] = "en",
+    symbol: str | None = None,
+    limit: int = Query(100, ge=1, le=200),
+    repo: Repository = Depends(get_repo),
+):
+    """Headlines from the past 3 days, newest first: for one stock, or across the NIFTY 50."""
+    ticker = resolve_ticker(symbol) if symbol else None
+    return [
+        NewsItem(**{k: v for k, v in r.items() if k != "ticker"}, symbol=r["ticker"].removesuffix(".NS"), name=config.MARKET[r["ticker"]][0])
+        for r in repo.news(lang, ticker, limit) if r["ticker"] in config.MARKET
     ]
 
 

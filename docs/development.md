@@ -5,7 +5,7 @@
 | Folder | What's in it |
 |---|---|
 | `ml/` | Data download, features, labels, model, walk-forward evaluation, SHAP explanations, model-card generator |
-| `jobs/` | `retrain` (weekly: evaluate, train, publish a model version) and `daily` (score matured calls, publish the next ones) |
+| `jobs/` | `retrain` (weekly: evaluate, train, publish a model version) and `daily` (score matured calls, publish the next ones), plus `news` (headlines every 3 hours) |
 | `ledger/` | Postgres schema (append-only triggers), database access, scoring rules |
 | `api/` | Read-only FastAPI service |
 | `frontend/` | React + TypeScript + Vite + Tailwind PWA |

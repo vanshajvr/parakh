@@ -47,6 +47,15 @@ export function dayLabel(isoDate: string, locale = 'en-IN'): string {
   return `${weekday} ${d.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' })}`
 }
 
+/** "3 hours ago", "कल": how long ago, in the reader's language. */
+export function ago(iso: string, locale = 'en-IN', now = Date.now()): string {
+  const minutes = Math.round((new Date(iso).getTime() - now) / 60_000)
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+  if (Math.abs(minutes) < 60) return rtf.format(minutes, 'minute')
+  if (Math.abs(minutes) < 1440) return rtf.format(Math.round(minutes / 60), 'hour')
+  return rtf.format(Math.round(minutes / 1440), 'day')
+}
+
 export function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
