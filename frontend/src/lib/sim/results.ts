@@ -1,4 +1,4 @@
-import type { Day, Market, Result } from './engine'
+import { lastClose, type Day, type Market, type Result } from './engine'
 
 export type Summary = {
   value: number
@@ -75,4 +75,27 @@ export function salesInFalls(market: Market, result: Result): FallSale[] {
       const later = fund[Math.min(f.day + AFTER, market.dates.length - 1)], then = fund[f.day]
       return [{ day: f.day, symbol: f.symbol, marketFall: fall, fundAfter: later != null && then != null ? later / then - 1 : null }]
     })
+}
+
+export type Position = { symbol: string; qty: number; value: number; cost: number; gain: number }
+
+/** What you hold at a day's close, with what it cost (charges included) and the gain since. */
+export function positions(market: Market, result: Result, day: number): Position[] {
+  const cost: Record<string, number> = {}, qty: Record<string, number> = {}
+  for (const f of result.fills) {
+    if (f.side === 'buy') {
+      cost[f.symbol] = (cost[f.symbol] ?? 0) + f.value + f.charges.total
+      qty[f.symbol] = (qty[f.symbol] ?? 0) + f.qty
+    } else {
+      // A sale takes its share of the cost with it, so the rest keeps its average price.
+      cost[f.symbol] -= (cost[f.symbol] / qty[f.symbol]) * f.qty
+      qty[f.symbol] -= f.qty
+    }
+  }
+  return Object.entries(result.holdings)
+    .map(([symbol, q]) => {
+      const value = q * (lastClose(market, symbol, day) ?? 0)
+      return { symbol, qty: q, value, cost: cost[symbol], gain: value / cost[symbol] - 1 }
+    })
+    .sort((a, b) => b.value - a.value)
 }

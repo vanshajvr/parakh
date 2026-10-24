@@ -5,6 +5,7 @@ import { I18nProvider } from './i18n'
 import { Glossary } from './pages/Glossary'
 import { Learn } from './pages/Learn'
 import { PageNotFound } from './pages/PageNotFound'
+import { Practice } from './pages/Practice'
 
 import { Record } from './pages/Record'
 import { Stock } from './pages/Stock'
@@ -24,6 +25,7 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route index element={<Today />} />
+              <Route path="practice" element={<Practice />} />
               <Route path="stocks" element={<Stocks />} />
               <Route path="stocks/:symbol" element={<Stock />} />
               <Route path="record" element={<Record />} />

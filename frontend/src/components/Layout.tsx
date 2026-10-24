@@ -2,18 +2,19 @@ import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useI18n, type Lang, type Messages } from '../i18n'
 import { useInstallPrompt, useOnline } from '../lib/pwa'
-import { Book, Calendar, Chart, Download, ReceiptIcon } from './Icons'
+import { Book, Calendar, Chart, Download, ReceiptIcon, Rewind } from './Icons'
 import { Logo } from './Logo'
 
 const nav = (m: Messages) => [
   { to: '/', label: m.layout.nav.today, Icon: Calendar },
+  { to: '/practice', label: m.layout.nav.practice, Icon: Rewind },
   { to: '/stocks', label: m.layout.nav.stocks, Icon: Chart },
   { to: '/record', label: m.layout.nav.record, short: m.layout.nav.recordShort, Icon: ReceiptIcon },
   { to: '/learn', label: m.layout.nav.learn, short: m.layout.nav.learnShort, Icon: Book },
 ]
 
 // Pages translated so far (decision D-034); the rest say they're English only.
-const TRANSLATED = new Set(['/', '/glossary'])
+const TRANSLATED = new Set(['/', '/glossary', '/practice'])
 
 export function Layout() {
   const { lang, m } = useI18n()
@@ -83,7 +84,7 @@ export function Layout() {
         </p>
       </main>
 
-      <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-4 border-t border-line bg-surface px-2 pt-2 pb-[max(env(safe-area-inset-bottom),12px)] lg:hidden">
+      <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-5 border-t border-line bg-surface px-2 pt-2 pb-[max(env(safe-area-inset-bottom),12px)] lg:hidden">
         {NAV.map(({ to, label, short, Icon }) => (
           <NavLink
             key={to}

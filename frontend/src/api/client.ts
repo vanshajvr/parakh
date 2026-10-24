@@ -92,3 +92,8 @@ export function useNews(lang: string, symbol?: string) {
   const params = new URLSearchParams({ lang, ...(symbol ? { symbol } : {}) })
   return useQuery({ queryKey: ['news', lang, symbol], queryFn: () => getJson<NewsItem[]>(`/api/news?${params}`) })
 }
+
+/** Price history for the time machine. About 740 KB, and it only changes once a day. */
+export function useSimMarket() {
+  return useQuery({ queryKey: ['sim-market'], queryFn: () => getJson<Schemas['SimMarket']>('/api/sim/prices'), staleTime: 60 * 60_000 })
+}

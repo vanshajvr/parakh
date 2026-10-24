@@ -61,11 +61,13 @@ describe('simulate', () => {
     expect(d5.value - d4.value).toBe(r.holdings.B * 10)
   })
 
-  it('invests a monthly SIP in the index fund on the first trading day of each month', () => {
+  it('invests a monthly SIP in the index fund from the first day, then each new month', () => {
     const r = simulate(tiny(), game({ cash: 0, sip: { amount: 1_000 } }))
-    expect(r.fills).toEqual([expect.objectContaining({ day: 3, symbol: 'FUND', sip: true })])
-    expect(r.days.at(-1)!.invested).toBe(1_000)
+    expect(r.fills.map((f) => [f.day, f.symbol, f.sip])).toEqual([[0, 'FUND', true], [3, 'FUND', true]])
+    expect(r.days.at(-1)!.invested).toBe(2_000)
     expect(summarise(r).trades).toBe(0)
+    // Left alone, a SIP game and its index-fund comparison are the same thing.
+    expect(simulate(tiny(), indexFundGame(tiny(), game({ cash: 0, sip: { amount: 1_000 } }))).days.at(-1)).toEqual(r.days.at(-1))
   })
 })
 

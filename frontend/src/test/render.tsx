@@ -6,10 +6,11 @@ import { vi } from 'vitest'
 import nifty from '../fixtures/history-nifty50.json'
 import titan from '../fixtures/history-titan.json'
 import news from '../fixtures/news.json'
+import simMarket from '../fixtures/sim-market.json'
 import screener from '../fixtures/screener.json'
 
 const RESPONSES: Record<string, unknown> = {
-  '/api/history/NIFTY50': nifty, '/api/history/TITAN': titan, '/api/screener': screener, '/api/news?lang=en': news,
+  '/api/history/NIFTY50': nifty, '/api/history/TITAN': titan, '/api/screener': screener, '/api/news?lang=en': news, '/api/sim/prices': simMarket,
 }
 
 /** Render a page with a router and a fresh query client; API responses come from the fixtures. */
