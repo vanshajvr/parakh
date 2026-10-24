@@ -5,10 +5,10 @@
 | Folder | What's in it |
 |---|---|
 | `ml/` | Data download, features, labels, model, walk-forward evaluation, SHAP explanations, model-card generator |
-| `jobs/` | `retrain` (weekly: evaluate, train, publish a model version) and `daily` (score matured calls, publish the next ones), plus `news` (headlines every 3 hours) |
+| `jobs/` | `retrain` (weekly: evaluate, train, publish a model version), `daily` (score matured calls, publish the next ones) and `news` (headlines every 3 hours) |
 | `ledger/` | Postgres schema (append-only triggers), database access, scoring rules |
 | `api/` | Read-only FastAPI service |
-| `frontend/` | React + TypeScript + Vite + Tailwind PWA |
+| `frontend/` | React + TypeScript + Vite + Tailwind PWA. `src/lib/sim/` is the time machine's engine; `src/i18n/` holds the English and Hindi text |
 | `tests/` | Python tests (frontend tests live next to the code in `frontend/src`) |
 | `docs/` | PRD, decision log, model card, this guide |
 | `analysis/` | SQL analysis of the track record, run against the production database (read-only) |
@@ -35,7 +35,7 @@ python -m jobs.retrain --publish     # create tables, store the model as the act
 python -m jobs.daily                 # refresh prices, score matured calls, publish the next calls
 ```
 
-In production both jobs run in GitHub Actions ([daily](../.github/workflows/daily.yml) at 18:00 IST on weekdays, [retrain](../.github/workflows/retrain.yml) on Saturdays) with a `DATABASE_URL` repository secret. The ledger rules are in [decision D-015](decisions.md).
+In production the jobs run in GitHub Actions with a `DATABASE_URL` repository secret: [daily](../.github/workflows/daily.yml) at 18:00 IST on weekdays (with catch-up runs), [retrain](../.github/workflows/retrain.yml) on Saturdays, and [news](../.github/workflows/news.yml) every 3 hours (`python -m jobs.news`). The ledger rules are in [decision D-015](decisions.md); the news filters are in [D-037](decisions.md).
 
 ### API
 
@@ -49,6 +49,9 @@ uvicorn api.main:app --reload        # http://localhost:8000/docs for the intera
 | `GET /api/stocks`, `/api/stocks/{symbol}` | Stock list; stock page (chart, latest call and factors, live and simulated history) |
 | `GET /api/track-record` | Live record next to the simulated one |
 | `GET /api/ledger`, `/api/ledger.csv` | The public ledger, paginated or as a CSV download |
+| `GET /api/screener`, `/api/history/{symbol}` | Market movers and the screener for all 50 stocks; daily candles since 2016 |
+| `GET /api/news?lang=en\|hi&symbol=` | Headlines from the past 3 days, across the NIFTY 50 or for one stock |
+| `GET /api/sim/prices` | The time machine's price history: every stock's open and close on a clean trading calendar (gzipped, cached for an hour) |
 | `GET /api/model` | Model version, features and evaluation |
 | `GET /api/status` | Data freshness and recent job runs |
 
@@ -68,6 +71,10 @@ npm run gen:api        # regenerate src/api/schema.ts after changing the API's r
 ```
 
 TypeScript types are generated from the API's OpenAPI schema, so the frontend and backend can't drift apart. Fixtures are development-only and never included in production builds.
+
+**Text and translations.** Every string on a translated screen lives in `src/i18n/en.ts`; `src/i18n/hi.ts` must have the same shape, so adding an English string without its Hindi version fails `tsc` ([D-034](decisions.md)). Read text with `const { m } = useI18n()`.
+
+**The time machine.** `src/lib/sim/` is pure functions: `simulate()` turns a game (start, end, cash, optional SIP, orders) into fills, daily values and results, and `buildReport()` turns a finished game into notes and lessons. Its tests run on real 2020–23 prices in `src/fixtures/sim-market.json`. Games are saved in the browser only (`parakh.practice.v1`).
 
 ## Deployment
 

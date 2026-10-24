@@ -1,6 +1,6 @@
 # Product Requirements: Parakh
 
-> Status: v1 draft · Owner: Vanshaj Verma · Last updated: 2026-10-24
+> Status: v1, built and live · Owner: Vanshaj Verma · Last updated: 2026-10-24
 
 ## 1. Summary
 
@@ -64,8 +64,9 @@ See [decisions.md](decisions.md) for the full decision log.
 On the phone, every screen shows a short summary first and reveals detail on tap. The receipt on each call and any per-stock warning are always visible (decisions D-018 and D-019). Desktop layouts open the detail by default.
 
 1. **Today**
-   - A card for each stock: its lean, a confidence band and a one-line reason.
-   - A scoreboard strip: hit rate on calls vs a coin flip, and how bullish-lean stocks did relative to simply holding a NIFTY 50 index fund.
+   - Key numbers: the live record, how many live calls have been right, the testing hit rate against a coin flip, and today's calls.
+   - Each call with its lean, one label (*Slight edge*, D-032), its receipt and its reason; each no-call with how close it came (D-035).
+   - On laptops, a workspace: the stock list, the selected stock's chart, reasons and news, and a rail with what to look at next and market movers (D-038). On phones, a scrolling feed.
 2. **Stock page**
    - A price chart with past signals marked as hits or misses.
    - A "Why" breakdown: the top factors, in plain words.
@@ -82,11 +83,12 @@ On the phone, every screen shows a short summary first and reveals detail on tap
    - A disclaimer.
 5. **Glossary** (D-034)
    - Every market word the app uses, in plain English and Hindi, with an example. Any dotted word in the app opens its meaning.
-6. **Practice: the time machine** (D-033, phase 16)
-   - Pick a scenario (the 2020 crash, the 2021 rally, a flat 2022–23, a decade of SIP, or a mystery period with the dates hidden) and a starting amount.
-   - Time plays forward on its own; buy and sell whole shares or a NIFTY 50 ETF, with real charges, filled at the next day's open.
-   - The game pauses on big market moves and asks what you'll do.
-   - A report card compares you with just holding the index fund, with short lessons tied to what you did.
+6. **Practice: the time machine** (D-033, D-039 to D-041)
+   - Pick a scenario (the 2020 crash, the 2021 rally, 18 flat months from October 2021, a decade of SIP, or a mystery period with the dates hidden) and a starting amount.
+   - Time plays forward on its own; buy by rupees or shares and sell any number of shares, of any NIFTY 50 stock or a NIFTY 50 ETF, with real charges, filled at the next day's open.
+   - The game stops on sharp market moves, or when your money is 15% down, and asks what you'll do.
+   - A report card compares you with the same money left in the index fund, notes what followed each choice, and links short lessons.
+   - A picture strip and a spotlight tour show first-time players how to play.
 
 **News** (D-037): Today shows headlines under the stocks that moved most, and each stock page lists its own, in English or Hindi. Tips are filtered out, and every list reminds the reader that news is usually priced in.
 
@@ -101,7 +103,9 @@ Trade execution, portfolio tracking, intraday data, personalised advice, user ac
 - Watchlist
 - A daily email or Telegram digest (meet users where the bad tips live)
 - LLM-written explanations built on top of the SHAP output
-- "Explain this tip": enter a stock a finfluencer mentioned and see what the data says
+- "Check a tip": paste a tip from a finfluencer or a Telegram group and see base rates, the index-fund comparison and red flags
+- Taxes on gains in the time machine (short- and long-term capital gains)
+- More of the app in Hindi (Stocks, Track record, How it works)
 
 ## 7. Success metrics
 
@@ -115,7 +119,7 @@ See [model-card.md](model-card.md) for current numbers.
 ### Product (hypothetical, for the case study)
 - **North star:** weekly users who view a signal's track record or finish a practice game.
 - **Supporting:** visits to "How it works", return visits each week, practice games replayed.
-- **Learning (phase 17 user test):** the share of testers who beat the index fund, and how often they sell during a big fall before and after seeing the lesson card.
+- **Learning (phase 19 user test):** the share of testers who beat the index fund, and how often they sell during a big fall before and after seeing the lesson card.
 
 ### Guardrails
 - 0 signals shown without a confidence value and a reason.
@@ -148,7 +152,7 @@ See [model-card.md](model-card.md) for current numbers.
 | 15 | English and Hindi, glossary, no-call reasons (D-033 to D-035) |
 | 16 | Motion and daily suggestions (D-036) |
 | 17 | News as context for moves (D-037) |
-| 18 | Practice: the time machine, with interruptions, a report card and lessons (D-039, D-040) |
+| 18 | Practice: the time machine, with interruptions, a report card, lessons and a how-to-play tour (D-039 to D-041) |
 | 19 | User test with 5–10 beginners, fixes and write-up |
 | Later | Ideas above; taxes in the simulator |
 
