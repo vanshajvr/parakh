@@ -472,7 +472,7 @@ export interface components {
         };
         /**
          * Receipt
-         * @description The track record shown next to a call: how this confidence level and this stock have done.
+         * @description The track record shown next to a call: how all testing calls and this stock have done.
          */
         Receipt: {
             /** Band Hit Rate */

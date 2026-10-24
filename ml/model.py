@@ -81,8 +81,7 @@ class SignalModel:
     base rate from turning every call bullish or bearish at once (decision D-011).
 
     The out-of-fold scores also size the "No call" band: `margin` is set so that about
-    TARGET_COVERAGE of those rows would get a call, and `strong_margin` splits those calls
-    into a less and a more confident half.
+    TARGET_COVERAGE of those rows would get a call.
     """
 
     def __init__(self, kind: str, horizon: int = config.HORIZON):
@@ -91,7 +90,6 @@ class SignalModel:
         self.base = make_base(kind)
         self.calibrator = LogisticRegression()
         self.margin = 0.0
-        self.strong_margin = 0.0
         self.daily_z = True
 
     def _calibrator_input(self, raw: np.ndarray, dates: pd.Series) -> np.ndarray:
@@ -112,10 +110,9 @@ class SignalModel:
         calibrated = self._centre(self.calibrator.predict_proba(x)[:, 1], oof["date"])
         distance = np.abs(calibrated - 0.5)
         if distance.max() < 1e-9:
-            self.margin = self.strong_margin = 1.0
+            self.margin = 1.0
         else:
             self.margin = float(np.quantile(distance, 1 - config.TARGET_COVERAGE))
-            self.strong_margin = float(np.median(distance[distance >= self.margin]))
 
         self.base.fit(df[FEATURE_COLUMNS], df["label"].astype(int))
         self.trained_through = pd.Timestamp(df["date"].max())

@@ -42,7 +42,7 @@ def latest_signals(model: SignalModel, data: pd.DataFrame) -> list[dict]:
             "p_outperform": round(float(p), 4),
             "lean": lean,
             "lean_label": LEAN_LABELS[lean],
-            "confidence": confidence_band(p, model.margin, model.strong_margin),
+            "confidence": confidence_band(p, model.margin),
             "reason": reason(lean, contrib.loc[idx], values.loc[idx]),
             "factors": top_factors(contrib.loc[idx], values.loc[idx]),
             "model_version": model_version(model),

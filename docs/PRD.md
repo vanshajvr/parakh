@@ -48,7 +48,7 @@ Beginners can't separate signal from noise, so they trust whoever sounds most co
 | Prediction horizon | 5 trading days | Less noisy than next-day; matches a beginner's holding period |
 | Stock universe | 20 liquid NIFTY 50 stocks | Better data quality and stats you can trust; a focused experience |
 | Signal types | Bullish lean (likely to outperform the index) / Bearish lean (likely to lag it) / No call | Bearish shown as "data suggests waiting", since beginners rarely short |
-| How often we make a call | About 25% of stock-days, with *Slight* / *Stronger edge* labels | The model's edge is small; fixed thresholds would almost never trigger (D-010) |
+| How often we make a call | About 25% of stock-days, all labelled *Slight edge* | The model's edge is small; fixed thresholds would almost never trigger (D-010). A *Stronger edge* tier did no better, so it was dropped (D-032) |
 | Publishing cadence | Daily, after market close, before the next open | Calls are locked in before the outcome is known |
 | Track record | Live ledger kept separate from the simulated backtest | Never mix simulated results with real out-of-sample results |
 | Explanations | The model's own factors (the rule's single input, or SHAP values for ML models) turned into fixed sentence templates | Deterministic; a reason can't be made up |

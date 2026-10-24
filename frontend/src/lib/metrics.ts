@@ -41,7 +41,7 @@ export function confidenceVerdict(bands: Record<string, CallStats>): string {
   const gap = (strong - slight) * 100
   if (gap >= 0.5) return 'Yes, a little. The confidence labels mean something, but not much.'
   if (gap > -0.5) return 'Not really: the two levels have done about the same.'
-  return 'No: stronger-edge calls have done slightly worse, so treat the labels with caution.'
+  return 'No: stronger-edge calls did slightly worse, so every new call gets the same label.'
 }
 
 /** Gap between how bullish-lean and bearish-lean stocks did against the index, per 5 days. */

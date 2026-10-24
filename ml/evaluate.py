@@ -42,9 +42,7 @@ def run_walk_forward(labeled: pd.DataFrame, kind: str) -> pd.DataFrame:
         test = labeled.loc[test_mask, ["date", "ticker", "label", "fwd_return", "excess_return"]].copy()
         test["p_up"] = model.predict_proba(labeled[test_mask])
         test["lean"] = [lean_from_prob(p, model.margin) for p in test["p_up"]]
-        test["confidence"] = [
-            confidence_band(p, model.margin, model.strong_margin) for p in test["p_up"]
-        ]
+        test["confidence"] = [confidence_band(p, model.margin) for p in test["p_up"]]
         test["fold"] = year
         folds.append(test)
     return pd.concat(folds, ignore_index=True)

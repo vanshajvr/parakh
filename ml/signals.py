@@ -12,11 +12,6 @@ def lean_from_prob(p_up: float, margin: float) -> str:
     return "no_call"
 
 
-def confidence_band(p_up: float, margin: float, strong_margin: float) -> str:
-    """'Stronger edge' for the more confident half of calls, 'Slight edge' for the rest."""
-    distance = abs(p_up - 0.5)
-    if distance >= strong_margin:
-        return "Stronger edge"
-    if distance >= margin:
-        return "Slight edge"
-    return "No edge"
+def confidence_band(p_up: float, margin: float) -> str:
+    """'Slight edge' for every call. A more confident tier did no better in testing (decision D-032)."""
+    return "Slight edge" if abs(p_up - 0.5) >= margin else "No edge"

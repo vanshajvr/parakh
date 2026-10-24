@@ -4,7 +4,7 @@
 
 **Stock signals with receipts, for beginner Indian investors.** Every call shows its track record, its confidence and its reasoning, says "No call" when the data isn't clear, and admits when its edge is too small to trade on.
 
-**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Model card](docs/model-card.md) · [Decision log](docs/decisions.md) (31 decisions) · [PRD](docs/PRD.md) · [SQL analysis](analysis/track_record_sql.ipynb)
+**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Model card](docs/model-card.md) · [Decision log](docs/decisions.md) (32 decisions) · [PRD](docs/PRD.md) · [SQL analysis](analysis/track_record_sql.ipynb)
 
 > **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. With rules written down before testing, a one-line rule matched a tuned LightGBM model, and on two years of data held back until the end, neither was reliably better than a coin flip. So the product doesn't compete on accuracy. It competes on honesty: every number Parakh shows can be checked, and nothing it publishes can be edited afterwards.
 
@@ -42,7 +42,7 @@ Parakh's bet: if a source showed its receipts (how often it has been right, how 
 
 - **Asks one honest question:** will this stock do better than a NIFTY 50 index fund over the next 5 trading days? For most beginners, the index fund is the real alternative.
 - **Gives a lean, not an instruction:** *Bullish lean*, *Bearish lean*, or *No call*, with a confidence label.
-- **Shows the receipt on every call:** for example, "Slight edge · 51.8% right in testing". That line never collapses away.
+- **Shows the receipt on every call:** for example, "Slight edge · 51.4% right in testing". That line never collapses away.
 - **Warns where it has struggled, with a range:** for example, "On ASIANPAINT: 47.4% in testing, below a coin flip (likely 41–54%)", so a user can see how much of that could be chance.
 - **Tracks calls in progress:** each open call is followed day by day against the NIFTY 50 until it's scored, from daily closes. There are no live tickers, on purpose ([D-025](docs/decisions.md)).
 - **Leads with what matters now:** four key numbers up top, the market first until live calls exist, then today's calls ([D-031](docs/decisions.md)).

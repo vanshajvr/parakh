@@ -4,6 +4,14 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-032 · One label for every call
+**Date:** 2026-10-24
+**Decision:** Drop the *Stronger edge* tier. Every call is labelled *Slight edge*, and its receipt shows the hit rate of all testing calls (51.4%), not of its tier. Calls already published keep the label they were published with, since the ledger can't be edited.
+**Why:** The SQL analysis (`analysis/track_record_sql.ipynb`, section 2) found the tiers don't sort calls: *Stronger edge* calls were right 50.9% of the time and *Slight edge* calls 51.8%, and the top probability decile beat the index less often than the middle ones. On the Today screen, a beginner saw "Stronger edge" next to the lower number. A label that claims more confidence than the record supports breaks the product's main promise (D-001).
+**Alternatives:** Renaming the tiers to describe signal strength rather than accuracy (honest but clunky, and tells a user nothing they can act on); showing both tiers' rates on every card (transparent but confusing for a beginner).
+
+---
+
 ### D-031 · An adaptive landing page: market first until there are calls
 **Date:** 2026-10-22
 **Decision:**
@@ -240,7 +248,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 ### D-010 · The "No call" band is sized by coverage, not a fixed threshold
 **Date:** 2026-10-22
 **Decision:** Each model sizes its "No call" band on its calibration slice so about 25% of stock-days get a call. Calls are split into *Slight edge* and *Stronger edge* (the more confident half).
-**Why:** With a weak model, calibrated probabilities sit between about 46% and 54%, so the planned fixed 55%/45% thresholds would almost never trigger and the Today screen would always say "No call". Sizing by coverage keeps the screen useful, and the hit rate shown next to each band keeps it honest. *Stronger edge* calls have done better (51.9% vs 50.6%).
+**Why:** With a weak model, calibrated probabilities sit between about 46% and 54%, so the planned fixed 55%/45% thresholds would almost never trigger and the Today screen would always say "No call". Sizing by coverage keeps the screen useful, and the hit rate shown next to each band keeps it honest. *Stronger edge* calls have done better (51.9% vs 50.6%). *Superseded in part by D-032: under the reversal rule the stronger tier did worse, so there is now one label.*
 **Alternatives:** Fixed thresholds (too few calls); always calling the top/bottom N each day (overstates confidence on quiet days).
 
 ### D-009 · Extra features tested and dropped

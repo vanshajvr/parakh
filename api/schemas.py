@@ -17,7 +17,7 @@ class Factor(BaseModel):
 
 
 class Receipt(BaseModel):
-    """The track record shown next to a call: how this confidence level and this stock have done."""
+    """The track record shown next to a call: how all testing calls and this stock have done."""
 
     band_hit_rate: float | None
     band_n_calls: int
