@@ -35,7 +35,8 @@ describe('Today', () => {
     const titan = items[0]
     expect(within(titan).getByText('Day 4 of 5')).toBeInTheDocument()
     expect(within(titan).getByText('behind the index by 2.1%')).toBeInTheDocument()
-    expect(within(titan).getByText('On track so far')).toBeInTheDocument() // bearish and lagging
+    // No verdict before the call is scored, even when it's going its way (bearish and lagging here).
+    expect(within(titan).getByText('Not a result yet')).toBeInTheDocument()
     expect(within(section).getByText(/Nothing here is a result yet/)).toBeInTheDocument()
   })
 

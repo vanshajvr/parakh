@@ -33,7 +33,11 @@ export const en = {
   },
 
   lean: { bullish: 'Bullish lean', bearish: 'Bearish lean', no_call: 'No call' },
-  confidence: (label: string) => label,
+  /**
+   * Every call carries one label (D-032). Calls published before that still have "Stronger edge"
+   * stored, and the ledger keeps it as published; everywhere else they read as "Slight edge".
+   */
+  confidence: (label: string) => (label === 'Stronger edge' ? 'Slight edge' : label),
 
   today: {
     loadingWhat: "today's calls",
@@ -125,6 +129,8 @@ export const en = {
     title: 'The time machine',
     intro: 'Go back to a real moment in the market with virtual money. Buy and sell real NIFTY 50 stocks or an index fund, let time run, and see whether you beat simply holding the index fund.',
     pickPeriod: 'Pick a period',
+    adjusted: 'Prices are adjusted for later splits, bonuses and dividends, so a share may look cheaper than it did on screens at the time. Gains and losses in rupees, dividends included, work out the same.',
+    adjustedTag: 'Adjusted prices',
     survivors: "The stocks here are today's NIFTY 50, so companies that have dropped out of the index since are missing. That makes picking stocks look easier than it really was.",
     startingMoney: 'Starting money',
     monthlyAmount: 'Monthly SIP',
@@ -187,6 +193,8 @@ export const en = {
     pendingBuyShares: (symbol: string, qty: number) => `Buy ${qty} ${symbol}`,
     sell: 'Sell',
     startHere: 'Start here',
+    playStep: { title: 'Now press Play', body: "Your order fills at the next morning's open, once time moves on." },
+    runningTip: { title: 'Pause any time', body: 'Buy or sell whenever you like. The game stops by itself on big market moves.' },
     firstStep: { title: 'Start with a buy', body: 'Everything is in cash. Buy something, then press Play.', button: 'Buy the index fund', other: 'or pick a stock from the market' },
     pressPlay: 'Now press Play',
     howToPlay: 'How to play',
@@ -223,7 +231,7 @@ export const en = {
       sellCharges: 'Charges on this sale',
       confirmSell: 'Place sell order',
       tooSmall: 'Not enough for one share at this price.',
-      fills: "Orders fill at the next day's open, so the price may move a little first.",
+      fills: "Orders fill at the next day's open, so the price may move a little first. Prices are adjusted for later splits, bonuses and dividends.",
       charges: 'Charges on this buy',
       lines: { stt: 'Securities transaction tax', exchange: 'Exchange fee', sebi: 'SEBI fee', stamp: 'Stamp duty', gst: 'GST on fees', dp: 'Depository charge' },
       total: 'Total charges',
@@ -352,8 +360,7 @@ export const en = {
     ahead: (size: string) => `ahead of the index by ${size}`,
     behind: (size: string) => `behind the index by ${size}`,
     startsNext: 'Starts next session',
-    onTrack: 'On track so far',
-    offTrack: 'Off track so far',
+    notYet: 'Not a result yet',
     gapAria: (summary: string) => `Gap to the NIFTY 50 after each day: ${summary}`,
     gapDay: (i: number, value: string) => `day ${i}: ${value}`,
   },

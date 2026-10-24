@@ -268,6 +268,7 @@ function Ledger() {
           <div className="flex items-center justify-between gap-3 text-[13px] text-muted">
             <span>
               Showing {offset + 1}–{Math.min(offset + PAGE, data.total)} of {count(data.total)}. "No call" rows are included so nothing is hidden.
+              Edge is shown as published: calls before 24 Oct 2026 were split into Slight and Stronger, a split dropped because Stronger did worse (D-032).
             </span>
             <span className="flex gap-2">
               <button type="button" disabled={offset === 0} onClick={() => setOffset(offset - PAGE)}

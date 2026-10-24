@@ -71,6 +71,7 @@ function Setup({ onStart }: { onStart: (scenario: ScenarioId, cash: number) => v
           })}
         </div>
         <p className="m-0 px-1 text-[13px] leading-relaxed text-muted">{m.practice.survivors} <Term id="survivorship" /></p>
+        <p className="m-0 px-1 text-[13px] leading-relaxed text-muted">{m.practice.adjusted}</p>
       </section>
       <section aria-labelledby="amount" className="flex flex-col gap-3">
         <h2 id="amount" className="m-0 px-1 text-base font-semibold">{sip ? m.practice.monthlyAmount : m.practice.startingMoney}</h2>
@@ -186,19 +187,23 @@ function Playing({ market, practice }: { market: Market; practice: PracticeState
             startLabel={when(game.start)} endLabel={when(game.end)} youLabel={m.practice.legendYou} fundLabel={m.practice.legendFund}
             label={m.practice.chartAria(money(now.value), money(fundNow.value))} />} />
       )}
-      {fresh && !practice.finished && (
-        <Card className="flex flex-wrap items-center justify-between gap-3 border-link p-4">
+      {/* One guide strip that changes its words but never its height, so nothing below it moves
+          (the Play button jumping away under a click was a real report). */}
+      {!practice.finished && (
+        <Card className={`flex min-h-30 flex-wrap items-center justify-between gap-3 p-4 sm:min-h-19 ${fresh || waiting ? 'border-link' : ''}`}>
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-[15px] font-semibold text-ink">{m.practice.firstStep.title}</span>
-            <span className="text-[13px] text-ink-2">{m.practice.firstStep.body}</span>
+            <span className="text-[15px] font-semibold text-ink">{fresh ? m.practice.firstStep.title : waiting ? m.practice.playStep.title : m.practice.runningTip.title}</span>
+            <span className="text-[13px] text-ink-2">{fresh ? m.practice.firstStep.body : waiting ? m.practice.playStep.body : m.practice.runningTip.body}</span>
           </span>
-          <span className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => open(market.indexFund, 'buy')}
-              className="pulse-ring h-10 cursor-pointer rounded-full bg-brand px-4 text-sm font-semibold text-on-brand">
-              {m.practice.firstStep.button}
-            </button>
-            <span className="text-xs text-muted">{m.practice.firstStep.other}</span>
-          </span>
+          {fresh && (
+            <span className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={() => open(market.indexFund, 'buy')}
+                className="pulse-ring h-10 cursor-pointer rounded-full bg-brand px-4 text-sm font-semibold text-on-brand">
+                {m.practice.firstStep.button}
+              </button>
+              <span className="text-xs text-muted">{m.practice.firstStep.other}</span>
+            </span>
+          )}
         </Card>
       )}
       {practice.prompt && <PromptDialog prompt={practice.prompt} when={when(practice.prompt.day)} onChoose={practice.choose} />}
@@ -333,7 +338,7 @@ function MarketList({ market, day, holdings, onBuy, disabled, hint }: {
     <Card className="flex flex-col gap-2 p-3 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)]">
       <div className="flex items-center justify-between gap-2 px-1 pt-1">
         <h2 className="m-0 text-[15px] font-semibold">{m.practice.market}</h2>
-        <span className="text-xs text-muted">{m.practice.oneMonth}</span>
+        <span className="text-xs text-muted">{m.practice.adjustedTag} · {m.practice.oneMonth}</span>
       </div>
       <label className="relative block">
         <span className="sr-only">{m.practice.search}</span>

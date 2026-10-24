@@ -68,6 +68,7 @@ npm run dev            # http://localhost:5173, with the API running on :8000
 npm run dev:fixtures   # no API needed: recorded responses from src/fixtures/
 npm test
 npm run gen:api        # regenerate src/api/schema.ts after changing the API's response models
+npm run build          # also saves public/sim-prices.json from the API first (prebuild; set SIM_PRICES_URL to change the source)
 ```
 
 TypeScript types are generated from the API's OpenAPI schema, so the frontend and backend can't drift apart. Fixtures are development-only and never included in production builds.
@@ -93,6 +94,8 @@ Each scheduled job finishes by pinging [healthchecks.io](https://healthchecks.io
 4. Run each workflow once from the Actions tab ("Run workflow") and check that its check turns green.
 
 Until a secret is set, that workflow simply skips its ping. Market holidays will show as a late daily run, which is expected.
+
+**Fresh prices for the time machine (optional).** In Vercel: Project → Settings → Git → Deploy Hooks, create a hook for `main`, and store its URL as the `VERCEL_DEPLOY_HOOK_URL` repository secret. The daily job then rebuilds the site after each run, so the static price file includes the latest close ([D-044](decisions.md)). Without it, the file refreshes on each deploy.
 
 ## Deployment
 

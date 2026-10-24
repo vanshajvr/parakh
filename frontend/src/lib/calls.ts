@@ -81,9 +81,12 @@ export function gapText(excess: number, m: Messages = en): string {
   return excess >= 0 ? m.openCalls.ahead(size) : m.openCalls.behind(size)
 }
 
+/**
+ * No verdict until a call is scored: a day or two of a 5-day call is noise, and calling it
+ * "on track" or "off track" invites reading it as a result.
+ */
 export function statusText(call: OpenCall, m: Messages = en): string {
-  if (call.on_track == null) return m.openCalls.startsNext
-  return call.on_track ? m.openCalls.onTrack : m.openCalls.offTrack
+  return call.on_track == null ? m.openCalls.startsNext : m.openCalls.notYet
 }
 
 type NoCall = NonNullable<Signal['no_call']>
