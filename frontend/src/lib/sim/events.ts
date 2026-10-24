@@ -45,15 +45,19 @@ export function portfolioEvent(days: Day[], quietSince: number | null): Portfoli
   return change <= DRAWDOWN ? { day: today.day, kind: 'drawdown', change } : null
 }
 
-/** The first day after `after` on which your portfolio is 15% below its peak, if it's outside the quiet spell. */
-export function firstDrawdown(days: Day[], after: number, quietSince: number | null): PortfolioEvent | null {
+/**
+ * The first day after `after` on which your portfolio is 15% below its peak, outside the quiet
+ * spell. Once per fall: after a drawdown prompt, it only fires again once a new peak has been set.
+ */
+export function firstDrawdown(days: Day[], after: number, quietSince: number | null, lastDrawdown: number | null = null): PortfolioEvent | null {
   const g = growth(days)
-  let peak = -Infinity
+  let peak = -Infinity, peakDay = -Infinity
   for (let i = 0; i < days.length; i++) {
-    peak = Math.max(peak, g[i])
+    if (g[i] > peak) [peak, peakDay] = [g[i], days[i].day]
     const change = g[i] / peak - 1
     const quiet = quietSince != null && days[i].day - quietSince < COOLDOWN
-    if (days[i].day > after && change <= DRAWDOWN && !quiet) return { day: days[i].day, kind: 'drawdown', change }
+    const sameFall = lastDrawdown != null && peakDay <= lastDrawdown
+    if (days[i].day > after && change <= DRAWDOWN && !quiet && !sameFall) return { day: days[i].day, kind: 'drawdown', change }
   }
   return null
 }

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useI18n } from '../../i18n'
 import { money, signedPct } from '../../lib/format'
 import type { Market, Result } from '../../lib/sim/engine'
@@ -19,10 +20,12 @@ type Props = {
   onReplay: () => void
   onNew: () => void
   onMystery: () => void
+  /** You against the index fund over the whole period. */
+  chart: ReactNode
 }
 
 /** The end of a game (decision D-040): you against the index fund, then what your choices tell you. */
-export function ReportCard({ market, result, fund, prompts, when, revealed, isMystery, onReplay, onNew, onMystery }: Props) {
+export function ReportCard({ market, result, fund, prompts, when, revealed, isMystery, onReplay, onNew, onMystery, chart }: Props) {
   const { m } = useI18n()
   const r = m.report
   const report = buildReport(market, result, fund, prompts)
@@ -66,6 +69,7 @@ export function ReportCard({ market, result, fund, prompts, when, revealed, isMy
         ))}
       </div>
       <p className="m-0 text-base font-medium text-ink">{Math.abs(gap) < 1 ? r.level : gap > 0 ? r.beat(money(gap)) : r.behind(money(-gap))}</p>
+      <div className="rounded-xl border border-line p-3.5 lg:p-4">{chart}</div>
 
       <table className="w-full max-w-xl border-collapse text-sm">
         <thead>

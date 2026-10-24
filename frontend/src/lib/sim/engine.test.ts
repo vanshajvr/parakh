@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import fixture from '../../fixtures/sim-market.json'
 import { charges } from './charges'
 import { indexFundGame, simulate, toMarket, type Game, type Market, type SimMarket } from './engine'
-import { marketEvents, COOLDOWN } from './events'
+import { firstDrawdown, marketEvents, COOLDOWN } from './events'
 import { salesInFalls, summarise } from './results'
 import { dayOnOrAfter, newGame } from './scenarios'
 
@@ -92,6 +92,15 @@ describe('on real prices', () => {
     const events = marketEvents(market, g.start, g.end)
     expect(events.find((e) => e.kind === 'fall')?.day).toBeGreaterThanOrEqual(dayOnOrAfter(market, '2020-03-01'))
     events.slice(1).forEach((e, i) => expect(e.day - events[i].day).toBeGreaterThanOrEqual(COOLDOWN))
+  })
+
+  it('asks about your own fall once per fall, not again until a new high', () => {
+    const g = newGame(market, 'crash', 100_000)
+    const days = simulate(market, indexFundGame(market, g)).days
+    const first = firstDrawdown(days, g.start, null)!
+    expect(first.change).toBeLessThanOrEqual(-0.15)
+    // Well past the quiet month, still in the same 2020 fall: no second prompt.
+    expect(firstDrawdown(days, first.day + COOLDOWN, first.day, first.day)).toBeNull()
   })
 
   it('notices a sale in the fall, and what the fund did next', () => {
