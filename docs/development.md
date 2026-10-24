@@ -11,6 +11,7 @@
 | `frontend/` | React + TypeScript + Vite + Tailwind PWA |
 | `tests/` | Python tests (frontend tests live next to the code in `frontend/src`) |
 | `docs/` | PRD, decision log, model card, this guide |
+| `analysis/` | SQL analysis of the track record, run against the production database (read-only) |
 | `research/` | The original screening-assignment notebook and its known issues |
 
 ## Python (ML, jobs, API)
@@ -23,6 +24,8 @@ pip install -e ".[ml,dev]"        # the API alone needs only `pip install .`
 pytest
 python -m jobs.retrain --refresh  # download data, evaluate, train, write docs/model-card.md, print today's calls
 ```
+
+The SQL notebook needs `pip install -e ".[analysis]"` and a `DATABASE_URL` in `.env`. Open `analysis/track_record_sql.ipynb` and run all cells. Its connection is read-only.
 
 ### Live ledger (Neon Postgres)
 
