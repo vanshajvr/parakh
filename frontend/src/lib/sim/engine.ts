@@ -35,9 +35,8 @@ export function toMarket(m: SimMarket): Market {
 }
 
 /** Placed after the close of `day`; fills at the open of `day + 1`. Buy by rupee amount, sell by shares. */
-export type Order =
-  | { day: number; symbol: string; side: 'buy'; amount: number }
-  | { day: number; symbol: string; side: 'sell'; qty: number }
+export type NewOrder = { symbol: string; side: 'buy'; amount: number } | { symbol: string; side: 'sell'; qty: number }
+export type Order = NewOrder & { day: number }
 
 export type Game = {
   /** Day indices into the market's dates, inclusive. */
@@ -81,9 +80,9 @@ export function lastClose(market: Market, symbol: string, day: number): number |
   return null
 }
 
-/** First trading day of each calendar month after the start day, within the game. */
+/** The start day, then the first trading day of each calendar month, within the game. */
 export function sipDays(market: Market, game: Game): number[] {
-  const days = []
+  const days = [game.start]
   for (let d = game.start + 1; d <= game.end; d++) {
     if (market.dates[d].slice(0, 7) !== market.dates[d - 1].slice(0, 7)) days.push(d)
   }
@@ -160,5 +159,5 @@ export function simulate(market: Market, game: Game, upTo = game.end): Result {
  * alone. Charges included.
  */
 export function indexFundGame(market: Market, game: Game): Game {
-  return { ...game, orders: [{ day: game.start, symbol: market.indexFund, side: 'buy', amount: game.cash }] }
+  return { ...game, orders: game.cash > 0 ? [{ day: game.start, symbol: market.indexFund, side: 'buy', amount: game.cash }] : [] }
 }

@@ -15,6 +15,12 @@ export function signedPct(x: number | null | undefined, digits = 2): string {
 }
 
 const rupees = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
+const wholeRupees = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
+
+/** 112903.38 -> "₹1,12,903": whole rupees, Indian grouping. */
+export function money(x: number): string {
+  return wholeRupees.format(Math.round(x))
+}
 
 /** 4424.2 -> "₹4,424.20" */
 export function price(x: number | null | undefined): string {

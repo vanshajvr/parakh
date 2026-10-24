@@ -52,6 +52,6 @@ export function newGame(market: Market, id: ScenarioId, cash: number, seed = Dat
     start = start + Math.floor(rand() * Math.max(1, end - start - length))
     end = Math.min(end, start + length)
   }
-  // The SIP scenario starts with one month's instalment, then adds the same every month.
-  return { start, end, cash, orders: [], ...(s.sip ? { sip: { amount: cash } } : {}) }
+  // In the SIP scenario the amount is the monthly instalment, invested from the first day.
+  return s.sip ? { start, end, cash: 0, orders: [], sip: { amount: cash } } : { start, end, cash, orders: [] }
 }

@@ -28,3 +28,8 @@ export const Calendar = (p: IconProps) => <Icon {...p}><rect x="4" y="5" width="
 export const Chart = (p: IconProps) => <Icon {...p}><path d="M4 19l5-6 4 3 7-9" /></Icon>
 export const ReceiptIcon = (p: IconProps) => <Icon {...p}><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z" /><path d="M9 8h6M9 12h6" /></Icon>
 export const Book = (p: IconProps) => <Icon {...p}><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z" /><path d="M4 21V5" /></Icon>
+export const Play = (p: IconProps) => <Icon {...p}><path d="M7 4.5v15l12-7.5z" /></Icon>
+export const Pause = (p: IconProps) => <Icon {...p}><path d="M8 5v14M16 5v14" /></Icon>
+/** A clock with an arrow turning back: the time machine. */
+export const Rewind = (p: IconProps) => <Icon {...p}><path d="M3 12a9 9 0 103-6.7M3 4v4h4" /><path d="M12 7.5V12l3 2" /></Icon>
+export const Search = (p: IconProps) => <Icon {...p}><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></Icon>
