@@ -88,6 +88,8 @@ On the phone, every screen shows a short summary first and reveals detail on tap
    - The game pauses on big market moves and asks what you'll do.
    - A report card compares you with just holding the index fund, with short lessons tied to what you did.
 
+**News** (D-037): Today shows headlines under the stocks that moved most, and each stock page lists its own, in English or Hindi. Tips are filtered out, and every list reminds the reader that news is usually priced in.
+
 The Today screen also explains each **no call**: how far the stock moved against the others last week, and where that day's calls began (D-035).
 
 ### Out of scope (MVP)
@@ -144,8 +146,10 @@ See [model-card.md](model-card.md) for current numbers.
 | 6 | Modelling pass: pre-registered evaluation, calibration fix, reversal rule vs ML (D-022 to D-024) |
 | 7–14 | Live tracking, charts, market movers, adaptive landing, SQL analysis, one label for every call (D-025 to D-032) |
 | 15 | English and Hindi, glossary, no-call reasons (D-033 to D-035) |
-| 16 | Practice: the time machine |
-| 17 | User test with 5–10 beginners, fixes and write-up |
+| 16 | Motion and daily suggestions (D-036) |
+| 17 | News as context for moves (D-037) |
+| 18 | Practice: the time machine |
+| 19 | User test with 5–10 beginners, fixes and write-up |
 | Later | Ideas above; taxes in the simulator |
 
 ## 10. Disclaimer

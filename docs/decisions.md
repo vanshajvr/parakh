@@ -4,6 +4,20 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-037 · News as context for a move, never as a tip
+**Date:** 2026-10-24
+**Decision:**
+- Headlines for all 50 NIFTY stocks come from Google News RSS searches, every 3 hours (`jobs/news.py`, its own workflow so it can never delay the day's calls). Hindi mode shows headlines from the Hindi edition.
+- Only the headline, source, time and link are stored; the article opens on the publisher's site. No article text and no AI summaries.
+- A headline counts for a stock only if its title names the company (hand-written English and Devanagari names, with look-alikes excluded: Severn Trent, Titan Biotech, Reliance Power) and is about the business (results, deals, shares, ₹ crore, नतीजे, मुनाफा).
+- Tips are dropped: "stocks to buy", "target price", "upside", price predictions, chart-pattern signals, "BUY रेटिंग", and sources that publish signals rather than reporting.
+- Today groups headlines under the stocks that moved most ("why did they move?"); each stock page lists its own. Every list ends with "by the time news reaches you, the price has usually already moved", linked to *priced in* in the glossary.
+- No scrolling ticker; a calm list, newest first.
+**Why:** "Why did this stock move?" is the first question a beginner asks, and headlines answer it. But a news feed can quietly teach trading on headlines, the habit Parakh exists to counter (D-001, D-033), so it shows news as context and filters out the tips that news sites mix in.
+**Alternatives:** Publisher RSS feeds (not per company); NSE/BSE announcements (official, but block automated access); paid news APIs (free tiers are development-only); AI summaries of articles (copyright grey area, and summaries can get facts wrong).
+
+---
+
 ### D-036 · Calm motion that makes the site feel alive, not live
 **Date:** 2026-10-24
 **Decision:**

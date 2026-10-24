@@ -91,3 +91,17 @@ CREATE TABLE IF NOT EXISTS job_runs (
     status       TEXT NOT NULL,
     detail       TEXT
 );
+
+-- Recent headlines per stock, in English and Hindi (decision D-037). Not part of the ledger:
+-- rows are refreshed and pruned, and only the headline, source, time and link are stored.
+CREATE TABLE IF NOT EXISTS news (
+    ticker        TEXT NOT NULL,
+    lang          TEXT NOT NULL CHECK (lang IN ('en', 'hi')),
+    url           TEXT NOT NULL,
+    title         TEXT NOT NULL,
+    source        TEXT NOT NULL,
+    published_at  TIMESTAMPTZ NOT NULL,
+    fetched_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (ticker, lang, url)
+);
+CREATE INDEX IF NOT EXISTS news_recent ON news (lang, published_at DESC);

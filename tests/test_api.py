@@ -81,6 +81,15 @@ class FakeRepository:
         return pd.DataFrame([{"ticker": t, "date": d, "close": c}
                              for t, cs in closes.items() for d, c in zip(days, cs)])
 
+    def news(self, lang, ticker, limit):
+        rows = [
+            {"ticker": "TCS.NS", "lang": "en", "title": "TCS declares dividend", "source": "Mint",
+             "url": "https://news.example/tcs", "published_at": PUBLISHED},
+            {"ticker": "INFY.NS", "lang": "hi", "title": "इंफोसिस का मुनाफा बढ़ा", "source": "Hindustan",
+             "url": "https://news.example/infy", "published_at": PUBLISHED},
+        ]
+        return [r for r in rows if r["lang"] == lang and ticker in (None, r["ticker"])][:limit]
+
     def latest_calls(self):
         if not self.calls:
             return []
@@ -293,3 +302,12 @@ def test_no_call_detail_is_empty_without_a_single_rule_input():
     # A side with no calls has no line to show; a multi-factor model has no single line at all.
     assert no_call_details([rule_row("ITC.NS", "no_call", 0.01)])["ITC.NS"].calls_from is None
     assert no_call_details(CALLS) == {}
+
+
+def test_news_is_filtered_by_language_and_stock(client):
+    en = client.get("/api/news").json()
+    assert [(n["symbol"], n["name"], n["source"]) for n in en] == [("TCS", "Tata Consultancy Services", "Mint")]
+    assert client.get("/api/news?lang=hi").json()[0]["title"] == "इंफोसिस का मुनाफा बढ़ा"
+    assert client.get("/api/news?symbol=INFY").json() == []
+    assert client.get("/api/news?symbol=NOPE").status_code == 404
+    assert client.get("/api/news?lang=fr").status_code == 422

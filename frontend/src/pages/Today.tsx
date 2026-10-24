@@ -7,6 +7,7 @@ import { Disclosure } from '../components/Disclosure'
 import { Info, Minus, Warning } from '../components/Icons'
 import { IndexCard, RecentTesting } from '../components/Market'
 import { Movers } from '../components/Movers'
+import { InTheNews } from '../components/News'
 import { NextCalls } from '../components/NextCalls'
 import { OpenCalls } from '../components/OpenCalls'
 import { Loading, LoadError } from '../components/States'
@@ -107,6 +108,7 @@ export function TodayView({ data }: { data: TodayData }) {
         </div>
         <aside className="flex min-w-0 flex-col gap-4">
           {hasCalls && <Suggestions data={data} />}
+          <InTheNews />
           <LiveRecord data={data} />
           <HowToRead />
         </aside>

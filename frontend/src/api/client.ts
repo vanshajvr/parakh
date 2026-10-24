@@ -13,6 +13,7 @@ export type TrackRecord = Schemas['TrackRecord']
 export type ModelInfo = Schemas['ModelInfo']
 export type PricePoint = Schemas['PricePoint']
 export type Screener = Schemas['ScreenerResponse']
+export type NewsItem = Schemas['NewsItem']
 
 const API_URL = import.meta.env.VITE_API_URL ?? ''
 
@@ -84,4 +85,10 @@ export function useLedger(params: { ticker?: string; limit: number; offset: numb
     queryFn: () => getJson<LedgerPage>(`/api/ledger?${query}`),
     placeholderData: keepPreviousData,
   })
+}
+
+/** Headlines from the past 3 days, in the reader's language; for one stock, or across the NIFTY 50. */
+export function useNews(lang: string, symbol?: string) {
+  const params = new URLSearchParams({ lang, ...(symbol ? { symbol } : {}) })
+  return useQuery({ queryKey: ['news', lang, symbol], queryFn: () => getJson<NewsItem[]>(`/api/news?${params}`) })
 }

@@ -5,9 +5,12 @@ import { MemoryRouter } from 'react-router'
 import { vi } from 'vitest'
 import nifty from '../fixtures/history-nifty50.json'
 import titan from '../fixtures/history-titan.json'
+import news from '../fixtures/news.json'
 import screener from '../fixtures/screener.json'
 
-const RESPONSES: Record<string, unknown> = { '/api/history/NIFTY50': nifty, '/api/history/TITAN': titan, '/api/screener': screener }
+const RESPONSES: Record<string, unknown> = {
+  '/api/history/NIFTY50': nifty, '/api/history/TITAN': titan, '/api/screener': screener, '/api/news?lang=en': news,
+}
 
 /** Render a page with a router and a fresh query client; API responses come from the fixtures. */
 export function renderPage(ui: ReactNode, path = '/') {

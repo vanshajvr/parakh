@@ -164,6 +164,15 @@ class Repository:
             ORDER BY date DESC, abs(p_outperform - 0.5) DESC
         """, (days,))
 
+    def news(self, lang: str, ticker: str | None, limit: int) -> list[dict]:
+        """Headlines from the past 3 days, newest first, for one stock or all of them."""
+        return self._all("""
+            SELECT ticker, title, source, url, published_at FROM news
+            WHERE lang = %(lang)s AND published_at > now() - interval '3 days'
+              AND (%(ticker)s::text IS NULL OR ticker = %(ticker)s)
+            ORDER BY published_at DESC LIMIT %(limit)s
+        """, {"lang": lang, "ticker": ticker, "limit": limit})
+
     def backtest_by_ticker(self) -> list[dict]:
         """Simulated hit rate per stock, over bullish/bearish calls only.
 

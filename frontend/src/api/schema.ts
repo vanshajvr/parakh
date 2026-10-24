@@ -178,6 +178,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/news": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * News
+         * @description Headlines from the past 3 days, newest first: for one stock, or across the NIFTY 50.
+         */
+        get: operations["news_api_news_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/model": {
         parameters: {
             query?: never;
@@ -376,6 +396,27 @@ export interface components {
             metrics: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * NewsItem
+         * @description One headline: only what's needed to link to it (decision D-037).
+         */
+        NewsItem: {
+            /** Symbol */
+            symbol: string;
+            /** Name */
+            name: string;
+            /** Title */
+            title: string;
+            /** Source */
+            source: string;
+            /** Url */
+            url: string;
+            /**
+             * Published At
+             * Format: date-time
+             */
+            published_at: string;
         };
         /**
          * NextWeek
@@ -1014,6 +1055,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PricePoint"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    news_api_news_get: {
+        parameters: {
+            query?: {
+                lang?: "en" | "hi";
+                symbol?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewsItem"][];
                 };
             };
             /** @description Validation Error */

@@ -5,6 +5,7 @@ import { Disclosure } from '../components/Disclosure'
 import { FactorBars } from '../components/FactorBars'
 import { ChevronLeft, Info, Warning } from '../components/Icons'
 import { LeanPill } from '../components/LeanPill'
+import { StockNews } from '../components/News'
 import { ChartKey } from '../components/ChartKey'
 import { LazyCandleChart as CandleChart } from '../components/LazyCandleChart'
 import { Card, Loading, LoadError, NotFoundState } from '../components/States'
@@ -94,6 +95,7 @@ export function StockView({ data }: { data: StockDetail }) {
         )}
       </div>
 
+      <StockNews symbol={stock.symbol} />
       {stock.covered !== false && <StockRecord data={data} />}
     </div>
   )
