@@ -18,6 +18,7 @@ import { closeness } from '../lib/calls'
 import { closeLabel, count, pct } from '../lib/format'
 import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { TodayWorkspace } from './TodayWorkspace'
 
 type Filter = 'calls' | 'bullish' | 'bearish'
 
@@ -55,6 +56,9 @@ export function TodayView({ data }: { data: TodayData }) {
       {noCall.length > 0 && <NoCall stocks={noCall} />}
     </section>
   ) : <FirstCalls />
+
+  // Laptops get the workspace once there are calls to explore; phones keep this scrolling feed (D-038).
+  if (isDesktop && hasCalls) return <TodayWorkspace data={data} />
 
   return (
     <div className="stagger flex flex-col gap-4 lg:gap-6">
@@ -117,7 +121,7 @@ export function TodayView({ data }: { data: TodayData }) {
   )
 }
 
-function FilterChips({ calls, filter, onChange }: { calls: Signal[]; filter: Filter; onChange: (f: Filter) => void }) {
+export function FilterChips({ calls, filter, onChange }: { calls: Signal[]; filter: Filter; onChange: (f: Filter) => void }) {
   const { m } = useI18n()
   const options: { value: Filter; label: string; n: number }[] = [
     { value: 'calls', label: m.today.filters.calls, n: calls.length },
@@ -147,7 +151,7 @@ function FilterChips({ calls, filter, onChange }: { calls: Signal[]; filter: Fil
  * The stocks without a call. Under the reversal rule each one says how far it moved against the
  * others and where that day's calls began, so "no call" reads as a reason, not a gap (decision D-035).
  */
-function NoCall({ stocks }: { stocks: Signal[] }) {
+export function NoCall({ stocks }: { stocks: Signal[] }) {
   const { m } = useI18n()
   const explained = stocks.every((s) => s.no_call)
   const sorted = explained ? [...stocks].sort((a, b) => (closeness(b.no_call!) ?? 0) - (closeness(a.no_call!) ?? 0)) : stocks
@@ -207,7 +211,7 @@ function NoCallRow({ signal }: { signal: Signal }) {
   )
 }
 
-function HowToRead() {
+export function HowToRead() {
   const { m } = useI18n()
   return (
     <section className="overflow-hidden rounded-2xl border border-line bg-surface">
@@ -226,7 +230,7 @@ function HowToRead() {
   )
 }
 
-function LiveRecord({ data }: { data: TodayData }) {
+export function LiveRecord({ data }: { data: TodayData }) {
   const { m } = useI18n()
   const t = m.today.liveRecord
   const { live_days, live_published, live_scored, live, simulated } = data.scoreboard
@@ -236,7 +240,7 @@ function LiveRecord({ data }: { data: TodayData }) {
         buttonClassName="min-h-13 px-3.5 py-3"
         summary={
           <span className="flex items-center gap-2.5 text-sm text-ink">
-            <span className="rounded-full bg-brand px-2.5 py-0.5 text-xs font-semibold text-on-brand">
+            <span className="shrink-0 rounded-full bg-brand px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-on-brand">
               {live_days > 0 ? m.today.tiles.day(live_days) : m.today.tiles.starting}
             </span>
             <span>
@@ -279,7 +283,7 @@ function FirstCalls() {
 }
 
 /** The four numbers that say where Parakh stands, each linking to its detail. */
-function KeyNumbers({ data }: { data: TodayData }) {
+export function KeyNumbers({ data }: { data: TodayData }) {
   const { m } = useI18n()
   const t = m.today.tiles
   const { live_days, live_published, live_scored, live, simulated } = data.scoreboard

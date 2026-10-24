@@ -4,6 +4,18 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-038 · A workspace for Today on laptops
+**Date:** 2026-10-24
+**Decision:**
+- On laptops, Today is a master–detail workspace: the 20 stocks in a sticky list on the left (calls first, then the no-calls ordered by how close they came, with their bars), the selected stock's chart, reasons, progress and news in the middle, and a rail with what to look at next, market movers, the live record and how to read a call. Calls in progress sit under the detail as a compact table.
+- The selected stock is kept in the URL (`/?stock=TCS`), so a link opens on it.
+- The page widens from about 1,150px to 1,600px. How it works gets a sticky "On this page" list beside its reading column, and Market movers drops its sparklines when the card is narrow.
+- Phones keep the scrolling feed (D-031) unchanged.
+**Why:** The phone layout stretched to a laptop made one long column, nearly 3,000px tall, with empty margins. Three working mockups (a three-column dashboard, horizontal bands with tabs, and this workspace) were compared on real data; the workspace was the most horizontal, about a third shorter, and gives the no-calls room to be explored rather than collapsed.
+**Alternatives:** A three-column dashboard (busiest, cramped left column); horizontal bands with tabs (calm, but an overview with news a tab away).
+
+---
+
 ### D-037 · News as context for a move, never as a tip
 **Date:** 2026-10-24
 **Decision:**

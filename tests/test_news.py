@@ -48,6 +48,7 @@ def test_names_need_the_company_not_a_lookalike():
 def test_tips_are_recognised_in_both_languages():
     assert TIPS.search("5 stocks to buy this Diwali")
     assert TIPS.search("ब्रोकरेज ने दी BUY रेटिंग")
+    assert TIPS.search("STOCK OF THE DAY Buy TCS Futures: SL 2475 Tgt 2535 #StockMarket")
     assert not TIPS.search("TCS declares dividend")
 
 

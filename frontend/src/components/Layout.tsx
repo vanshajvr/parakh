@@ -33,7 +33,7 @@ export function Layout() {
         {m.layout.skip}
       </a>
       <header className="sticky top-0 z-10 border-b border-line bg-surface">
-        <div className="mx-auto flex min-h-14 max-w-6xl items-center gap-8 px-5 lg:min-h-16 lg:px-8">
+        <div className="mx-auto flex min-h-14 max-w-[1600px] items-center gap-8 px-5 lg:min-h-16 lg:px-10">
           <NavLink to="/" aria-label={m.layout.home} className="no-underline">
             <Logo />
           </NavLink>
@@ -73,7 +73,7 @@ export function Layout() {
         </p>
       )}
 
-      <main id="main" className="mx-auto max-w-6xl px-4 pt-5 pb-28 lg:px-8 lg:pt-8 lg:pb-12">
+      <main id="main" className="mx-auto max-w-[1600px] px-4 pt-5 pb-28 lg:px-10 lg:pt-8 lg:pb-12">
         {lang !== 'en' && !TRANSLATED.has(pathname) && (
           <p role="note" className="m-0 mb-4 rounded-xl bg-chip px-4 py-2.5 text-[13px] text-ink-2">{m.layout.englishOnly}</p>
         )}

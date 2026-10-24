@@ -34,7 +34,8 @@ USER_AGENT = "Mozilla/5.0 (compatible; Parakh news; +https://parakh-bi78.vercel.
 TIPS = re.compile(
     r"\b(stocks? to (buy|sell|watch)|buy or sell|should you buy|multibaggers?|stock picks?|top picks|"
     r"target price|price target|buy rating|sell rating|picks to watch|price prediction|share price forecast|"
-    r"upside|death cross|golden cross|bearish trend|bullish trend|breakout)\b"
+    r"upside|death cross|golden cross|bearish trend|bullish trend|breakout|stock of the day|futures|options|"
+    r"tgt|SL|stop ?loss|intraday)\b|#\w+"
     r"|\b(BUY|SELL) रेटिंग|तेजी का अनुमान|खरीदें|बेचें|मल्टीबैगर|टारगेट|कमाई का मौका|दांव|खरीदारी की सलाह|Stocks to Buy"
     # Live quote and chart pages, which are listings rather than news.
     r"|Share Price Today|Live NSE|Stock Price (&|and) Chart|Price Today (&|and) Chart",
@@ -43,7 +44,7 @@ TIPS = re.compile(
 # Machine-written pages, estimate listings and signal services, not reporting.
 BLOCKED_SOURCES = {
     "AD HOC NEWS", "ad-hoc-news.de", "TradingView", "TechGraph", "MarketScreener", "MarketsMojo",
-    "Kalkine India", "Kalkine Media", "Univest",
+    "Kalkine India", "Kalkine Media", "Univest", "Facebook", "Instagram", "X", "YouTube", "Telegram",
 }
 # A headline must be about the business (results, deals, shares), not just mention the company:
 # "IndiGo flight delayed" or a factory canteen dispute isn't market news.
