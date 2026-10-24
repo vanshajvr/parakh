@@ -28,4 +28,8 @@ jobs:
           done
       - name: Report to healthchecks.io
         if: always() && env.HEALTHCHECK_URL != ''
-        run: curl -fsS -m 10 --retry 3 "$HEALTHCHECK_URL${{ job.status == 'success' && '' || '/fail' }}"
+        # Trim the URL (a pasted secret can carry a newline), and add /fail only when the job failed.
+        run: |
+          url=$(printf %s "$HEALTHCHECK_URL" | tr -d '[:space:]')
+          suffix=""; [ "${{ job.status }}" = "success" ] || suffix="/fail"
+          curl -fsS -m 10 --retry 3 "$url$suffix"
