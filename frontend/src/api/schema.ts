@@ -395,6 +395,16 @@ export interface components {
             losers_beat: number;
         };
         /**
+         * NoCallDetail
+         * @description Why the reversal rule made no call: the stock's move against the others, and where calls began.
+         */
+        NoCallDetail: {
+            /** Move */
+            move: number;
+            /** Calls From */
+            calls_from: number | null;
+        };
+        /**
          * OpenCall
          * @description A published call still inside its 5 sessions. Provisional: only the final close scores it.
          */
@@ -644,6 +654,7 @@ export interface components {
             close: number | null;
             /** Change 1D */
             change_1d: number | null;
+            no_call?: components["schemas"]["NoCallDetail"] | null;
         };
         /** SimulatedCall */
         SimulatedCall: {

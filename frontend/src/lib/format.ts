@@ -1,3 +1,5 @@
+import { en, type Messages } from '../i18n/en'
+
 const MINUS = '−'
 
 /** 0.5135 -> "51.4%" */
@@ -24,25 +26,25 @@ export function count(n: number): string {
 }
 
 /** "2026-10-19" -> "Monday's close, 19 Oct" (dates are trading days, so no time zone shift). */
-export function closeLabel(isoDate: string): string {
+export function closeLabel(isoDate: string, m: Messages = en): string {
   const d = new Date(`${isoDate}T12:00:00Z`)
-  const weekday = d.toLocaleDateString('en-IN', { weekday: 'long', timeZone: 'UTC' })
-  const day = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' })
-  return `${weekday}'s close, ${day}`
+  const weekday = d.toLocaleDateString(m.locale, { weekday: 'long', timeZone: 'UTC' })
+  const day = d.toLocaleDateString(m.locale, { day: 'numeric', month: 'short', timeZone: 'UTC' })
+  return m.format.closeLabel(weekday, day)
 }
 
 /** "2026-10-19" -> "19 Oct 2026" */
-export function shortDate(isoDate: string): string {
-  return new Date(`${isoDate}T12:00:00Z`).toLocaleDateString('en-IN', {
+export function shortDate(isoDate: string, locale = 'en-IN'): string {
+  return new Date(`${isoDate}T12:00:00Z`).toLocaleDateString(locale, {
     day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
   })
 }
 
 /** "2026-10-19" -> "Mon 19 Oct" */
-export function dayLabel(isoDate: string): string {
+export function dayLabel(isoDate: string, locale = 'en-IN'): string {
   const d = new Date(`${isoDate}T12:00:00Z`)
-  const weekday = d.toLocaleDateString('en-IN', { weekday: 'short', timeZone: 'UTC' })
-  return `${weekday} ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' })}`
+  const weekday = d.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' })
+  return `${weekday} ${d.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' })}`
 }
 
 export function capitalize(s: string): string {

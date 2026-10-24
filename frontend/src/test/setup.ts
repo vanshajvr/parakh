@@ -31,3 +31,14 @@ vi.mock('lightweight-charts', () => {
     })),
   }
 })
+
+// Node's own experimental localStorage can shadow jsdom's with a non-working one; use a plain in-memory store.
+const store = new Map<string, string>()
+vi.stubGlobal('localStorage', {
+  getItem: (k: string) => store.get(k) ?? null,
+  setItem: (k: string, v: string) => void store.set(k, String(v)),
+  removeItem: (k: string) => void store.delete(k),
+  clear: () => store.clear(),
+  key: (i: number) => [...store.keys()][i] ?? null,
+  get length() { return store.size },
+})

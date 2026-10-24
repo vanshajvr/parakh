@@ -1,4 +1,5 @@
 import type { Screener } from '../api/client'
+import { en, type Messages } from '../i18n/en'
 import { pct, signedPct } from './format'
 
 export type Row = Screener['stocks'][number]
@@ -17,13 +18,13 @@ export type View = {
   descending: boolean
   /** For the short movers lists only: e.g. a stock that fell isn't shown as a top gainer. The screener sorts everything. */
   include?: (r: Row, tf: Timeframe) => boolean
-  show: (r: Row, tf: Timeframe) => string
+  show: (r: Row, tf: Timeframe, m?: Messages) => string
   usesTimeframe?: boolean
   coveredOnly?: boolean
   note: string
 }
 
-export const crore = (rupees: number) => `₹${Math.round(rupees / 1e7).toLocaleString('en-IN')} cr`
+export const crore = (rupees: number, m: Messages = en) => m.movers.crore(Math.round(rupees / 1e7).toLocaleString('en-IN'))
 
 export const VIEWS: View[] = [
   { id: 'gainers', label: 'Gainers', metric: (r, tf) => CHANGE[tf](r), descending: true, usesTimeframe: true,
@@ -33,16 +34,16 @@ export const VIEWS: View[] = [
     include: (r, tf) => (CHANGE[tf](r) ?? 0) < 0,
     show: (r, tf) => signedPct(CHANGE[tf](r), 1), note: 'Biggest falls over the period.' },
   { id: 'active', label: 'Most active', metric: (r) => r.value_traded, descending: true,
-    show: (r) => crore(r.value_traded),
+    show: (r, _tf, m) => crore(r.value_traded, m),
     note: 'By value traded (shares × price) on the latest day. Share counts alone mislead: a cheaper stock trades more shares without being busier.' },
   { id: 'unusual', label: 'Unusual volume', metric: (r) => r.volume_ratio, descending: true,
-    show: (r) => (r.volume_ratio == null ? '—' : `${r.volume_ratio.toFixed(1)}× usual`),
+    show: (r, _tf, m = en) => (r.volume_ratio == null ? '—' : m.movers.usual(r.volume_ratio.toFixed(1))),
     note: "Shares traded on the latest day compared with the stock's own 20-day average. A big jump often means news." },
   { id: 'high', label: 'Near 52-week high', metric: (r) => r.pos_52w, descending: true,
-    show: (r) => (r.close == null ? '—' : r.close >= r.high_52w ? 'At its high' : `${pct(1 - r.close / r.high_52w)} below high`),
+    show: (r, _tf, m = en) => (r.close == null ? '—' : r.close >= r.high_52w ? m.movers.atHigh : m.movers.belowHigh(pct(1 - r.close / r.high_52w))),
     note: "Where each price sits in its range over the past year." },
   { id: 'low', label: 'Near 52-week low', metric: (r) => r.pos_52w, descending: false,
-    show: (r) => (r.close == null ? '—' : r.close <= r.low_52w ? 'At its low' : `${pct(r.close / r.low_52w - 1)} above low`),
+    show: (r, _tf, m = en) => (r.close == null ? '—' : r.close <= r.low_52w ? m.movers.atLow : m.movers.aboveLow(pct(r.close / r.low_52w - 1))),
     note: "Where each price sits in its range over the past year." },
   { id: 'rule', label: 'Vs the others', metric: (r) => r.vs_peers_5d, descending: false, coveredOnly: true,
     show: (r) => signedPct(r.vs_peers_5d, 1),

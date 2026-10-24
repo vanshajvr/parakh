@@ -3,6 +3,10 @@
 @import "@fontsource/ibm-plex-sans/500.css";
 @import "@fontsource/ibm-plex-sans/600.css";
 @import "@fontsource/ibm-plex-serif/600.css";
+/* Devanagari for Hindi (D-034). Its files only download when Devanagari text is on screen. */
+@import "@fontsource/ibm-plex-sans-devanagari/400.css";
+@import "@fontsource/ibm-plex-sans-devanagari/500.css";
+@import "@fontsource/ibm-plex-sans-devanagari/600.css";
 
 /* Design tokens (decision D-018). Bullish and bearish always come with an icon and a label,
    never colour alone. */
@@ -68,8 +72,8 @@
   --color-bear-mark: var(--bear-mark);
   --color-bear-tint: var(--bear-tint);
   --color-warn-ink: var(--warn-ink);
-  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
-  --font-serif: "IBM Plex Serif", Georgia, serif;
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Devanagari", system-ui, sans-serif;
+  --font-serif: "IBM Plex Serif", "IBM Plex Sans Devanagari", Georgia, serif;
 }
 
 /* In the base layer so utility classes (e.g. nav link colours) can override them. */

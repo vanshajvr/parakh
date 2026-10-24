@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
-from api.main import app
+from api.main import app, no_call_details
 
 TODAY = datetime.now(timezone.utc).date()
 DAY1, DAY2 = TODAY - timedelta(days=8), TODAY - timedelta(days=1)
@@ -273,3 +273,23 @@ def test_empty_ledger_is_a_valid_state(client):
 
 def test_responses_are_cacheable(client):
     assert client.get("/api/model").headers["cache-control"] == "public, max-age=300"
+
+
+def rule_row(ticker, lean, move):
+    return {"ticker": ticker, "lean": lean, "factors": [{"feature": "ret_5d_vs_peers", "value": move}]}
+
+
+def test_no_call_shows_where_calls_began_on_the_same_side():
+    rows = [rule_row("TCS.NS", "bearish", 0.091), rule_row("INFY.NS", "bearish", 0.054),
+            rule_row("NTPC.NS", "bullish", -0.038), rule_row("BHARTIARTL.NS", "no_call", 0.035),
+            rule_row("TATASTEEL.NS", "no_call", -0.035)]
+    details = no_call_details(rows)
+    assert set(details) == {"BHARTIARTL.NS", "TATASTEEL.NS"}
+    assert details["BHARTIARTL.NS"].calls_from == 0.054
+    assert details["TATASTEEL.NS"].calls_from == -0.038
+
+
+def test_no_call_detail_is_empty_without_a_single_rule_input():
+    # A side with no calls has no line to show; a multi-factor model has no single line at all.
+    assert no_call_details([rule_row("ITC.NS", "no_call", 0.01)])["ITC.NS"].calls_from is None
+    assert no_call_details(CALLS) == {}

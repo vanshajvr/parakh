@@ -1,4 +1,5 @@
 import type { StockDetail } from '../api/client'
+import { en, type Messages } from '../i18n/en'
 
 export type Range = '1M' | '3M' | '6M' | '1Y'
 export const RANGE_DAYS: Record<Range, number> = { '1M': 31, '3M': 92, '6M': 183, '1Y': 366 }
@@ -10,15 +11,9 @@ export type Candle = { date: string; open: number; high: number; low: number; cl
  * One day's candle in plain words. A candle's colour compares the close with that day's open, not
  * with the day before, which is a common beginner confusion, so both are spelled out.
  */
-export function candleReading(c: Candle, prevClose: number | null, fmt: (v: number) => string): string {
-  const body = c.close >= c.open
-    ? `closed above where it opened (${fmt(c.open)} → ${fmt(c.close)}), so the candle is green`
-    : `closed below where it opened (${fmt(c.open)} → ${fmt(c.close)}), so the candle is red`
-  const range = `It traded between ${fmt(c.low)} and ${fmt(c.high)} during the day`
-  if (prevClose == null) return `${range}, and ${body}.`
-  const change = (c.close / prevClose - 1) * 100
-  const vsYesterday = Math.abs(change) < 0.005 ? 'unchanged from' : `${change > 0 ? 'up' : 'down'} ${Math.abs(change).toFixed(1)}% from`
-  return `${range}, and ${body}. That close was ${vsYesterday} the day before.`
+export function candleReading(c: Candle, prevClose: number | null, fmt: (v: number) => string, m: Messages = en): string {
+  const change = prevClose == null ? null : (c.close / prevClose - 1) * 100
+  return m.chart.reading(fmt(c.low), fmt(c.high), fmt(c.open), fmt(c.close), c.close >= c.open, change)
 }
 export type Marker = { date: string; lean: 'bullish' | 'bearish'; hit: boolean | null; live: boolean }
 

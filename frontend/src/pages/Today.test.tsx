@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import type { Today } from '../api/client'
 import fixture from '../fixtures/today.json'
+import { I18nProvider } from '../i18n'
 import { renderPage } from '../test/render'
 import { TodayView } from './Today'
 
@@ -122,5 +123,33 @@ describe('Today', () => {
     renderToday({ ...data, as_of: null, signals: [] })
     expect(screen.getByText('Our first calls are on their way')).toBeInTheDocument()
     expect(screen.queryByRole('article')).not.toBeInTheDocument()
+  })
+
+  it('says how close each no-call stock came to a call, closest first', async () => {
+    const noCalls = data.signals.filter((s) => s.lean === 'no_call')
+    const moves = [0.035, -0.002, -0.031]
+    const signals = data.signals.map((s) => {
+      const i = noCalls.indexOf(s)
+      if (i < 0) return s
+      const move = moves[i] ?? 0.001
+      return { ...s, no_call: { move, calls_from: move > 0 ? 0.054 : i === 1 ? null : -0.038 } }
+    })
+    renderToday({ ...data, signals })
+    await userEvent.click(screen.getByRole('button', { name: /No call on 15 stocks/ }))
+    const rows = screen.getAllByRole('img', { name: /of the way to a call/ })
+    // -3.1% against a -3.8% line is closer than +3.5% against +5.4%.
+    expect(rows[0]).toHaveAccessibleName(`${noCalls[2].symbol} is 82% of the way to a call`)
+    expect(screen.getByText('3.5% ahead of the average')).toBeInTheDocument()
+    expect(screen.getAllByText('calls started at 5.4%').length).toBeGreaterThan(0)
+    expect(screen.getByText('no calls on this side today')).toBeInTheDocument()
+  })
+
+  it('reads in Hindi when the reader has chosen it', () => {
+    localStorage.setItem('parakh.lang', 'hi')
+    renderPage(<I18nProvider><TodayView data={data} /></I18nProvider>)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('आज की calls')
+    expect(screen.getByText('15 stocks पर कोई call नहीं')).toBeInTheDocument()
+    expect(within(screen.getAllByRole('article')[0]).getByText(/testing में 51.3% सही/)).toBeInTheDocument()
+    localStorage.clear()
   })
 })
