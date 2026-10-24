@@ -50,17 +50,22 @@ export function stockCaveat(r: Receipt, m: Messages = en): string {
   return r.stock_clearly_below ? m.call.caveatClear : m.call.caveatMaybe
 }
 
-/** Short receipt that stays visible on a collapsed card. */
+/** "2019–26": the years a stretch of testing covers. */
+const span = (from?: number | null, to?: number | null) => (from && to ? `${from}–${String(to).slice(-2)}` : null)
+
+/** Short receipt that stays visible on a collapsed card, with the years "in testing" covers. */
 export function receiptShort(signal: Signal, m: Messages = en): string | null {
   const r = signal.receipt
-  return r.band_hit_rate == null ? null : m.call.rightInTesting(pct(r.band_hit_rate))
+  return r.band_hit_rate == null ? null : m.call.rightInTesting(pct(r.band_hit_rate), span(r.tested_from, r.tested_to))
 }
 
 /** Full receipt shown when a card is expanded. */
 export function receiptLong(signal: Signal, m: Messages = en): string {
   const r = signal.receipt
   const parts: string[] = []
-  if (r.band_hit_rate != null) parts.push(m.call.receiptAll(pct(r.band_hit_rate), count(r.band_n_calls)))
+  if (r.band_hit_rate != null) parts.push(m.call.receiptAll(pct(r.band_hit_rate), count(r.band_n_calls), span(r.tested_from, r.tested_to)))
+  const holdout = span(r.holdout_from, r.holdout_to)
+  if (r.holdout_hit_rate != null && holdout) parts.push(m.call.receiptHoldout(pct(r.holdout_hit_rate), count(r.holdout_n_calls ?? 0), holdout))
   if (r.stock_hit_rate != null) {
     parts.push(m.call.receiptStock(signal.name, pct(r.stock_hit_rate), count(r.stock_n_calls), stockRange(r, m)))
   }

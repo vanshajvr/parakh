@@ -4,9 +4,9 @@
 
 **Practise investing with fake money, and see honestly what works.** A web app for beginner Indian investors. Replay real markets in a time machine, follow stock signals that show their track record, and judge everything against simply holding a NIFTY 50 index fund. In English and Hindi.
 
-**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Decision log](docs/decisions.md) (41 decisions) · [PRD](docs/PRD.md) · [Model card](docs/model-card.md) · [SQL analysis](analysis/track_record_sql.ipynb)
+**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Decision log](docs/decisions.md) (43 decisions) · [PRD](docs/PRD.md) · [Model card](docs/model-card.md) · [SQL analysis](analysis/track_record_sql.ipynb)
 
-> **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. Under rules written down before testing, a one-line rule matched a tuned LightGBM model, and on two years of held-back data neither beat a coin flip. So I stopped competing on accuracy. Parakh shows its receipts on every call, and teaches the lesson the data taught me through a game: picking stocks is hard, so measure everything against the index fund.
+> **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. Under rules written down before testing, a one-line rule matched a tuned LightGBM model, and on two years of held-back data neither was reliably better than a coin flip. So I stopped competing on accuracy. Parakh shows its receipts on every call, and teaches the lesson the data taught me through a game: picking stocks is hard, so measure everything against the index fund.
 
 <img src="docs/img/screen-practice-desktop.png" alt="The time machine mid-game in the 2020 crash: holdings on the left, your money (₹90,598) against the same money left in the index fund (₹73,804) with a line chart and play controls in the middle, and a market list with Buy buttons on the right" width="860">
 
@@ -38,7 +38,7 @@
 
 ### Context, in plain words
 
-- **News as context, not tips:** headlines for all 50 stocks from Google News, grouped under the biggest movers ("why did they move?"). Tips, price targets and predictions are filtered out, and every list notes that news is usually already priced in ([D-037](docs/decisions.md)).
+- **News is paused.** Headlines under the biggest movers were built ([D-037](docs/decisions.md)), then switched off: Google News feeds may only be shown in a personal feed reader. They come back only with a source whose terms allow public display ([D-042](docs/decisions.md)).
 - **Charts a beginner can read:** zoomable candles since 2016, each day described in a sentence, and past calls marked right or wrong.
 - **Hindi throughout the new screens,** in everyday Hindi that keeps the English market words people actually use, plus a 27-term glossary behind every dotted word ([D-034](docs/decisions.md)).
 
@@ -47,18 +47,21 @@
 1. **The first model looked like it worked:** 51.2% right in a walk-forward test, and well calibrated.
 2. **Measured properly, the edge vanished** (rank correlation on non-overlapping weeks, t ≈ 1.1). Its "worst year" was a calibration bug that had flipped the ranking upside down ([D-023](docs/decisions.md)).
 3. **I fixed the rules before testing again** ([D-022](docs/decisions.md)): one metric, a pass bar, a list of allowed experiments, and 2025–26 held back for one final test. A one-line rule ("last week's laggards beat the index next week") passed; LightGBM didn't ([D-024](docs/decisions.md)).
-4. **The holdout didn't hold up**, and the model card prints it as it came out:
+4. **The holdout didn't hold up.** The rule ships, because switching to LightGBM on its holdout score would have meant choosing on the only clean test. The model card prints both as they came out:
 
-| | Research 2019–24 | Holdout 2025–26 | Coin flip |
-|---|---|---|---|
-| Calls that were right | 52.1% | **48.8%** (2,181 calls) | 50% |
-| Rank IC (t-stat) | 0.029 (2.39) | 0.018 (0.98) | 0 |
+| Holdout 2025–26 (unseen until the final test) | Calls that were right | Rank IC (t-stat) |
+|---|---|---|
+| The rule (ships) | 48.8% of 2,181 calls | 0.018 (0.98) |
+| LightGBM | 52.1% | not significant either |
+| Coin flip | 50% | 0 |
 
-The gap between bullish and bearish leans (about 0.2% over 5 days) is smaller than trading costs (about 0.25%), and the app says so. A [SQL analysis](analysis/track_record_sql.ipynb) of the record adds two findings. The "stronger edge" label did *worse* than "slight edge", so it was dropped ([D-032](docs/decisions.md)). And the price feed has gaps on some trading days.
+On the research years (2019–24), the rule was right 52.1% of the time (IC 0.029, t = 2.39). The "51.4% right in testing" on each call covers 2019–26, research and holdout together, and the app says so.
+
+The gap between bullish and bearish leans (about 0.2% over 5 days) is smaller than trading costs (about 0.25%), and the app says so. One caveat applies to everything here: **the stocks are today's index members**, picked in 2026, so companies that dropped out of the NIFTY 50 since 2019 are missing from both the backtest and the time machine. The app, the game and the [model card](docs/model-card.md) say so too. A point-in-time universe is planned research. A [SQL analysis](analysis/track_record_sql.ipynb) of the record adds two findings. The "stronger edge" label did *worse* than "slight edge", so it was dropped ([D-032](docs/decisions.md)). And the price feed has gaps on some trading days.
 
 ## Key decisions
 
-All 41 are in the [decision log](docs/decisions.md), each with the alternatives considered.
+All 43 are in the [decision log](docs/decisions.md), each with the alternatives considered.
 
 | Decision | Why |
 |---|---|
@@ -82,13 +85,12 @@ All 41 are in the [decision log](docs/decisions.md), each with the alternatives 
 ```mermaid
 flowchart LR
     Y[Yahoo Finance<br/>daily prices] --> D
-    G[Google News RSS] --> N
     subgraph GA[GitHub Actions]
         D[Daily job, 18:00 IST<br/>score calls, publish next]
         W[Weekly retrain]
-        N[News, every 3 hours]
     end
-    D & W & N --> DB[(Neon Postgres<br/>append-only ledger)]
+    D & W --> DB[(Neon Postgres<br/>append-only ledger)]
+    D & W -.heartbeat.-> HC[healthchecks.io<br/>alerts on a missed run]
     DB --> API[FastAPI on Render<br/>read-only]
     API --> APP[React PWA on Vercel<br/>time machine runs in the browser]
 ```
@@ -96,7 +98,8 @@ flowchart LR
 - **Signals:** a reversal rule, logistic regression and LightGBM (SHAP explanations), compared under pre-registered rules. Explanations are fixed sentence templates, so a reason can't be made up.
 - **Time machine:** a pure TypeScript engine replays a game from its saved orders, so a game can be resumed or replayed exactly. Prices come from one cached endpoint (about 740 KB). Games are saved on the device.
 - **App:** React, TypeScript and Tailwind, with types generated from the API schema and typed English/Hindi dictionaries (a missing Hindi line fails the build). It's an installable PWA.
-- **Quality:** 56 Python and 73 frontend tests, including look-ahead checks and engine tests on real 2020–23 prices.
+- **Monitoring:** each job pings healthchecks.io, which emails if a run fails or doesn't arrive on time, and a monthly keepalive stops GitHub switching the schedules off after 60 quiet days ([D-043](docs/decisions.md)).
+- **Quality:** 56 Python and 75 frontend tests, including look-ahead checks and engine tests on real 2020–23 prices.
 
 Setup and deployment: [development guide](docs/development.md). The original screening-assignment notebook this grew from is in [`research/`](research/README.md), with its methodology issues listed.
 

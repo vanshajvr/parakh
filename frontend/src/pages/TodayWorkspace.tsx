@@ -10,6 +10,7 @@ import { Card } from '../components/States'
 import { Suggestions } from '../components/Suggestions'
 import { Term } from '../components/Term'
 import { useI18n } from '../i18n'
+import { NEWS_ENABLED } from '../lib/features'
 import { closeness, drivers, gapText, receiptLong, receiptShort, statusText, type OpenCall } from '../lib/calls'
 import { closeLabel, price, signedPct } from '../lib/format'
 import { HowToRead, KeyNumbers, LiveRecord } from './Today'
@@ -155,7 +156,7 @@ function Detail({ signal, running }: { signal: Signal; running?: OpenCall }) {
         </div>
         <Link to={`/stocks/${signal.symbol}`} className="self-start text-sm font-medium no-underline">{m.call.open(signal.symbol)}</Link>
       </Card>
-      <StockNews symbol={signal.symbol} />
+      {NEWS_ENABLED && <StockNews symbol={signal.symbol} />}
     </>
   )
 }

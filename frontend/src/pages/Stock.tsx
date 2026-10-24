@@ -13,6 +13,7 @@ import { markers } from '../lib/chart'
 import { stockCaveat, stockRange } from '../lib/calls'
 import { capitalize, closeLabel, count, dayLabel, pct, price, shortDate, signedPct } from '../lib/format'
 import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
+import { NEWS_ENABLED } from '../lib/features'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 export function Stock() {
@@ -95,7 +96,7 @@ export function StockView({ data }: { data: StockDetail }) {
         )}
       </div>
 
-      <StockNews symbol={stock.symbol} />
+      {NEWS_ENABLED && <StockNews symbol={stock.symbol} />}
       {stock.covered !== false && <StockRecord data={data} />}
     </div>
   )

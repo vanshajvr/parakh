@@ -21,6 +21,14 @@ class Receipt(BaseModel):
 
     band_hit_rate: float | None
     band_n_calls: int
+    # The years the testing record covers, research and holdout together.
+    tested_from: int | None = None
+    tested_to: int | None = None
+    # The holdout alone: years kept unseen until the final test (D-022).
+    holdout_hit_rate: float | None = None
+    holdout_n_calls: int = 0
+    holdout_from: int | None = None
+    holdout_to: int | None = None
     stock_hit_rate: float | None
     stock_n_calls: int
     # 95% range for the stock's true hit rate, given how few independent results there are.

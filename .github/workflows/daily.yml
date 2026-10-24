@@ -18,6 +18,8 @@ jobs:
   daily:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_DAILY_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -28,3 +30,7 @@ jobs:
       - run: python -m jobs.daily
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Heartbeat for healthchecks.io (decision D-043): an alert if a run fails, or if none arrives on schedule.
+      - name: Report to healthchecks.io
+        if: always() && env.HEALTHCHECK_URL != ''
+        run: curl -fsS -m 10 --retry 3 "$HEALTHCHECK_URL${{ job.status == 'success' && '' || '/fail' }}"

@@ -90,7 +90,7 @@ On the phone, every screen shows a short summary first and reveals detail on tap
    - A report card compares you with the same money left in the index fund, notes what followed each choice, and links short lessons.
    - A picture strip and a spotlight tour show first-time players how to play.
 
-**News** (D-037): Today shows headlines under the stocks that moved most, and each stock page lists its own, in English or Hindi. Tips are filtered out, and every list reminds the reader that news is usually priced in.
+**News** (D-037) was built, then paused (D-042): Google News feeds may only be shown in a personal feed reader. It returns only with publisher feeds whose terms allow public display.
 
 The Today screen also explains each **no call**: how far the stock moved against the others last week, and where that day's calls began (D-035).
 
@@ -104,6 +104,8 @@ Trade execution, portfolio tracking, intraday data, personalised advice, user ac
 - A daily email or Telegram digest (meet users where the bad tips live)
 - LLM-written explanations built on top of the SHAP output
 - "Check a tip": paste a tip from a finfluencer or a Telegram group and see base rates, the index-fund comparison and red flags
+- News from publishers' own feeds, used only where their terms allow public display
+- A point-in-time universe: index membership month by month, with delisted stocks
 - Taxes on gains in the time machine (short- and long-term capital gains)
 - More of the app in Hindi (Stocks, Track record, How it works)
 
@@ -135,6 +137,9 @@ See [model-card.md](model-card.md) for current numbers.
 | Being perceived as investment advice | Lean wording, disclaimers, educational framing, no personalisation |
 | The live track record starts empty | Show the simulated record, clearly labelled, until the live record has enough history |
 | The simulator rewards hindsight or gambling | Mystery mode hides the dates, every result is compared with the index fund, and there's no leaderboard (D-033) |
+| Survivorship bias: the 20 stocks and the time machine's 50 are today's index members, so stocks that dropped out since are missing | Disclosed in the model card, the README and the game's setup screen; a point-in-time universe is planned research |
+| A data source's terms forbid public use (as Google News's did) | Read a source's own terms before building on it (D-042) |
+| Scheduled jobs stop silently (GitHub's 60-day rule, outages) | healthchecks.io heartbeats and a monthly keepalive (D-043) |
 | Hindi that reads like a literal translation | Simple everyday Hindi that keeps the English market words people use, reviewed by a native speaker (D-034) |
 
 ## 9. Roadmap

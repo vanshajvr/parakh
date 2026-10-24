@@ -122,7 +122,8 @@ class FakeRepository:
 
     def active_model(self):
         return {"version": "lightgbm-test", "kind": "lightgbm", "trained_through": date(2026, 10, 12),
-                "created_at": PUBLISHED, "metrics": {"models": {"lightgbm": SIM_SUMMARY}}}
+                "created_at": PUBLISHED, "metrics": {"models": {"lightgbm": SIM_SUMMARY},
+                                                     "holdout": {"lightgbm": {"hit_rate": 0.488, "n_calls": 40, "period": ["2025-01-01", "2026-10-12"]}}}}
 
     def backtest(self, ticker):
         return pd.DataFrame([
@@ -183,6 +184,9 @@ def test_every_call_carries_its_receipt(client):
 
     # Every call carries the record of all testing calls, not of its confidence label (D-032).
     assert tcs["band_hit_rate"] == 0.51 and tcs["band_n_calls"] == 100
+    # The receipt says which years "in testing" covers, and how the unseen holdout went on its own.
+    assert (tcs["tested_from"], tcs["tested_to"]) == (2019, 2026)
+    assert tcs["holdout_hit_rate"] == 0.488 and (tcs["holdout_from"], tcs["holdout_to"]) == (2025, 2026)
     assert tcs["stock_hit_rate"] == 0.471 and tcs["stock_below_coin_flip"] is True
     # 150 independent weeks can't rule out 50%, so the stock isn't flagged as clearly worse.
     assert tcs["stock_hit_low"] < 0.471 < 0.5 < tcs["stock_hit_high"]
