@@ -31,16 +31,16 @@
 <img src="docs/img/screen-today-desktop.png" alt="Today on a laptop: key numbers, a list of the 20 stocks with calls first and no-calls ranked by how close they came, the selected stock's chart and lean in the middle, and a rail with what to look at next and market movers" width="860">
 
 - **One honest question:** will this stock beat a NIFTY 50 index fund over the next 5 trading days? The answer is a *lean*, not an instruction, or *No call*.
-- **A receipt on every call:** "Slight edge · 51.4% right in testing", plus a range when a stock has done worse than a coin flip, so you can see how much of that could be chance.
+- **A receipt on every call:** "Slight edge · 51.4% right in testing, 2019–26", with the unseen 2025–26 holdout one tap away, plus a range when a stock has done worse than a coin flip, so you can see how much of that could be chance.
 - **Every no-call says why:** "3.5% behind the average; calls started at 3.8%", with a bar for how close it came ([D-035](docs/decisions.md)).
 - **A laptop workspace:** stock list, selected stock's chart and reasons, and a rail with what to look at next ([D-038](docs/decisions.md)). Phones get a scrolling feed.
 - **A record nobody can edit:** calls are published before the market opens, and the database refuses edits or deletions. Live and simulated records are never mixed, and the whole ledger downloads as a CSV.
 
 ### Context, in plain words
 
-- **News is paused.** Headlines under the biggest movers were built ([D-037](docs/decisions.md)), then switched off: Google News feeds may only be shown in a personal feed reader. They come back only with a source whose terms allow public display ([D-042](docs/decisions.md)).
 - **Charts a beginner can read:** zoomable candles since 2016, each day described in a sentence, and past calls marked right or wrong.
 - **Hindi throughout the new screens,** in everyday Hindi that keeps the English market words people actually use, plus a 27-term glossary behind every dotted word ([D-034](docs/decisions.md)).
+- **News is paused.** Headlines under the biggest movers were built ([D-037](docs/decisions.md)), then switched off: Google News feeds may only be shown in a personal feed reader. They come back only with a source whose terms allow public display ([D-042](docs/decisions.md)).
 
 ## What the data said
 
@@ -55,9 +55,11 @@
 | LightGBM | 52.1% | not significant either |
 | Coin flip | 50% | 0 |
 
-On the research years (2019–24), the rule was right 52.1% of the time (IC 0.029, t = 2.39). The "51.4% right in testing" on each call covers 2019–26, research and holdout together, and the app says so.
+On the research years (2019–24), the rule was right 52.1% of the time (IC 0.029, t = 2.39). The "51.4% right in testing" on each call covers 2019–26, research and holdout together, and each receipt says so.
 
-The gap between bullish and bearish leans (about 0.2% over 5 days) is smaller than trading costs (about 0.25%), and the app says so. One caveat applies to everything here: **the stocks are today's index members**, picked in 2026, so companies that dropped out of the NIFTY 50 since 2019 are missing from both the backtest and the time machine. The app, the game and the [model card](docs/model-card.md) say so too. A point-in-time universe is planned research. A [SQL analysis](analysis/track_record_sql.ipynb) of the record adds two findings. The "stronger edge" label did *worse* than "slight edge", so it was dropped ([D-032](docs/decisions.md)). And the price feed has gaps on some trading days.
+Even at face value, the gap between bullish and bearish leans (about 0.2% over 5 days) is smaller than trading costs (about 0.25%), which the Track record screen states plainly. A [SQL analysis](analysis/track_record_sql.ipynb) of the record found that the "stronger edge" label did *worse* than "slight edge", so it was dropped ([D-032](docs/decisions.md)), and that the price feed has gaps on some trading days.
+
+**One caveat applies to everything here: the stocks are today's index members,** picked in 2026, so companies that dropped out of the NIFTY 50 since 2019 are missing from both the backtest and the time machine. The [model card](docs/model-card.md) and the time machine's setup screen say so. A point-in-time universe is planned research.
 
 ## Key decisions
 
@@ -90,7 +92,7 @@ flowchart LR
         W[Weekly retrain]
     end
     D & W --> DB[(Neon Postgres<br/>append-only ledger)]
-    D & W -.heartbeat.-> HC[healthchecks.io<br/>alerts on a missed run]
+    D & W -. heartbeat .-> HC[healthchecks.io<br/>alerts on a missed run]
     DB --> API[FastAPI on Render<br/>read-only]
     API --> APP[React PWA on Vercel<br/>time machine runs in the browser]
 ```
