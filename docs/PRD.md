@@ -148,7 +148,7 @@ See [model-card.md](model-card.md) for current numbers.
 | 15 | English and Hindi, glossary, no-call reasons (D-033 to D-035) |
 | 16 | Motion and daily suggestions (D-036) |
 | 17 | News as context for moves (D-037) |
-| 18 | Practice: the time machine |
+| 18 | Practice: the time machine, with interruptions, a report card and lessons (D-039, D-040) |
 | 19 | User test with 5–10 beginners, fixes and write-up |
 | Later | Ideas above; taxes in the simulator |
 
