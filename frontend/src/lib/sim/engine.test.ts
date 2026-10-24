@@ -29,6 +29,11 @@ describe('simulate', () => {
     expect(r.days.at(-1)!.value).toBeCloseTo(r.cash + 4_900, 2)
   })
 
+  it('buys a number of shares, or as many as the cash allows', () => {
+    const r = simulate(tiny(), game({ orders: [{ day: 0, symbol: 'A', side: 'buy', qty: 30 }, { day: 1, symbol: 'A', side: 'buy', qty: 500 }] }))
+    expect(r.fills.map((f) => f.qty)).toEqual([30, 69])
+  })
+
   it('refuses what a real broker would', () => {
     const r = simulate(tiny(), game({
       orders: [

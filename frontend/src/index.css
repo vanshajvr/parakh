@@ -166,6 +166,17 @@ a:not([class*="rounded"]):not([class*="flex"]):hover {
   animation: draw 900ms ease-out both;
 }
 
+/* "Start here": a soft ring that pulses outward, pointing a first-time player at the next step. */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--link) 55%, transparent); }
+  70% { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.6s ease-out infinite;
+}
+
 /* Page changes cross-fade (React Router's viewTransition). */
 ::view-transition-old(root),
 ::view-transition-new(root) {
