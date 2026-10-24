@@ -1,12 +1,14 @@
 # Product Requirements: Parakh
 
-> Status: v0 draft · Owner: Vanshaj Verma · Last updated: 2026-10-22
+> Status: v1 draft · Owner: Vanshaj Verma · Last updated: 2026-10-24
 
 ## 1. Summary
 
 Parakh is an ML-powered stock signal tool for beginner Indian investors, designed as the opposite of a stock-tips group. Every signal comes with its **track record**, its **confidence** and its **reasoning** in plain language, and the tool openly says "No call" when the data isn't clear.
 
-**One-liner:** ML stock signals with receipts.
+Testing showed that even Parakh's own signal can't reliably beat a coin flip (D-024). So the product also gives beginners a fast way to **practise investing with virtual money on real past markets**, judged against the same honest benchmark: simply holding a NIFTY 50 index fund (D-033). It works in English and Hindi (D-034).
+
+**One-liner:** Practise investing with fake money, and see honestly what works.
 
 ## 2. Problem
 
@@ -78,10 +80,19 @@ On the phone, every screen shows a short summary first and reveals detail on tap
    - A beginner-friendly explainer of the indicators used.
    - The model card: data, method, evaluation and limitations.
    - A disclaimer.
+5. **Glossary** (D-034)
+   - Every market word the app uses, in plain English and Hindi, with an example. Any dotted word in the app opens its meaning.
+6. **Practice: the time machine** (D-033, phase 16)
+   - Pick a scenario (the 2020 crash, the 2021 rally, a flat 2022–23, a decade of SIP, or a mystery period with the dates hidden) and a starting amount.
+   - Time plays forward on its own; buy and sell whole shares or a NIFTY 50 ETF, with real charges, filled at the next day's open.
+   - The game pauses on big market moves and asks what you'll do.
+   - A report card compares you with just holding the index fund, with short lessons tied to what you did.
+
+The Today screen also explains each **no call**: how far the stock moved against the others last week, and where that day's calls began (D-035).
 
 ### Out of scope (MVP)
 
-Trade execution, portfolio tracking, intraday data, personalised advice, user accounts, and options/F&O.
+Trade execution, portfolio tracking, intraday data, personalised advice, user accounts and sign-in, a live "make your own call" game, leaderboards, taxes in the simulator, and options/F&O (D-033).
 
 ### Later ideas
 
@@ -100,8 +111,9 @@ See [model-card.md](model-card.md) for current numbers.
 - **Coverage**: the share of stock-days on which the model makes a call.
 
 ### Product (hypothetical, for the case study)
-- **North star:** weekly users who view a signal's track record.
-- **Supporting:** visits to "How it works", return visits each week.
+- **North star:** weekly users who view a signal's track record or finish a practice game.
+- **Supporting:** visits to "How it works", return visits each week, practice games replayed.
+- **Learning (phase 17 user test):** the share of testers who beat the index fund, and how often they sell during a big fall before and after seeing the lesson card.
 
 ### Guardrails
 - 0 signals shown without a confidence value and a reason.
@@ -116,6 +128,8 @@ See [model-card.md](model-card.md) for current numbers.
 | yfinance outages or rate limits | Cache data in the database; show a "data delayed" state |
 | Being perceived as investment advice | Lean wording, disclaimers, educational framing, no personalisation |
 | The live track record starts empty | Show the simulated record, clearly labelled, until the live record has enough history |
+| The simulator rewards hindsight or gambling | Mystery mode hides the dates, every result is compared with the index fund, and there's no leaderboard (D-033) |
+| Hindi that reads like a literal translation | Simple everyday Hindi that keeps the English market words people use, reviewed by a native speaker (D-034) |
 
 ## 9. Roadmap
 
@@ -128,7 +142,11 @@ See [model-card.md](model-card.md) for current numbers.
 | 4 | Frontend: Today, Stock, Track record, How it works |
 | 5 | Ship: deployment, CI, case-study README |
 | 6 | Modelling pass: pre-registered evaluation, calibration fix, reversal rule vs ML (D-022 to D-024) |
-| 7 | Later ideas (see above) |
+| 7–14 | Live tracking, charts, market movers, adaptive landing, SQL analysis, one label for every call (D-025 to D-032) |
+| 15 | English and Hindi, glossary, no-call reasons (D-033 to D-035) |
+| 16 | Practice: the time machine |
+| 17 | User test with 5–10 beginners, fixes and write-up |
+| Later | Ideas above; taxes in the simulator |
 
 ## 10. Disclaimer
 

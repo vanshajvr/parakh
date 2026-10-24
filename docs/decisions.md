@@ -4,6 +4,36 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-035 · Every "No call" says why
+**Date:** 2026-10-24
+**Decision:** Under the reversal rule, each no-call stock on Today shows how far it moved against the average of the 20 last week, where that day's calls on the same side began, and a bar for how close it came. The API works this out at read time from the stored factors, so the ledger is untouched. Multi-factor models have no single line, so they keep the generic sentence.
+**Why:** On a typical day 15 or 16 of the 20 stocks get no call (by design, D-010), and "the signals are mixed or weak" made the app look broken or lazy. A concrete reason ("3.5% behind the average; calls started at 3.8%") turns the biggest box on the page into a lesson in how the rule works.
+**Alternatives:** Explaining it once in How it works (nobody connects it to the box); showing the probability (meaningless to a beginner).
+
+---
+
+### D-034 · English and Hindi, with a glossary
+**Date:** 2026-10-24
+**Decision:**
+- Text lives in typed dictionaries (`frontend/src/i18n/en.ts` is the source, and `hi.ts` must match its shape), so a missing Hindi string fails the build. No i18n library.
+- Hindi is simple everyday Hindi that keeps the English market words people actually use (stock, index, call, SIP).
+- A language toggle in the header, remembered on the device and set on `<html lang>`. Pages not yet translated say so.
+- Phase 15 translates the shell, Today and its components, and the glossary. Factor sentences are rebuilt in Hindi from the stored feature values.
+- A glossary of about 25 terms, each with a plain definition and an example. Any dotted word opens it in a native popover.
+- IBM Plex Sans Devanagari, which only downloads when Hindi text is on screen.
+**Why:** The primary user is a beginner, and many beginners in India are more comfortable in Hindi. Jargon is the first wall they hit, so the meaning should be one tap away where the word appears.
+**Alternatives:** react-i18next (string keys with no type checking, and a dependency for about 300 strings); pure Hindi terms such as सूचकांक (more correct, harder for beginners); Hinglish in Roman script (informal, and harder to read at length).
+
+---
+
+### D-033 · From signals to practice
+**Date:** 2026-10-24
+**Decision:** Keep the honest signals, and make the core of the product a fast simulator: a "time machine" that replays real past markets with virtual money, judged against simply holding a NIFTY 50 index fund. Cut user accounts, a live "make your own call" game, leaderboards and taxes.
+**Why:** Testing showed Parakh's own signal can't reliably beat a coin flip (D-024). For a beginner, the most useful lesson is exactly that, and it's learned best by trying and failing with fake money, not by reading. Lessons are everywhere online; practice with honest feedback isn't. Accounts add sign-in and privacy work without adding to that lesson, and a live game takes 5 days per result, which is too slow to learn from. Leaderboards on returns reward gambling.
+**Alternatives:** A lesson course (already plentiful online); live virtual trading like existing apps (slow, and it rewards luck); keeping Parakh signals-only (an honest dead end for the user).
+
+---
+
 ### D-032 · One label for every call
 **Date:** 2026-10-24
 **Decision:** Drop the *Stronger edge* tier. Every call is labelled *Slight edge*, and its receipt shows the hit rate of all testing calls (51.4%), not of its tier. Calls already published keep the label they were published with, since the ledger can't be edited.

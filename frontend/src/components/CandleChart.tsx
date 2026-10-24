@@ -5,6 +5,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useHistory } from '../api/client'
 import { candleReading, movingAverage, RANGE_DAYS, type Candle, type Marker } from '../lib/chart'
+import { useI18n } from '../i18n'
 import { price, shortDate, signedPct } from '../lib/format'
 import { DOWN, UP } from './ChartKey'
 
@@ -39,6 +40,7 @@ function themeOptions() {
  * a plain-words reading of the hovered day. Past calls are dots in their lean colour, ✓ or ✗ once scored.
  */
 export function CandleChart({ symbol, name, markers = [], height = 300, defaultRange = '1Y', format = price }: Props) {
+  const { m } = useI18n()
   const { data, isPending, isError } = useHistory(symbol)
   const candles = useMemo<Candle[]>(() => (data ?? []).map((p) => ({ date: p.date, open: p.open, high: p.high, low: p.low, close: p.close })), [data])
   const average = useMemo(() => movingAverage(candles.map((c) => c.close), MA_DAYS), [candles])
@@ -125,8 +127,8 @@ export function CandleChart({ symbol, name, markers = [], height = 300, defaultR
     c.timeScale().setVisibleRange({ from: (from < candles[0].date ? candles[0].date : from) as Time, to: last as Time })
   }, [range, candles])
 
-  if (isPending) return <div style={{ height }} className="animate-pulse rounded-xl bg-chip" aria-label={`Loading ${name}'s price history`} />
-  if (isError || candles.length < 2) return <p className="m-0 text-sm text-muted">Price history isn't available right now.</p>
+  if (isPending) return <div style={{ height }} className="animate-pulse rounded-xl bg-chip" aria-label={m.chart.loadingAria(name)} />
+  if (isError || candles.length < 2) return <p className="m-0 text-sm text-muted">{m.chart.unavailable}</p>
 
   const shown = hover?.i ?? candles.length - 1
   const day = candles[shown]
@@ -148,13 +150,13 @@ export function CandleChart({ symbol, name, markers = [], height = 300, defaultR
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div role="group" aria-label="Chart layers" className="flex flex-wrap gap-1.5">
-          {chip(layers.candles, 'Candles', () => toggleLayer('candles'))}
-          {chip(layers.close, 'Close line', () => toggleLayer('close'), css('--ink-2'))}
-          {chip(layers.average, `${MA_DAYS}-day average`, () => toggleLayer('average'), css('--link'))}
-          {markers.length > 0 && chip(layers.calls, 'Past calls', () => toggleLayer('calls'))}
+        <div role="group" aria-label={m.chart.layersAria} className="flex flex-wrap gap-1.5">
+          {chip(layers.candles, m.chart.candles, () => toggleLayer('candles'))}
+          {chip(layers.close, m.chart.closeLine, () => toggleLayer('close'), css('--ink-2'))}
+          {chip(layers.average, m.chart.average(MA_DAYS), () => toggleLayer('average'), css('--link'))}
+          {markers.length > 0 && chip(layers.calls, m.chart.pastCalls, () => toggleLayer('calls'))}
         </div>
-        <div role="group" aria-label="Chart range" className="flex gap-1 rounded-full bg-chip p-0.5">
+        <div role="group" aria-label={m.chart.rangeAria} className="flex gap-1 rounded-full bg-chip p-0.5">
           {RANGES.map((r) => (
             <button key={r} type="button" aria-pressed={range === r} onClick={() => setRange(r)}
               className={`h-8 cursor-pointer rounded-full px-2.5 text-xs ${range === r ? 'bg-surface font-semibold text-ink shadow-sm' : 'font-medium text-muted'}`}>
@@ -166,26 +168,26 @@ export function CandleChart({ symbol, name, markers = [], height = 300, defaultR
 
       <div className="relative" style={{ height }}>
         <div ref={box} className="absolute inset-0" role="img"
-          aria-label={`${name} daily price chart from ${shortDate(candles[0].date)} to ${shortDate(day.date)}. Scroll or pinch to zoom, drag to move through time.`} />
+          aria-label={m.chart.chartAria(name, shortDate(candles[0].date, m.locale), shortDate(day.date, m.locale))} />
         {hover && (
           <div className={`pointer-events-none absolute top-2 z-10 w-44 rounded-lg border border-line bg-surface/95 px-2.5 py-2 text-xs shadow-sm`}
             style={{ left: flip ? hover.x - 188 : hover.x + 12 }}>
-            <div className="mb-1 font-semibold text-ink">{shortDate(day.date)}</div>
+            <div className="mb-1 font-semibold text-ink">{shortDate(day.date, m.locale)}</div>
             <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 tabular-nums">
-              <dt className="text-muted">Open</dt><dd className="m-0 text-right text-ink">{format(day.open)}</dd>
-              <dt className="text-muted">High</dt><dd className="m-0 text-right text-ink">{format(day.high)}</dd>
-              <dt className="text-muted">Low</dt><dd className="m-0 text-right text-ink">{format(day.low)}</dd>
-              <dt className="text-muted">Close</dt>
+              <dt className="text-muted">{m.chart.open}</dt><dd className="m-0 text-right text-ink">{format(day.open)}</dd>
+              <dt className="text-muted">{m.chart.high}</dt><dd className="m-0 text-right text-ink">{format(day.high)}</dd>
+              <dt className="text-muted">{m.chart.low}</dt><dd className="m-0 text-right text-ink">{format(day.low)}</dd>
+              <dt className="text-muted">{m.chart.close}</dt>
               <dd className="m-0 text-right font-semibold" style={{ color: day.close >= day.open ? UP : DOWN }}>{format(day.close)}</dd>
-              {prev != null && (<><dt className="text-muted">vs day before</dt><dd className="m-0 text-right text-ink">{signedPct(day.close / prev - 1)}</dd></>)}
-              {average[shown] != null && (<><dt className="text-muted">{MA_DAYS}-day avg</dt><dd className="m-0 text-right text-ink">{format(average[shown]!)}</dd></>)}
+              {prev != null && (<><dt className="text-muted">{m.chart.vsDayBefore}</dt><dd className="m-0 text-right text-ink">{signedPct(day.close / prev - 1)}</dd></>)}
+              {average[shown] != null && (<><dt className="text-muted">{m.chart.avgShort(MA_DAYS)}</dt><dd className="m-0 text-right text-ink">{format(average[shown]!)}</dd></>)}
             </dl>
           </div>
         )}
       </div>
 
       <p className="m-0 text-[13px] leading-relaxed text-ink-2" aria-live="polite">
-        <span className="font-medium text-ink">{hover ? shortDate(day.date) : 'Latest day'}:</span> {candleReading(day, prev, format)}
+        <span className="font-medium text-ink">{hover ? shortDate(day.date, m.locale) : m.chart.latestDay}:</span> {candleReading(day, prev, format, m)}
       </p>
     </div>
   )

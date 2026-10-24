@@ -31,6 +31,15 @@ class Receipt(BaseModel):
     stock_clearly_below: bool = False
 
 
+class NoCallDetail(BaseModel):
+    """Why the reversal rule made no call: the stock's move against the others, and where calls began."""
+
+    # Last week's return minus the average of the 20 stocks.
+    move: float
+    # The smallest move on the same side (ahead or behind) that got a call that day; None if none did.
+    calls_from: float | None
+
+
 class Signal(BaseModel):
     ticker: str
     symbol: str
@@ -48,6 +57,7 @@ class Signal(BaseModel):
     receipt: Receipt
     close: float | None
     change_1d: float | None
+    no_call: NoCallDetail | None = None
 
 
 class CallStats(BaseModel):

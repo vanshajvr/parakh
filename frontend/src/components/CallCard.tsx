@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import type { Signal } from '../api/client'
 import { chance, drivers, headline, looksLikeReversal, receiptLong, receiptShort, stockRange } from '../lib/calls'
+import { useI18n } from '../i18n'
 import { pct, price, signedPct } from '../lib/format'
 import { Disclosure } from './Disclosure'
 import { Warning } from './Icons'
@@ -11,8 +12,10 @@ import { LeanPill } from './LeanPill'
  * warning stays visible too (decision D-019). Expanded, it adds the chance and the factors.
  */
 export function CallCard({ signal }: { signal: Signal }) {
-  const short = receiptShort(signal)
-  const factors = drivers(signal)
+  const { m } = useI18n()
+  const short = receiptShort(signal, m)
+  const factors = drivers(signal, 2, m)
+  const range = stockRange(signal.receipt, m)
   return (
     <article className="self-start overflow-hidden rounded-2xl border border-line bg-surface">
       <Disclosure
@@ -32,15 +35,15 @@ export function CallCard({ signal }: { signal: Signal }) {
             <span className="flex flex-wrap items-center gap-2">
               <LeanPill lean={signal.lean} />
               <span className="text-[13px] font-medium text-ink-2">
-                {signal.confidence}
+                {m.confidence(signal.confidence)}
                 {short && <span className="text-xs font-normal text-muted"> · {short}</span>}
               </span>
             </span>
             {signal.receipt.stock_below_coin_flip && (
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-bear">
                 <Warning size={15} />
-                On {signal.symbol}: {pct(signal.receipt.stock_hit_rate)} in testing, below a coin flip
-                {stockRange(signal.receipt) && ` (${stockRange(signal.receipt)})`}
+                {m.call.belowCoinFlip(signal.symbol, pct(signal.receipt.stock_hit_rate))}
+                {range && ` (${range})`}
               </span>
             )}
           </span>
@@ -48,11 +51,11 @@ export function CallCard({ signal }: { signal: Signal }) {
       >
         <div className="flex flex-col gap-3 border-t border-chip px-4 pt-3 pb-4">
           <p className="m-0 text-[15px] leading-snug text-ink">
-            {headline(signal)} <span className="text-muted">{chance(signal)}.</span>
+            {headline(signal, m)} <span className="text-muted">{chance(signal, m)}.</span>
           </p>
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold tracking-wide text-muted uppercase">Biggest factors</span>
-            {factors.length === 0 && <span className="text-sm text-ink-2">No single standout factor.</span>}
+            <span className="text-xs font-semibold tracking-wide text-muted uppercase">{m.call.biggestFactors}</span>
+            {factors.length === 0 && <span className="text-sm text-ink-2">{m.call.noStandout}</span>}
             <ul className="m-0 flex list-none flex-col gap-1 p-0">
               {factors.map((f) => (
                 <li key={f} className="flex gap-2 text-sm leading-snug text-ink-2">
@@ -63,13 +66,13 @@ export function CallCard({ signal }: { signal: Signal }) {
             </ul>
             {looksLikeReversal(signal) && (
               <Link to="/learn#reversals" className="text-[13px] no-underline">
-                Why might this point the other way? About reversals →
+                {m.call.reversalLink}
               </Link>
             )}
           </div>
-          <p className="m-0 text-[13px] leading-snug text-ink-2">{receiptLong(signal)}</p>
+          <p className="m-0 text-[13px] leading-snug text-ink-2">{receiptLong(signal, m)}</p>
           <Link to={`/stocks/${signal.symbol}`} className="self-start text-sm font-medium no-underline">
-            Open {signal.symbol} →
+            {m.call.open(signal.symbol)}
           </Link>
         </div>
       </Disclosure>

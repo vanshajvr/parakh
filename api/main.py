@@ -19,7 +19,7 @@ from api import screener
 from api.repository import Repository
 from ledger.db import database_url
 from api.schemas import (
-    CallStats, DataStatus, LedgerPage, LedgerRow, MarketSnapshot, ModelInfo, NextWeek, OpenCall, PricePoint,
+    CallStats, DataStatus, LedgerPage, LedgerRow, MarketSnapshot, ModelInfo, NextWeek, NoCallDetail, OpenCall, PricePoint,
     Receipt, RecentSimulatedCall, Scoreboard, ScreenerResponse, ScreenerRow, Signal,
     SimulatedCall, StatusResponse, StockDetail, StockSummary, TodayResponse, TrackRecord,
 )
@@ -138,12 +138,40 @@ def receipt_lookup(repo: Repository):
     return receipt
 
 
+RULE_FEATURE = "ret_5d_vs_peers"
+
+
+def no_call_details(rows: list[dict]) -> dict[str, NoCallDetail]:
+    """For the reversal rule, how far each no-call stock was from getting a call that day.
+
+    The rule's only input is last week's return against the other stocks, and calls go to the
+    biggest moves on each side, so the smallest move that got a call shows where the line was.
+    Other models weigh several factors, so there is no single line to show.
+    """
+    moves = {}
+    for row in rows:
+        values = [f["value"] for f in row["factors"] if f["feature"] == RULE_FEATURE]
+        if not values:
+            return {}
+        moves[row["ticker"]] = values[0]
+    called = [moves[r["ticker"]] for r in rows if r["lean"] != "no_call"]
+    details = {}
+    for row in rows:
+        if row["lean"] != "no_call":
+            continue
+        move = moves[row["ticker"]]
+        same_side = [m for m in called if (m > 0) == (move > 0)]
+        details[row["ticker"]] = NoCallDetail(move=move, calls_from=min(same_side, key=abs) if same_side else None)
+    return details
+
+
 def to_signals(repo: Repository, rows: list[dict]) -> list[Signal]:
     """Published calls with display names, receipts and the closing price they were based on."""
     if not rows:
         return []
     receipt = receipt_lookup(repo)
     closes = repo.closes_on(rows[0]["as_of"])
+    no_call = no_call_details(rows)
     signals = []
     for row in rows:
         name, sector = config.MARKET[row["ticker"]]
@@ -151,7 +179,7 @@ def to_signals(repo: Repository, rows: list[dict]) -> list[Signal]:
         signals.append(Signal(
             **row, symbol=row["ticker"].removesuffix(".NS"), name=name, sector=sector,
             lean_label=LEAN_LABELS[row["lean"]], receipt=receipt(row["ticker"], row["lean"]),
-            close=close, change_1d=change,
+            close=close, change_1d=change, no_call=no_call.get(row["ticker"]),
         ))
     return signals
 
