@@ -8,7 +8,7 @@ export function Sparkline({ values, label, width = 88, height = 28 }: { values: 
   const points = values.map((v, i) => `${x(i)},${y(v)}`).join(' ')
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} className="shrink-0">
-      <polyline points={points} fill="none" stroke="var(--ink-2)" strokeWidth={1.5} strokeLinejoin="round" />
+      <polyline points={points} pathLength={1} className="draw" fill="none" stroke="var(--ink-2)" strokeWidth={1.5} strokeLinejoin="round" />
       <circle cx={x(values.length - 1)} cy={y(values[values.length - 1])} r={2.25} fill="var(--ink)" />
     </svg>
   )

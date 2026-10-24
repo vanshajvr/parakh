@@ -130,6 +130,24 @@ export const hi: Messages = {
     },
   },
 
+  next: {
+    in: (weekday, wait) => `अगली calls ${weekday} को बाज़ार बंद होने के बाद · ${wait} में`,
+    due: 'अगली calls आने वाली हैं: आमतौर पर शाम 6:30 बजे (IST) तक आ जाती हैं',
+    duration: (days, hours, minutes) =>
+      days > 0 ? `${days} दिन ${hours} घंटे` : hours > 0 ? `${hours} घंटे ${minutes} मिनट` : `${minutes} मिनट`,
+  },
+
+  suggest: {
+    title: 'आगे क्या देखें',
+    strongestRule: (symbol, move, ahead, lean) =>
+      `${symbol} पिछले हफ़्ते बाकियों से ${move} ${ahead ? 'आगे' : 'पीछे'} रहा। देखें कि इस पर ${lean} क्यों है`,
+    strongest: (symbol) => `आज की सबसे साफ़ call ${symbol} पर है। वजह देखें`,
+    closest: (symbol, share) => `${symbol} call बनने के सबसे करीब पहुँचा, पर call नहीं बनी (${Math.round(share * 100)}% रास्ता)`,
+    open: (symbol, gap, day, total) => `${symbol} की call अब तक ${gap} है, ${total} में से दिन ${day}`,
+    mover: (symbol, change, up) => `पिछले बंद भाव पर ${symbol} ${change} ${up ? 'चढ़ा' : 'गिरा'}, Parakh के 20 stocks में सबसे बड़ी चाल`,
+    glossary: 'शब्द नए हैं? शब्दकोश हर शब्द को उदाहरण के साथ समझाता है',
+  },
+
   noCall: {
     title: (n) => `${n} stocks पर कोई call नहीं`,
     generic: 'Signals मिले-जुले या कमज़ोर हैं, इसलिए अंदाज़ा लगाने से बेहतर है कुछ न कहना।',

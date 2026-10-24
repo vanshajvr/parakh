@@ -43,6 +43,7 @@ export function Layout() {
                 key={to}
                 to={to}
                 end={to === '/'}
+                viewTransition
                 className={({ isActive }) =>
                   `rounded-lg px-3.5 py-2.5 text-[15px] no-underline ${
                     isActive ? 'bg-chip font-semibold text-ink' : 'font-medium text-ink-2 hover:bg-chip'
@@ -88,6 +89,7 @@ export function Layout() {
             key={to}
             to={to}
             end={to === '/'}
+            viewTransition
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 py-1.5 text-xs no-underline ${isActive ? 'font-semibold text-ink' : 'font-medium text-muted'}`
             }

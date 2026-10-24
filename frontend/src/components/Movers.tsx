@@ -92,7 +92,7 @@ export function MoverControls({ data, view, setView, tf, setTf, sector, setSecto
 function MoverRow({ row, view, tf }: { row: Row; view: View; tf: Timeframe }) {
   const { m } = useI18n()
   return (
-    <li className="flex items-center gap-3 border-b border-chip py-2.5 last:border-0">
+    <li className="-mx-2 flex items-center gap-3 rounded-lg border-b border-chip px-2 py-2.5 last:border-0 hover:bg-page">
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="flex items-center gap-2 whitespace-nowrap">
           <Link to={`/stocks/${row.symbol}`} className="text-[15px] font-semibold text-ink no-underline">{row.symbol}</Link>

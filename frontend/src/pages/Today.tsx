@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { useToday, type Signal, type Today as TodayData } from '../api/client'
 import { CallCard } from '../components/CallCard'
+import { CountUp } from '../components/CountUp'
 import { Disclosure } from '../components/Disclosure'
 import { Info, Minus, Warning } from '../components/Icons'
 import { IndexCard, RecentTesting } from '../components/Market'
 import { Movers } from '../components/Movers'
+import { NextCalls } from '../components/NextCalls'
 import { OpenCalls } from '../components/OpenCalls'
 import { Loading, LoadError } from '../components/States'
+import { Suggestions } from '../components/Suggestions'
 import { Term } from '../components/Term'
 import { useI18n } from '../i18n'
 import { closeness } from '../lib/calls'
@@ -45,7 +48,7 @@ export function TodayView({ data }: { data: TodayData }) {
   const callsBlock = hasCalls ? (
     <section aria-label={m.today.callsAria} className="flex flex-col gap-3">
       <FilterChips calls={calls} filter={filter} onChange={setFilter} />
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+      <div className="stagger grid gap-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
         {shown.map((s) => <CallCard key={s.ticker} signal={s} />)}
       </div>
       {noCall.length > 0 && <NoCall stocks={noCall} />}
@@ -53,7 +56,7 @@ export function TodayView({ data }: { data: TodayData }) {
   ) : <FirstCalls />
 
   return (
-    <div className="flex flex-col gap-4 lg:gap-6">
+    <div className="stagger flex flex-col gap-4 lg:gap-6">
       <section className="flex flex-col gap-1 px-1">
         <div className="flex items-center gap-1">
           <h1 className="m-0 font-serif text-[30px] leading-tight font-semibold tracking-[-0.015em] lg:text-[40px]">{m.today.title}</h1>
@@ -70,6 +73,7 @@ export function TodayView({ data }: { data: TodayData }) {
         {data.as_of && (
           <p className="m-0 text-sm text-muted">{m.today.asOf(closeLabel(data.as_of, m))}</p>
         )}
+        {data.as_of && <NextCalls asOf={data.as_of} />}
       </section>
 
       {questionOpen && (
@@ -102,6 +106,7 @@ export function TodayView({ data }: { data: TodayData }) {
           {data.scoreboard.live_scored === 0 && <RecentTesting calls={data.recent_simulated ?? []} />}
         </div>
         <aside className="flex min-w-0 flex-col gap-4">
+          {hasCalls && <Suggestions data={data} />}
           <LiveRecord data={data} />
           <HowToRead />
         </aside>
@@ -192,7 +197,7 @@ function NoCallRow({ signal }: { signal: Signal }) {
       </span>
       {share != null && (
         <span className="h-1.5 overflow-hidden rounded-full bg-chip" role="img" aria-label={m.noCall.closeness(signal.symbol, share)}>
-          <span className="block h-full rounded-full bg-ink-2" style={{ width: `${share * 100}%` }} />
+          <span className="grow-x block h-full rounded-full bg-ink-2" style={{ width: `${share * 100}%` }} />
         </span>
       )}
       <span className="text-xs text-muted">{d.calls_from == null ? m.noCall.noneThisSide : m.noCall.callsFrom(d.calls_from)}</span>
@@ -298,9 +303,9 @@ function KeyNumbers({ data }: { data: TodayData }) {
   return (
     <section aria-label={m.today.keyNumbersAria} className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
       {tiles.map((tile) => (
-        <Link key={tile.label} to={tile.to} className="flex flex-col gap-1 rounded-2xl border border-line bg-surface px-4 py-3 no-underline hover:border-line-2">
+        <Link key={tile.label} to={tile.to} className="lift flex flex-col gap-1 rounded-2xl border border-line bg-surface px-4 py-3 no-underline">
           <span className="text-xs font-semibold tracking-wide text-muted uppercase">{tile.label}</span>
-          <span className="font-serif text-[26px] leading-tight font-semibold text-ink tabular-nums">{tile.value}</span>
+          <span className="font-serif text-[26px] leading-tight font-semibold text-ink tabular-nums"><CountUp value={tile.value} /></span>
           <span className="text-xs leading-snug text-muted">{tile.detail}</span>
         </Link>
       ))}
