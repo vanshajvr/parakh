@@ -27,7 +27,8 @@ export function Movers() {
   const params = new URLSearchParams({ view, ...(v.usesTimeframe ? { tf } : {}), ...(sector ? { sector } : {}) })
 
   return (
-    <Card className="flex min-w-0 flex-col gap-3 p-4 lg:p-5">
+    // A container, so rows drop their sparkline when the card itself is narrow (e.g. a side rail).
+    <Card className="@container flex min-w-0 flex-col gap-3 p-4 lg:p-5">
       <div className="flex flex-col gap-0.5">
         <h2 className="m-0 text-base font-semibold">{m.movers.title}</h2>
         <span className="text-[13px] text-muted">{m.movers.subtitle(closeLabel(data.as_of, m))}</span>
@@ -94,7 +95,7 @@ function MoverRow({ row, view, tf }: { row: Row; view: View; tf: Timeframe }) {
   return (
     <li className="-mx-2 flex items-center gap-3 rounded-lg border-b border-chip px-2 py-2.5 last:border-0 hover:bg-page">
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="flex items-center gap-2 whitespace-nowrap">
+        <span className="flex min-w-0 items-center gap-2 whitespace-nowrap">
           <Link to={`/stocks/${row.symbol}`} className="text-[15px] font-semibold text-ink no-underline">{row.symbol}</Link>
           {row.covered && row.lean && row.lean !== 'no_call' && <LeanPill lean={row.lean} />}
           {!row.covered && (
@@ -105,7 +106,7 @@ function MoverRow({ row, view, tf }: { row: Row; view: View; tf: Timeframe }) {
         </span>
         <span className="truncate text-xs text-muted">{row.name} · {price(row.close)}</span>
       </span>
-      <span className="hidden sm:block"><Sparkline values={row.spark} label={m.movers.sparkAria(row.symbol)} width={72} height={24} /></span>
+      <span className="hidden @sm:block"><Sparkline values={row.spark} label={m.movers.sparkAria(row.symbol)} width={72} height={24} /></span>
       <span className="w-28 shrink-0 text-right text-sm font-semibold text-ink tabular-nums">{view.show(row, tf, m)}</span>
     </li>
   )

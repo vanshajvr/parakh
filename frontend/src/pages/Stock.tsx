@@ -53,7 +53,7 @@ export function StockView({ data }: { data: StockDetail }) {
       </section>
 
       {/* Phone order: call, chart, why. Desktop: chart on the left, call and why on the right. */}
-      <div className="grid gap-4 lg:grid-cols-[2fr_1fr] lg:items-start lg:gap-6">
+      <div className="grid gap-4 lg:grid-cols-[2fr_1fr] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-6">
         <div className="min-w-0 lg:col-start-2 lg:row-start-1">
           {stock.covered !== false ? <TodaysCall stock={data} latest={latest ?? null} /> : <NotCovered name={stock.name} />}
         </div>
