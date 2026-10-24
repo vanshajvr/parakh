@@ -163,10 +163,12 @@ function Playing({ market, practice }: { market: Market; practice: PracticeState
           <span className="text-sm text-muted">{hide ? t.period : `${shortDate(market.dates[game.start], m.locale)} – ${shortDate(market.dates[game.end], m.locale)}`}</span>
         </div>
         <span className="flex gap-2">
-          <button type="button" onClick={() => { practice.pause(); setTouring(true) }}
-            className="h-9 cursor-pointer rounded-full border border-line-2 bg-surface px-3.5 text-[13px] font-medium text-ink">
-            {m.practice.howToPlay}
-          </button>
+          {!practice.finished && (
+            <button type="button" onClick={() => { practice.pause(); setTouring(true) }}
+              className="h-9 cursor-pointer rounded-full border border-line-2 bg-surface px-3.5 text-[13px] font-medium text-ink">
+              {m.practice.howToPlay}
+            </button>
+          )}
           <button type="button" onClick={() => { if (window.confirm(m.practice.confirmNew)) practice.quit() }}
             className="h-9 cursor-pointer rounded-full border border-line-2 bg-surface px-3.5 text-[13px] font-medium text-ink">
             {m.practice.newGame}
@@ -178,7 +180,10 @@ function Playing({ market, practice }: { market: Market; practice: PracticeState
         <ReportCard market={market} result={result} fund={fund} prompts={saved.prompts ?? []} when={when}
           revealed={hide ? m.practice.end.revealed(shortDate(market.dates[game.start], m.locale), shortDate(market.dates[game.end], m.locale)) : null}
           isMystery={saved.scenario === 'mystery'} onReplay={practice.replay} onNew={practice.quit}
-          onMystery={() => practice.start('mystery', game.cash || game.sip?.amount || 1_00_000)} />
+          onMystery={() => practice.start('mystery', game.cash || game.sip?.amount || 1_00_000)}
+          chart={<ValueChart you={result.days} fund={fund.days} length={game.end - game.start + 1}
+            startLabel={when(game.start)} endLabel={when(game.end)} youLabel={m.practice.legendYou} fundLabel={m.practice.legendFund}
+            label={m.practice.chartAria(money(now.value), money(fundNow.value))} />} />
       )}
       {fresh && !practice.finished && (
         <Card className="flex flex-wrap items-center justify-between gap-3 border-link p-4">
@@ -197,8 +202,9 @@ function Playing({ market, practice }: { market: Market; practice: PracticeState
       )}
       {practice.prompt && <PromptDialog prompt={practice.prompt} when={when(practice.prompt.day)} onChoose={practice.choose} />}
 
-      {/* Phone: one column. Laptop: holdings | your money and time | the market (D-038's workspace style). */}
-      <div className="grid gap-4 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)_minmax(300px,360px)] lg:items-start lg:gap-6">
+      {/* Phone: one column. Laptop: holdings | your money and time | the market (D-038's workspace style).
+          Once the period is over there's nothing left to do here, so only the report card shows. */}
+      {!practice.finished && <div className="grid gap-4 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)_minmax(300px,360px)] lg:items-start lg:gap-6">
         <div className="min-w-0 lg:col-start-2 lg:row-start-1">{summary}</div>
         <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-1 lg:gap-6">
           <Holdings market={market} practice={practice} onSell={(s) => open(s, 'sell')} />
@@ -207,7 +213,7 @@ function Playing({ market, practice }: { market: Market; practice: PracticeState
         <div className="min-w-0 lg:col-start-3 lg:row-start-1">
           <MarketList market={market} day={day} holdings={result.holdings} onBuy={(s) => open(s, 'buy')} disabled={practice.finished} hint={fresh && !touring} />
         </div>
-      </div>
+      </div>}
 
       {sheet && (
         <OrderSheet market={market} symbol={sheet.symbol} side={sheet.side} day={day} cash={result.cash} held={result.holdings[sheet.symbol] ?? 0}

@@ -58,6 +58,10 @@ describe('Practice', () => {
       await userEvent.click(prompt ? within(prompt).getByRole('button', { name: /^Hold/ }) : screen.getByRole('button', { name: '+1 month' }))
     }
     expect(screen.getByRole('heading', { name: 'Your report card' })).toBeInTheDocument()
+    // The finished game shows only the report: no trading controls or market below it.
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Market' })).not.toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /Your money .* against the same money left in the index fund/ })).toBeInTheDocument()
     // With everything left in cash, the index fund wins, and the report says what cash cost.
     expect(screen.getAllByText(/The index fund beat you by/).length).toBeGreaterThan(0)
     expect(screen.getByText(/sat in cash, earning nothing/)).toBeInTheDocument()

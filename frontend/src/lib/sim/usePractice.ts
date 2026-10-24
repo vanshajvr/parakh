@@ -42,7 +42,8 @@ function moveOn(market: Market, s: Saved, days: number): Saved {
   const quiet = (day: number) => last != null && day - last < COOLDOWN
   let target = Math.min(s.game.end, s.day + days)
   const move = marketEvents(market, s.game.start, s.game.end).find((e) => e.day > s.day && e.day <= target && !quiet(e.day))
-  const mine = firstDrawdown(simulate(market, s.game, target).days, s.day, last)
+  const lastFall = prompts.filter((p) => p.kind === 'drawdown').at(-1)?.day ?? null
+  const mine = firstDrawdown(simulate(market, s.game, target).days, s.day, last, lastFall)
   const stop = [move, mine].filter((e) => e != null).sort((a, b) => a!.day - b!.day)[0]
   if (!stop) return { ...s, day: target }
   target = stop.day
