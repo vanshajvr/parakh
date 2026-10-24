@@ -17,6 +17,7 @@ import { useI18n } from '../i18n'
 import { closeness } from '../lib/calls'
 import { closeLabel, count, pct } from '../lib/format'
 import { DESKTOP, useMediaQuery } from '../lib/useMediaQuery'
+import { NEWS_ENABLED } from '../lib/features'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { TodayWorkspace } from './TodayWorkspace'
 
@@ -112,7 +113,7 @@ export function TodayView({ data }: { data: TodayData }) {
         </div>
         <aside className="flex min-w-0 flex-col gap-4">
           {hasCalls && <Suggestions data={data} />}
-          <InTheNews />
+          {NEWS_ENABLED && <InTheNews />}
           <LiveRecord data={data} />
           <HowToRead />
         </aside>

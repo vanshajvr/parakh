@@ -147,7 +147,8 @@ probability into a *Bullish lean* (likely to outperform), a *Bearish lean* (like
 
 - Daily adjusted prices from Yahoo Finance (via `yfinance`), {config.START_DATE} onwards, plus the NIFTY 50 index.
 - {n_rows:,} labelled stock-days after indicator warm-up.
-- Universe: {", ".join(t.removesuffix(".NS") for t in config.TICKERS)}.
+- Universe: {", ".join(t.removesuffix(".NS") for t in config.TICKERS)}. These are today's members, not the
+  index as it stood each year (see Limitations).
 
 ## The model
 
@@ -242,6 +243,11 @@ The 15 price and volume features the ML candidates used:
 
 ## Limitations
 
+- **Survivorship bias.** The 20 stocks were picked in 2026 from today's large caps, and the backtest runs
+  on them back to 2019. Companies that were in the NIFTY 50 then but have since dropped out are missing, so
+  the universe is made of survivors. Because every call is relative to the other stocks and the index, the
+  direction of the effect isn't obvious, but the backtest is not a point-in-time test. A point-in-time
+  universe (index membership month by month, with delisted names) is planned research, not done.
 - Uses price and volume only: no fundamentals, news or earnings dates.
 - Large, liquid stocks are the hardest to predict. This is expected behaviour, not a bug.
 - yfinance data can be delayed or revised. Yahoo rewrites adjusted price history after dividends and

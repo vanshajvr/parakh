@@ -1,0 +1,31 @@
+name: Keepalive
+
+# GitHub turns off scheduled workflows in a public repository after 60 days without repository
+# activity, and they stay off until someone turns them back on (decision D-043). Once a month this
+# re-enables each scheduled workflow through the API, which resets that clock without a commit.
+# Its own healthchecks.io ping means a stopped keepalive is noticed too.
+on:
+  schedule:
+    - cron: "0 4 1 * *" # 09:30 IST on the 1st of each month
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_KEEPALIVE_URL }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Re-enable the scheduled workflows
+        run: |
+          for workflow in daily.yml retrain.yml keep-warm.yml keepalive.yml; do
+            gh api --method PUT "repos/${{ github.repository }}/actions/workflows/$workflow/enable"
+            echo "enabled $workflow"
+          done
+      - name: Report to healthchecks.io
+        if: always() && env.HEALTHCHECK_URL != ''
+        run: curl -fsS -m 10 --retry 3 "$HEALTHCHECK_URL${{ job.status == 'success' && '' || '/fail' }}"

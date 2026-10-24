@@ -70,6 +70,7 @@ function Setup({ onStart }: { onStart: (scenario: ScenarioId, cash: number) => v
             )
           })}
         </div>
+        <p className="m-0 px-1 text-[13px] leading-relaxed text-muted">{m.practice.survivors} <Term id="survivorship" /></p>
       </section>
       <section aria-labelledby="amount" className="flex flex-col gap-3">
         <h2 id="amount" className="m-0 px-1 text-base font-semibold">{sip ? m.practice.monthlyAmount : m.practice.startingMoney}</h2>

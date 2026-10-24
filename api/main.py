@@ -119,6 +119,11 @@ def receipt_lookup(repo: Repository):
     """
     model = repo.active_model()
     summary = model["metrics"]["models"][model["kind"]] if model else {}
+    # The final test on years kept unseen until the end (D-022), for the same rule.
+    holdout = (model["metrics"].get("holdout") or {}).get(model["kind"], {}) if model else {}
+    years = lambda period: (int(period[0][:4]), int(period[1][:4])) if period else (None, None)
+    tested_from, tested_to = years(summary.get("period"))
+    holdout_from, holdout_to = years(holdout.get("period"))
     stocks = {r["ticker"]: r for r in repo.backtest_by_ticker()}
 
     def receipt(ticker: str, lean: str) -> Receipt:
@@ -131,6 +136,12 @@ def receipt_lookup(repo: Repository):
         return Receipt(
             band_hit_rate=_clean(band.get("hit_rate")),
             band_n_calls=band.get("n_calls", 0),
+            tested_from=tested_from if band else None,
+            tested_to=tested_to if band else None,
+            holdout_hit_rate=_clean(holdout.get("hit_rate")) if band else None,
+            holdout_n_calls=holdout.get("n_calls", 0) if band else 0,
+            holdout_from=holdout_from if band else None,
+            holdout_to=holdout_to if band else None,
             stock_hit_rate=stock_hit,
             stock_n_calls=stock.get("n_calls", 0),
             stock_hit_low=low,

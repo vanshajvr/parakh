@@ -14,6 +14,8 @@ jobs:
   retrain:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_RETRAIN_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,3 +33,7 @@ jobs:
             docs/model-card.md
             docs/img/calibration.png
             artifacts/metrics.json
+      # Heartbeat for healthchecks.io (decision D-043): an alert if a run fails, or if none arrives on schedule.
+      - name: Report to healthchecks.io
+        if: always() && env.HEALTHCHECK_URL != ''
+        run: curl -fsS -m 10 --retry 3 "$HEALTHCHECK_URL${{ job.status == 'success' && '' || '/fail' }}"

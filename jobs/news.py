@@ -1,5 +1,9 @@
 """News job: recent headlines for each NIFTY 50 stock, in English and Hindi (decision D-037).
 
+PAUSED (decision D-042): Google News feeds may only be shown in a personal feed reader, so this
+job no longer runs on a schedule and the app hides news. Point FEED at a source whose terms allow
+public display before running it again.
+
 Headlines come from Google News RSS searches. Only the headline, source, time and link are kept;
 article text is never copied. A headline counts for a stock only if its title names the company,
 and headlines that are stock tips ("stocks to buy", "target price") are dropped: Parakh shows

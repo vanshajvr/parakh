@@ -550,6 +550,21 @@ export interface components {
             band_hit_rate: number | null;
             /** Band N Calls */
             band_n_calls: number;
+            /** Tested From */
+            tested_from?: number | null;
+            /** Tested To */
+            tested_to?: number | null;
+            /** Holdout Hit Rate */
+            holdout_hit_rate?: number | null;
+            /**
+             * Holdout N Calls
+             * @default 0
+             */
+            holdout_n_calls: number;
+            /** Holdout From */
+            holdout_from?: number | null;
+            /** Holdout To */
+            holdout_to?: number | null;
             /** Stock Hit Rate */
             stock_hit_rate: number | null;
             /** Stock N Calls */

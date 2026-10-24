@@ -4,6 +4,23 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-043 · Alerts for missed runs, and a keepalive
+**Date:** 2026-10-24
+**Decision:** The daily job and the weekly retrain each finish by pinging healthchecks.io: a success ping, or `/fail` if a step failed. healthchecks.io knows each schedule and emails if a run fails or doesn't arrive in its grace period. A monthly keepalive workflow re-enables every scheduled workflow through GitHub's API, and pings its own check. Pings are skipped until their `HEALTHCHECK_*_URL` secrets are set.
+**Why:** The failure that matters is silence. GitHub turns off scheduled workflows in a public repository after 60 days without activity, and an Actions outage or a broken secret stops every job. Anything that runs inside GitHub stops with it and can't report its own absence, so the check has to live outside: a dead man's switch. The keepalive should stop the 60-day shutdown from happening, and the outside check notices if it does anyway. The app's "data may be delayed" banner tells users; this tells the owner first.
+**Alternatives:** GitHub's own failure emails (silent when nothing runs); a watchdog workflow (switched off along with everything else); dummy commits to stay active (noise in the history).
+
+---
+
+### D-042 · News off until a source allows public display
+**Date:** 2026-10-24
+**Decision:** News is switched off: the schedule is removed, the 502 stored headlines are deleted, and the app hides the news card and stock-page section behind one flag (`NEWS_ENABLED`). The job, the table and the endpoint stay, for a future source.
+**Why:** Every Google News feed carries this notice: "This XML feed is made available solely for the purpose of rendering Google News results within a personal feed reader for personal, non-commercial use. Any other use of the feed is expressly prohibited." A public website is other use, however non-commercial the project, so D-037's source was the wrong one; checking the feed's own terms should have come before building on it. Showing the source and linking out doesn't change that.
+**Next:** publishers' own RSS feeds (business sections of English and Hindi newspapers), each used only after reading its terms, with the company matching from D-037 on top.
+**Alternatives:** Keep it and add "via Google News" (credit doesn't grant permission); NSE corporate announcements (official, but they block automated access and aren't news as such).
+
+---
+
 ### D-041 · Show how to play, don't tell
 **Date:** 2026-10-24
 **Decision:**
@@ -58,6 +75,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ### D-037 · News as context for a move, never as a tip
 **Date:** 2026-10-24
+*Paused by D-042: the feed's terms don't allow showing it in a public app.*
 **Decision:**
 - Headlines for all 50 NIFTY stocks come from Google News RSS searches, every 3 hours (`jobs/news.py`, its own workflow so it can never delay the day's calls). Hindi mode shows headlines from the Hindi edition.
 - Only the headline, source, time and link are stored; the article opens on the publisher's site. No article text and no AI summaries.
@@ -66,6 +84,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 - Today groups headlines under the stocks that moved most ("why did they move?"); each stock page lists its own. Every list ends with "by the time news reaches you, the price has usually already moved", linked to *priced in* in the glossary.
 - No scrolling ticker; a calm list, newest first.
 **Why:** "Why did this stock move?" is the first question a beginner asks, and headlines answer it. But a news feed can quietly teach trading on headlines, the habit Parakh exists to counter (D-001, D-033), so it shows news as context and filters out the tips that news sites mix in.
+**Known limit:** the company, business and tip filters are keyword lists, so they leak both ways. Before launch a Facebook post ("Buy TCS Futures: SL 2475 Tgt 2535") got through, and genuine headlines that happen to mention "target" or "options" are dropped. They reduce tips; they can't guarantee none.
 **Alternatives:** Publisher RSS feeds (not per company); NSE/BSE announcements (official, but block automated access); paid news APIs (free tiers are development-only); AI summaries of articles (copyright grey area, and summaries can get facts wrong).
 
 ---
