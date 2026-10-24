@@ -6,7 +6,8 @@ import { Practice } from './Practice'
 
 afterEach(() => localStorage.clear())
 
-async function startCrash() {
+async function startCrash({ tour = false } = {}) {
+  if (!tour) localStorage.setItem('parakh.tour.v1', 'done')
   renderPage(<Practice />, '/practice')
   await userEvent.click(await screen.findByRole('radio', { name: /Survive the crash/ }))
   await userEvent.click(screen.getByRole('button', { name: /^Start · Survive the crash/ }))
@@ -62,5 +63,41 @@ describe('Practice', () => {
     expect(screen.getByText(/sat in cash, earning nothing/)).toBeInTheDocument()
     expect(screen.getAllByText(/and you held\. Over the next month the index fund went (up|down)/).length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: "Cash doesn't grow" })).toBeInTheDocument()
+  })
+
+  it('shows a first-time player how to play, then points at where to start', async () => {
+    await startCrash({ tour: true })
+    const tour = screen.getByRole('dialog', { name: 'This is your money' })
+    for (const title of ['Buy from here', 'Then press Play', 'The game will stop you', 'See how you did']) {
+      await userEvent.click(within(tour).getByRole('button', { name: 'Next' }))
+      expect(within(screen.getByRole('dialog')).getByRole('heading')).toHaveTextContent(title)
+    }
+    await userEvent.click(screen.getByRole('button', { name: "Let's play" }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(localStorage.getItem('parakh.tour.v1')).toBe('done')
+    expect(screen.getByText('Start here')).toBeInTheDocument()
+    // It can be opened again at any time.
+    await userEvent.click(screen.getByRole('button', { name: 'How to play' }))
+    expect(screen.getByRole('dialog', { name: 'This is your money' })).toBeInTheDocument()
+  })
+
+  it('buys by a number of shares, and the amount box never keeps a stray zero', async () => {
+    await startCrash()
+    const fund = screen.getAllByRole('listitem').find((li) => li.textContent?.startsWith('NIFTYBEES'))!
+    await userEvent.click(within(fund).getByRole('button', { name: 'Buy' }))
+    const sheet = screen.getByRole('dialog', { name: 'Buy NIFTYBEES' })
+    const amount = within(sheet).getByRole('textbox', { name: 'How much to spend' })
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '01000')
+    expect(amount).toHaveValue('1,000')
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Shares' }))
+    const shares = within(sheet).getByRole('textbox', { name: 'How many shares to buy' })
+    await userEvent.clear(shares)
+    await userEvent.type(shares, '25')
+    expect(within(sheet).getByText(/^About 25 shares at/)).toBeInTheDocument()
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Place order' }))
+    expect(screen.getByText('Buy 25 NIFTYBEES')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: '+1 week' }))
+    expect(screen.getByText('25 shares')).toBeInTheDocument()
   })
 })

@@ -4,6 +4,18 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-041 · Show how to play, don't tell
+**Date:** 2026-10-24
+**Decision:**
+- **Setup screen:** a three-step picture strip (buy the index fund or any stock → press Play → did you beat the index fund?), with each picture drawn from the game's own pieces.
+- **First game:** a five-step tour that dims the page and spotlights the real parts of the screen: your money against the index fund, the index fund's Buy button, Play, the interruptions and the report card. One short line per step, Skip and Back, reopened from "How to play". It's shown once per device.
+- **Nudges:** until the first order, a "Start with a buy" card at the top offers a one-tap "Buy the index fund", and the fund's Buy button pulses. Once an order is waiting, Play pulses with "Now press Play".
+- **Orders:** buy by rupees or by shares; sell any number of shares. Amounts use a text field with Indian grouping that can be empty, replacing a number field that kept a leading zero ("01000").
+**Why:** In the first real test, the player couldn't tell where to start, put about ₹1,000 into the fund, left 98.6% in cash, and got a report card about idle cash. The game's rules were fine; the first minute wasn't. Beginners learn a game by being shown its pieces in place, not by reading paragraphs.
+**Alternatives:** A written how-to page (skipped by most players); a video (heavy, and goes out of date with every change).
+
+---
+
 ### D-040 · Interruptions, a report card and lessons
 **Date:** 2026-10-24
 **Decision:**

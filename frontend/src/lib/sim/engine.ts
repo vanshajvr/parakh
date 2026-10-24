@@ -34,8 +34,11 @@ export function toMarket(m: SimMarket): Market {
   return { dates: m.dates, symbols: m.stocks.map((s) => s.symbol), indexFund: m.index_fund, index: m.index, open, close, info }
 }
 
-/** Placed after the close of `day`; fills at the open of `day + 1`. Buy by rupee amount, sell by shares. */
-export type NewOrder = { symbol: string; side: 'buy'; amount: number } | { symbol: string; side: 'sell'; qty: number }
+/** Placed after the close of `day`; fills at the open of `day + 1`. Buy by rupee amount or by shares; sell by shares. */
+export type NewOrder =
+  | { symbol: string; side: 'buy'; amount: number; qty?: undefined }
+  | { symbol: string; side: 'buy'; qty: number; amount?: undefined }
+  | { symbol: string; side: 'sell'; qty: number }
 export type Order = NewOrder & { day: number }
 
 export type Game = {
@@ -104,11 +107,12 @@ export function simulate(market: Market, game: Game, upTo = game.end): Result {
     byFillDay.set(o.day + 1, [...(byFillDay.get(o.day + 1) ?? []), o])
   }
 
-  const buy = (day: number, symbol: string, budget: number, isSip = false): boolean => {
+  /** Buy as many shares as `budget` allows (or `limit`, if fewer), at the day's open. */
+  const buy = (day: number, symbol: string, budget: number, isSip = false, limit = Infinity): boolean => {
     const price = market.open[symbol]?.[day] ?? null
     if (price == null) return false
     const etf = symbol === market.indexFund
-    const qty = affordable(Math.min(budget, cash), price, etf)
+    const qty = Math.min(limit, affordable(Math.min(budget, cash), price, etf))
     if (qty === 0) return false
     const value = qty * price, c = charges('buy', value, etf)
     cash -= value + c.total
@@ -133,7 +137,8 @@ export function simulate(market: Market, game: Game, upTo = game.end): Result {
       if (price == null) {
         rejections.push({ order: o, reason: 'no-price' })
       } else if (o.side === 'buy') {
-        if (!buy(day, o.symbol, o.amount)) rejections.push({ order: o, reason: 'too-small' })
+        const ok = o.qty != null ? buy(day, o.symbol, cash, false, o.qty) : buy(day, o.symbol, o.amount)
+        if (!ok) rejections.push({ order: o, reason: 'too-small' })
       } else {
         const qty = Math.min(o.qty, holdings[o.symbol] ?? 0)
         if (qty <= 0) {
