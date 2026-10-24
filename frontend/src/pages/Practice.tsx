@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSimMarket } from '../api/client'
 import { Pause, Play, Search } from '../components/Icons'
+import { PromptDialog } from '../components/practice/PromptDialog'
+import { ReportCard } from '../components/practice/ReportCard'
 import { ValueChart } from '../components/practice/ValueChart'
 import { Card, Loading, LoadError } from '../components/States'
 import { Term } from '../components/Term'
@@ -8,7 +10,7 @@ import { useI18n, type Messages } from '../i18n'
 import { money, price, shortDate, signedPct } from '../lib/format'
 import { affordable, charges } from '../lib/sim/charges'
 import { lastClose, toMarket, type Market } from '../lib/sim/engine'
-import { positions, summarise } from '../lib/sim/results'
+import { positions } from '../lib/sim/results'
 import { SCENARIOS, scenarioById, type ScenarioId } from '../lib/sim/scenarios'
 import { SPEEDS, usePractice, type Practice as PracticeState } from '../lib/sim/usePractice'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -144,7 +146,13 @@ function Playing({ market, practice }: { market: Market; practice: PracticeState
         </button>
       </section>
 
-      {practice.finished && <EndPanel market={market} practice={practice} />}
+      {practice.finished && (
+        <ReportCard market={market} result={result} fund={fund} prompts={saved.prompts ?? []} when={when}
+          revealed={hide ? m.practice.end.revealed(shortDate(market.dates[game.start], m.locale), shortDate(market.dates[game.end], m.locale)) : null}
+          isMystery={saved.scenario === 'mystery'} onReplay={practice.replay} onNew={practice.quit}
+          onMystery={() => practice.start('mystery', game.cash || game.sip?.amount || 1_00_000)} />
+      )}
+      {practice.prompt && <PromptDialog prompt={practice.prompt} when={when(practice.prompt.day)} onChoose={practice.choose} />}
 
       {/* Phone: one column. Laptop: holdings | your money and time | the market (D-038's workspace style). */}
       <div className="grid gap-4 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)_minmax(300px,360px)] lg:items-start lg:gap-6">
@@ -381,38 +389,5 @@ function BuySheet({ market, practice, symbol, onClose }: { market: Market; pract
         </div>
       </div>
     </div>
-  )
-}
-
-function EndPanel({ market, practice }: { market: Market; practice: PracticeState }) {
-  const { m } = useI18n()
-  const { saved, result, fund } = practice
-  if (!saved || !result || !fund) return null
-  const you = summarise(result), index = summarise(fund)
-  const gap = you.value - index.value
-  const e = m.practice.end
-  return (
-    <Card className="flex flex-col gap-3 border-ink p-5">
-      <h2 className="m-0 font-serif text-2xl font-semibold">{e.title}</h2>
-      <div className="grid grid-cols-2 gap-3">
-        {[[e.you, you], [e.fund, index]].map(([label, s]) => (
-          <div key={label as string} className="flex flex-col gap-0.5 rounded-xl bg-page p-3">
-            <span className="text-xs font-semibold tracking-wide text-muted uppercase">{label as string}</span>
-            <span className="text-[22px] font-semibold tabular-nums">{money((s as typeof you).value)}</span>
-            <span className="text-[13px] text-muted tabular-nums">{signedPct((s as typeof you).returnPct, 1)}</span>
-          </div>
-        ))}
-      </div>
-      <p className="m-0 text-[15px] font-medium text-ink">{Math.abs(gap) < 1 ? e.tie : gap > 0 ? e.beat(money(gap)) : e.lost(money(-gap))}</p>
-      <p className="m-0 text-[13px] text-muted">{e.details(you.trades, money(you.chargesPaid))}</p>
-      {scenarioById(saved.scenario).hideDates && (
-        <p className="m-0 text-[13px] text-ink-2">{e.revealed(shortDate(market.dates[saved.game.start], m.locale), shortDate(market.dates[saved.game.end], m.locale))}</p>
-      )}
-      <p className="m-0 text-xs text-muted">{e.soon}</p>
-      <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={practice.replay} className="h-10 cursor-pointer rounded-full bg-brand px-4 text-sm font-semibold text-on-brand">{e.again}</button>
-        <button type="button" onClick={practice.quit} className="h-10 cursor-pointer rounded-full border border-line-2 bg-surface px-4 text-sm font-medium text-ink">{m.practice.newGame}</button>
-      </div>
-    </Card>
   )
 }

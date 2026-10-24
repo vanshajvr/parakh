@@ -44,3 +44,16 @@ export function portfolioEvent(days: Day[], quietSince: number | null): Portfoli
   const change = g[g.length - 1] / Math.max(...g) - 1
   return change <= DRAWDOWN ? { day: today.day, kind: 'drawdown', change } : null
 }
+
+/** The first day after `after` on which your portfolio is 15% below its peak, if it's outside the quiet spell. */
+export function firstDrawdown(days: Day[], after: number, quietSince: number | null): PortfolioEvent | null {
+  const g = growth(days)
+  let peak = -Infinity
+  for (let i = 0; i < days.length; i++) {
+    peak = Math.max(peak, g[i])
+    const change = g[i] / peak - 1
+    const quiet = quietSince != null && days[i].day - quietSince < COOLDOWN
+    if (days[i].day > after && change <= DRAWDOWN && !quiet) return { day: days[i].day, kind: 'drawdown', change }
+  }
+  return null
+}
