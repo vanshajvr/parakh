@@ -9,6 +9,16 @@ PRICES_PATH = config.DATA_DIR / "prices.parquet"
 PRICE_COLUMNS = ["open", "high", "low", "close", "volume"]
 
 
+def drop_placeholders(df: pd.DataFrame) -> pd.DataFrame:
+    """Drop rows Yahoo fills in for days with no trading: open, high, low and close all equal, and no volume.
+
+    Found by the SQL analysis (analysis/, section 6): 15 Jan 2026 and 18 Mar 2025 are such rows for
+    nearly every stock. Index rows have no volume on Yahoo, but never four equal prices, so they stay.
+    """
+    flat = (df["open"] == df["high"]) & (df["high"] == df["low"]) & (df["low"] == df["close"])
+    return df[~(flat & (df["volume"].fillna(0) == 0))]
+
+
 def download_prices(tickers: list[str], start: str = config.START_DATE) -> pd.DataFrame:
     """Return long-format prices: one row per (date, ticker), split/dividend adjusted."""
     raw = yf.download(
@@ -21,6 +31,7 @@ def download_prices(tickers: list[str], start: str = config.START_DATE) -> pd.Da
         df = raw[ticker].rename(columns=str.lower)[PRICE_COLUMNS]
         # yfinance can return a trailing row with volume but no prices for an unfinished session.
         df = df.dropna(subset=["open", "high", "low", "close"])
+        df = drop_placeholders(df)
         df = df.assign(ticker=ticker)
         frames.append(df)
 

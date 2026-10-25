@@ -520,11 +520,20 @@ def sim_market(prices: pd.DataFrame) -> SimMarket:
                      index=series(config.BENCHMARK, "close"), stocks=stocks)
 
 
+# Building SimMarket takes a few seconds, so it's kept until the prices change (new rows or a new day).
+_sim_cache: dict[tuple, SimMarket] = {}
+
+
 @app.get("/api/sim/prices", response_model=SimMarket)
 def sim_prices(response: Response, repo: Repository = Depends(get_repo)):
     """Every NIFTY 50 stock and the index fund, open and close per trading day since 2016."""
     response.headers["Cache-Control"] = "public, max-age=3600"
-    return sim_market(repo.sim_prices())
+    prices = repo.sim_prices()
+    key = (len(prices), str(prices["date"].max()) if len(prices) else "")
+    if key not in _sim_cache:
+        _sim_cache.clear()
+        _sim_cache[key] = sim_market(prices)
+    return _sim_cache[key]
 
 
 @app.get("/api/model", response_model=ModelInfo)

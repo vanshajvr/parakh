@@ -4,7 +4,7 @@
 
 **Practise investing with fake money, and see honestly what works.** A web app for beginner Indian investors. Replay real markets in a time machine, follow stock signals that show their track record, and judge everything against simply holding a NIFTY 50 index fund. In English and Hindi.
 
-**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Decision log](docs/decisions.md) (45 decisions) · [PRD](docs/PRD.md) · [Model card](docs/model-card.md) · [SQL analysis](analysis/track_record_sql.ipynb)
+**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Decision log](docs/decisions.md) (46 decisions) · [PRD](docs/PRD.md) · [Model card](docs/model-card.md) · [SQL analysis](analysis/track_record_sql.ipynb)
 
 > **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. Under rules written down before testing, a one-line rule matched a tuned LightGBM model, and on two years of held-back data neither was reliably better than a coin flip. So I stopped competing on accuracy. Parakh shows its receipts on every call, and teaches the lesson the data taught me through a game: picking stocks is hard, so measure everything against the index fund.
 
@@ -15,7 +15,7 @@
 ### The time machine: practice on real markets
 
 - **Pick a period and an amount:** the 2020 crash, the 2021 rally, 18 flat months, a decade of SIP, or a **mystery** period with the dates hidden, so hindsight can't help.
-- **Let time run:** buy and sell any NIFTY 50 stock or a real index fund (NIFTYBEES) with virtual money. Orders fill at the next day's open, in whole shares, with real charges itemised: STT, exchange fees, stamp duty, GST and the depository charge. Prices are adjusted for later splits, bonuses and dividends, so a share can look cheaper than it did at the time; gains in rupees work out the same.
+- **Let time run:** buy and sell any NIFTY 50 stock or a real index fund (NIFTYBEES) with virtual money. Orders fill at the next day's open, in whole shares, with real charges itemised: STT, exchange fees, stamp duty, GST and the depository charge. Prices are adjusted for later splits, bonuses and dividends, so a share can look cheaper than it did at the time; gains in rupees work out nearly the same (whole-share rounding and leftover cash differ).
 - **The market interrupts you.** In a sharp fall or rally, or when your own money is 15% down, the game stops and asks: hold, sell or buy more? It shows only what you could have known that day.
 - **A report card, not a score:** you against the same money left in the index fund, what followed each of your choices, and short lessons linked to what you did (selling in a fall, idle cash, charges, survivorship bias…). A win is called luck: one period proves nothing.
 - **Shown, not told:** a picture strip and a spotlight tour on the first game, with "start here" nudges until the first order ([D-041](docs/decisions.md)).
@@ -34,7 +34,7 @@
 - **A receipt on every call:** "Slight edge · 51.4% right in testing, 2019–26", with the unseen 2025–26 holdout one tap away, plus a range when a stock has done worse than a coin flip, so you can see how much of that could be chance.
 - **Every no-call says why:** "3.5% behind the average; calls started at 3.8%", with a bar for how close it came ([D-035](docs/decisions.md)).
 - **A laptop workspace:** stock list, selected stock's chart and reasons, and a rail with what to look at next ([D-038](docs/decisions.md)). Phones get a scrolling feed.
-- **A record nobody can edit:** calls are published before the market opens, and the database refuses edits or deletions. Live and simulated records are never mixed, and the whole ledger downloads as a CSV.
+- **A record that can't be quietly edited:** calls are published before the market opens, and the database blocks edits and deletions; loosening that would mean changing its rules in the public code. Live and simulated records are never mixed, and the whole ledger downloads as a CSV.
 
 ### Context, in plain words
 
@@ -65,7 +65,7 @@ Even at face value, the gap between bullish and bearish leans (about 0.2% over 5
 
 ## Key decisions
 
-All 45 are in the [decision log](docs/decisions.md), each with the alternatives considered.
+All 46 are in the [decision log](docs/decisions.md), each with the alternatives considered.
 
 | Decision | Why |
 |---|---|
@@ -103,13 +103,13 @@ flowchart LR
 - **Time machine:** a pure TypeScript engine replays a game from its saved orders, so a game can be resumed or replayed exactly. Its prices are a static file saved at build time and served by Vercel's CDN, rebuilt after each daily run, so Practice never waits for the API to wake ([D-044](docs/decisions.md)). Games are saved on the device.
 - **App:** React, TypeScript and Tailwind, with types generated from the API schema and typed English/Hindi dictionaries (a missing Hindi line fails the build). It's an installable PWA.
 - **Monitoring:** each job pings healthchecks.io, which emails if a run fails or doesn't arrive on time, and a monthly keepalive stops GitHub switching the schedules off after 60 quiet days ([D-043](docs/decisions.md)).
-- **Quality:** 56 Python and 80 frontend tests, including look-ahead checks and engine tests on real 2020–23 prices.
+- **Quality:** 58 Python and 80 frontend tests, including look-ahead checks and engine tests on real 2020–23 prices.
 
 Setup and deployment: [development guide](docs/development.md). The original screening-assignment notebook this grew from is in [`research/`](research/README.md), with its methodology issues listed.
 
 ## Disclaimer
 
-Parakh is an educational project. It is not investment advice, and it is not registered with SEBI as an investment adviser or research analyst.
+Parakh is a personal, non-commercial portfolio project built to demonstrate data and product skills on public market data. It is not investment advice, and it is not registered with SEBI as an investment adviser or research analyst ([D-046](docs/decisions.md)).
 
 ## Author
 

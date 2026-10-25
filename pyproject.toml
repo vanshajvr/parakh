@@ -1,7 +1,7 @@
 [project]
 name = "parakh"
 version = "0.1.0"
-description = "ML stock signals with receipts: calibrated, explained, and publicly scored."
+description = "Practise investing on real past markets, and stock signals that show their track record."
 requires-python = ">=3.11,<3.14"
 # Core: what the read-only API needs. The ML stack is an extra, so the API host stays small.
 dependencies = [
