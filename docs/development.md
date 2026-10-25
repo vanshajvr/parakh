@@ -97,6 +97,16 @@ Until a secret is set, that workflow simply skips its ping. Market holidays will
 
 **Fresh prices for the time machine (optional).** In Vercel: Project → Settings → Git → Deploy Hooks, create a hook for `main`, and store its URL as the `VERCEL_DEPLOY_HOOK_URL` repository secret. The daily job then rebuilds the site after each run, so the static price file includes the latest close ([D-044](decisions.md)). Without it, the file refreshes on each deploy.
 
+## Before merging a phase
+
+A short checklist, because most of the issues reviewers found were claims that had drifted from the code or the data:
+
+1. **Data and terms.** For any new data source, read its own terms and what its numbers mean (adjusted or raw, what's missing) before building on it ([D-042](decisions.md), [D-039](decisions.md)).
+2. **Claims against the code.** Every number or promise in the README, PRD, model card and app copy still matches the code and the current model; numbers are pinned to a model version.
+3. **Stale words.** Search for removed features and old names (e.g. `git grep -i "stronger edge"`) across the app, its metadata and the docs.
+4. **Tests and build.** `pytest`, `npm test`, `npx tsc -b`, `npm run lint` and `npm run build` all pass.
+5. **Decision log.** New choices, and changes to old ones, are written up with the alternatives.
+
 ## Deployment
 
 | Piece | Where | Config |
@@ -104,7 +114,6 @@ Until a secret is set, that workflow simply skips its ping. Market holidays will
 | API | Render (free plan, Singapore) | [`render.yaml`](../render.yaml); set `DATABASE_URL` in the dashboard |
 | Frontend | Vercel (root directory `frontend`), live at [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) | [`frontend/vercel.json`](../frontend/vercel.json) forwards `/api/*` to the API |
 | Jobs | GitHub Actions | `DATABASE_URL` secret |
-| Keep-warm ping | GitHub Actions | `API_URL` repository variable ([why](../.github/workflows/keep-warm.yml)) |
 | Database | Neon Postgres (Singapore) | — |
 
 Because Vercel forwards `/api/*` to Render, the browser only ever talks to one site: no CORS configuration is needed, and Vercel preview deployments work too.

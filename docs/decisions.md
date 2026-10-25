@@ -4,6 +4,14 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-046 · What Parakh is, for data terms and regulation
+**Date:** 2026-10-25
+**Decision:** Parakh is a personal, non-commercial portfolio project that demonstrates data and product skills on public market data. It keeps using Yahoo Finance data via `yfinance` and showing named-stock leans, with the disclaimer stating this plainly.
+**Why:** The owner checked both questions: `yfinance` is widely used for projects of this kind, and SEBI's rules on unregistered advice and finfluencers were reviewed for a personal skills showcase that offers no paid service and solicits no one. Reviewers raised both points after D-042, so the position is written down rather than left implicit. If Parakh ever became a public service with users relying on it, both would need revisiting: licensed price and index data, and either registration or signals delayed past SEBI's limit for education.
+**Alternatives:** Licensed end-of-day data (cost); publishing each lean 3 months late to stay within SEBI's reported rule for educators using price data (changes the product's core); removing bulk downloads of price data.
+
+---
+
 ### D-045 · No verdict on a call until it's scored
 **Date:** 2026-10-25
 **Decision:** Calls in progress show how far ahead of or behind the index they are, and "Not a result yet", instead of "On track so far" or "Off track so far".
@@ -16,6 +24,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 **Date:** 2026-10-25
 **Decision:** Before each build, `frontend/scripts/fetch-sim-prices.mjs` saves the price history to `public/sim-prices.json`, which Vercel's CDN serves. Practice reads that file first and only falls back to the API. The daily job triggers a Vercel rebuild (an optional deploy hook) so the file includes each new close. The PWA caches it, refreshing in the background.
 **Why:** The game runs entirely in the browser, yet it waited on the API, which sleeps on Render's free plan. A tester saw loading placeholders and a "can take up to a minute" notice. The keep-warm workflow doesn't prevent this: GitHub runs frequent schedules hours late.
+*Update, 25 Oct: the keep-warm workflow is removed. GitHub ran its 10-minute schedule hours apart, so it never kept the API awake, yet it used about 100 runs a day.*
 **Alternatives:** A paid always-on API host (cost); committing the file to the repository daily (2 MB of churn in the history); caching the proxied API response at the CDN (depends on Vercel's handling of external rewrites).
 
 ---
@@ -151,7 +160,7 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ### D-032 · One label for every call
 **Date:** 2026-10-24
-**Decision:** Drop the *Stronger edge* tier. Every call is labelled *Slight edge*, and its receipt shows the hit rate of all testing calls (51.4%), not of its tier. Calls already published keep the label they were published with, since the ledger can't be edited. *Update, 25 Oct: the app showed those stored labels for days, contradicting this decision, so every screen now shows one label; only the ledger table and CSV keep the stored value, with a note.*
+**Decision:** Drop the *Stronger edge* tier. Every call is labelled *Slight edge*, and its receipt shows the hit rate of all testing calls (51.4%), not of its tier. Calls already published keep the label they were published with, since the ledger can't be edited. *Update, 25 Oct: the app showed those stored labels for days, contradicting this decision, so every screen now shows one label; only the ledger table and CSV keep the stored value, with a note.* *Note: the finding came from the SQL analysis across all years, holdout included. It's a product decision about a label, not a model choice, but it does use the holdout years.*
 **Why:** The SQL analysis (`analysis/track_record_sql.ipynb`, section 2) found the tiers don't sort calls: *Stronger edge* calls were right 50.9% of the time and *Slight edge* calls 51.8%, and the top probability decile beat the index less often than the middle ones. On the Today screen, a beginner saw "Stronger edge" next to the lower number. A label that claims more confidence than the record supports breaks the product's main promise (D-001).
 **Alternatives:** Renaming the tiers to describe signal strength rather than accuracy (honest but clunky, and tells a user nothing they can act on); showing both tiers' rates on every card (transparent but confusing for a beginner).
 

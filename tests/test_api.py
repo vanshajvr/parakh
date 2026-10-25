@@ -329,6 +329,7 @@ def test_news_is_filtered_by_language_and_stock(client):
 def test_sim_prices_use_a_clean_calendar(monkeypatch):
     from api import main
     monkeypatch.setattr(main.config, "MARKET_TICKERS", ["TCS.NS", "INFY.NS"])
+    main._sim_cache.clear()
     app.state.repo = FakeRepository(CALLS)
     with TestClient(app) as c:
         body = c.get("/api/sim/prices").json()
@@ -340,3 +341,17 @@ def test_sim_prices_use_a_clean_calendar(monkeypatch):
     assert fund["sector"] == "Index fund"
     # A member with no stored prices is listed with no prices rather than left out.
     assert next(s for s in body["stocks"] if s["symbol"] == "ITC")["close"] == [None, None]
+
+
+def test_sim_prices_are_built_once_until_the_prices_change(monkeypatch):
+    from api import main
+    monkeypatch.setattr(main.config, "MARKET_TICKERS", ["TCS.NS", "INFY.NS"])
+    main._sim_cache.clear()
+    built = []
+    real = main.sim_market
+    monkeypatch.setattr(main, "sim_market", lambda prices: built.append(1) or real(prices))
+    app.state.repo = FakeRepository(CALLS)
+    with TestClient(app) as c:
+        assert c.get("/api/sim/prices").status_code == c.get("/api/sim/prices").status_code == 200
+    del app.state.repo
+    assert len(built) == 1

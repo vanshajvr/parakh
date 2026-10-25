@@ -140,7 +140,7 @@ See [model-card.md](model-card.md) for current numbers.
 | Survivorship bias: the 20 stocks and the time machine's 50 are today's index members, so stocks that dropped out since are missing | Disclosed in the model card, the README and the game's setup screen; a point-in-time universe is planned research |
 | A data source's terms forbid public use (as Google News's did) | Read a source's own terms before building on it (D-042) |
 | Scheduled jobs stop silently (GitHub's 60-day rule, outages) | healthchecks.io heartbeats and a monthly keepalive (D-043) |
-| Hindi that reads like a literal translation | Simple everyday Hindi that keeps the English market words people use, reviewed by a native speaker (D-034) |
+| Hindi that reads like a literal translation | Simple everyday Hindi that keeps the English market words people use; to be reviewed by a native speaker before wider use (D-034) |
 
 ## 9. Roadmap
 

@@ -53,7 +53,7 @@ export function Learn() {
           <p className="m-0 text-[15px] leading-relaxed text-ink-2 lg:text-base">
             Parakh looks at {model ? model.universe.length : 20} large Indian companies every trading day and asks one question:{' '}
             <strong className="font-semibold text-ink">will this stock do better than a NIFTY 50 index fund over the next 5 trading days?</strong>{' '}
-            It answers with a lean, a confidence level and its reasons, and keeps a public record of every answer.
+            It answers with a lean, its track record in testing and its reasons, and keeps a public record of every answer.
           </p>
           <p className="m-0 font-serif text-[15px] text-muted italic">
             Parakh (परख): to test something's true worth, the way a jeweller tests gold on a touchstone.
@@ -92,8 +92,8 @@ export function Learn() {
             </p>
             <p className="m-0">
               Tips channels often name candle shapes, like "hammer", "doji" or "engulfing", as signs of what comes next. Parakh's calls
-              don't use them. Whether they predict anything is something we're testing on 10 years of data, and we'll publish the
-              answer here either way.
+              don't use them. Whether they predict anything hasn't been tested here yet: it's planned research, and the result
+              will be added to this page when it's done, whichever way it comes out.
             </p>
           </>
         ))}
@@ -144,12 +144,19 @@ export function Learn() {
           <>
             <p className="m-0">
               Large, well-known companies are watched by thousands of professionals, so patterns in their public price data are
-              mostly used up. In testing, Parakh's calls were right {s ? pct(s.hit_rate) : 'about 51%'} of the time
-              {s && ` across ${count(s.n_calls)} calls`}. A coin flip gets 50%.
+              mostly used up. In testing from {s ? s.period[0].slice(0, 4) : '2019'} to {s ? s.period[1].slice(0, 4) : '2026'}, Parakh's calls were
+              right {s ? pct(s.hit_rate) : 'about 51%'} of the time{s && ` across ${count(s.n_calls)} calls`}. A coin flip gets 50%. On 2025–26
+              alone, the years kept unseen until the final test, the rule wasn't reliably better than a coin flip.
             </p>
             <p className="m-0">
-              That edge is real but smaller than typical trading costs (about {pct(ROUND_TRIP_COST, 2)} for a round trip), so trading on
-              Parakh's calls alone would not be expected to make money. We'd rather tell you that than pretend otherwise.
+              So there may be no edge at all, and even taken at face value it's smaller than typical trading costs (about{' '}
+              {pct(ROUND_TRIP_COST, 2)} for a round trip). Trading on Parakh's calls alone would not be expected to make money. We'd
+              rather tell you that than pretend otherwise.
+            </p>
+            <p className="m-0">
+              Two more caveats. Calls on the same stock on neighbouring days share most of their 5 days, so the number of calls
+              overstates how many independent results there are. And the 20 stocks are today's NIFTY 50 members, chosen in 2026,
+              so companies that dropped out of the index since 2019 aren't in the test (<Link to="/glossary#survivorship">survivorship bias</Link>).
             </p>
           </>
         ))}
@@ -171,7 +178,7 @@ export function Learn() {
         {topic('honest', (
           <ul className="m-0 flex list-disc flex-col gap-2 pl-5">
             <li>Calls are published after the market closes and before the next open, so no call can see its own outcome.</li>
-            <li>Published calls and their results can't be edited or deleted. The database itself refuses.</li>
+            <li>Published calls and their results can't be edited or deleted: the database blocks it. Loosening that would mean changing its rules in the public code, where anyone could see it.</li>
             <li>The live record and the simulated testing record are always shown separately.</li>
             <li>Stocks where the model has done worse than a coin flip are flagged on their calls, with a range showing how much of that could be chance.</li>
             <li>The rules for choosing the model were written down before testing, and the most recent data was kept back as a final check.</li>

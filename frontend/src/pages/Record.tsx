@@ -79,7 +79,7 @@ function LiveCard({ data }: { data: TrackRecord }) {
         {live_scored === 0
           ? 'The first results arrive 5 trading days after the first calls. '
           : `Scored calls only: ${count(data.n_pending)} more are waiting for their 5 days to pass. `}
-        Every call is timestamped before the market opens, and the database refuses any edit or deletion, including ours.
+        Every call is timestamped before the market opens, and the database blocks any edit or deletion. Loosening that would mean changing its rules in the public code.
       </p>
       {live && live.n_calls > 0 && Object.keys(data.live_by_confidence).length > 0 && (
         <p className="m-0 text-sm text-ink-2">
@@ -108,6 +108,10 @@ function TestingCard({ sim }: { sim: SimulatedMetrics }) {
         <span className="font-serif text-[44px] leading-none font-semibold tracking-[-0.02em] lg:text-[52px]"><CountUp value={pct(s.hit_rate)} /></span>
         <span className="text-sm text-ink-2">of {count(s.n_calls)} calls were right</span>
       </div>
+      <p className="m-0 text-[13px] leading-relaxed text-muted">
+        Neighbouring calls on a stock share most of their 5 days, so there are fewer independent results than calls. The 20 stocks
+        are today's NIFTY 50 members, so companies that left the index since aren't in the test.
+      </p>
       <Disclosure buttonClassName="min-h-11"
         summary={<span className="text-sm font-medium text-link">Compare with a coin flip</span>}>
         <div className="flex flex-col gap-3 pt-1">

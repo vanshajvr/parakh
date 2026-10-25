@@ -13,9 +13,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Parakh: stock signals with receipts',
+        name: 'Parakh: practise investing, honestly',
         short_name: 'Parakh',
-        description: 'ML stock signals that show their track record, their confidence and their reasoning.',
+        description: 'Practise investing on real past markets with fake money, and follow stock signals that show their track record.',
         lang: 'en-IN',
         start_url: '/',
         scope: '/',

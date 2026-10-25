@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Re-enable the scheduled workflows
         run: |
-          for workflow in daily.yml retrain.yml keep-warm.yml keepalive.yml; do
+          for workflow in daily.yml retrain.yml keepalive.yml; do
             gh api --method PUT "repos/${{ github.repository }}/actions/workflows/$workflow/enable"
             echo "enabled $workflow"
           done
