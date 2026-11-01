@@ -131,7 +131,7 @@ See [model-card.md](model-card.md) for current numbers.
 
 | Risk | Mitigation |
 |---|---|
-| The model is barely better than random (Phase 6: a one-line reversal rule beat ML under pre-registered rules, then fell to 48.8% on the 2025–26 holdout; D-024) | The product's value is honesty; the scoreboard and model card show the truth either way |
+| The model is barely better than random (Phase 6: a one-line reversal rule was chosen over ML under pre-registered rules, then fell below 50% on the 2025–26 holdout; D-024) | The product's value is honesty; the scoreboard and model card show the truth either way |
 | Explanations that sound illogical (the model often bets on reversals) | "Biggest factors" wording, plus a plain-words explainer on How it works (D-013) |
 | yfinance outages or rate limits | Cache data in the database; show a "data delayed" state |
 | Being perceived as investment advice | Lean wording, disclaimers, educational framing, no personalisation |
