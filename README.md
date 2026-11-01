@@ -6,7 +6,7 @@
 
 **Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Case study deck (PDF, 12 slides)](docs/parakh-case-study.pdf) · [Decision log](docs/decisions.md) (46 decisions) · [PRD](docs/PRD.md) · [Model card](docs/model-card.md) · [SQL analysis](analysis/track_record_sql.ipynb)
 
-> **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. Under rules written down before testing, a one-line rule matched a tuned LightGBM model, and on two years of held-back data neither was reliably better than a coin flip. So I stopped competing on accuracy. Parakh shows its receipts on every call, and teaches the lesson the data taught me through a game: picking stocks is hard, so measure everything against the index fund.
+> **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. Under rules written down before testing, a one-line rule matched a LightGBM model built on 15 features, and on two years of held-back data neither was reliably better than a coin flip. So I stopped competing on accuracy. Parakh shows its receipts on every call, and teaches the lesson the data taught me through a game: picking stocks is hard, so measure everything against the index fund.
 
 <img src="docs/img/screen-practice-desktop.png" alt="The time machine mid-game in the 2020 crash: holdings on the left, your money (₹90,598) against the same money left in the index fund (₹73,804) with a line chart and play controls in the middle, and a market list with Buy buttons on the right" width="860">
 
@@ -49,12 +49,12 @@
 3. **I fixed the rules before testing again** ([D-022](docs/decisions.md)): one metric, a pass bar, a list of allowed experiments, and 2025–26 held back for one final test. A one-line rule ("last week's laggards beat the index next week") passed; LightGBM didn't ([D-024](docs/decisions.md)).
 4. **The holdout didn't hold up.** The rule ships, because switching to LightGBM on its holdout score would have meant choosing on the only clean test. The model card prints both as they came out.
 
-Numbers as of model `reversal-20261015`, retrained 24 Oct 2026. Each weekly retrain re-downloads prices, so they move by a few tenths; the [model card](docs/model-card.md) always has the current run.
+Numbers as of model `reversal-20261023`, the same run as the [model card](docs/model-card.md). Each weekly retrain re-downloads prices, so they move a little from week to week.
 
 | Holdout 2025–26 (unseen until the final test) | Calls that were right | Rank IC (t-stat) |
 |---|---|---|
-| The rule (ships) | 48.7% of 2,188 calls | 0.017 (0.87) |
-| LightGBM | 52.5% of 2,147 calls | 0.040 (1.46) |
+| The rule (ships) | 48.6% of 2,206 calls | 0.016 (0.83) |
+| LightGBM | 50.7% of 2,156 calls | 0.037 (1.08) |
 | Coin flip | 50% | 0 |
 
 Neither holdout result is statistically significant. On the research years (2019–24), the rule was right 52.1% of the time (IC 0.029, t = 2.39). The "51.4% right in testing" on each call covers 2019–26, research and holdout together, and each receipt says so.

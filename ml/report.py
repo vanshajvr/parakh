@@ -251,8 +251,8 @@ The 15 price and volume features the ML candidates used:
 - Uses price and volume only: no fundamentals, news or earnings dates.
 - Large, liquid stocks are the hardest to predict. This is expected behaviour, not a bug.
 - yfinance data can be delayed or revised. Yahoo rewrites adjusted price history after dividends and
-  corporate actions, so the simulated numbers above can shift slightly between retrains (we have
-  seen hit rates move by about 0.2 points). Live calls can't shift: each one is stored when it's published.
+  corporate actions, so the simulated numbers above shift between retrains (holdout hit rates by up to
+  about 2 points, since it is the smallest sample). Live calls can't shift: each one is stored when it's published.
 - Past out-of-sample performance does not guarantee future performance. The live ledger is the real test.
 
 ## Disclaimer
