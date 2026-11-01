@@ -10,7 +10,7 @@
 | `api/` | Read-only FastAPI service |
 | `frontend/` | React + TypeScript + Vite + Tailwind PWA. `src/lib/sim/` is the time machine's engine; `src/i18n/` holds the English and Hindi text |
 | `tests/` | Python tests (frontend tests live next to the code in `frontend/src`) |
-| `docs/` | PRD, decision log, model card, this guide |
+| `docs/` | PRD, decision log, model card, case study deck (PDF), this guide |
 | `analysis/` | SQL analysis of the track record, run against the production database (read-only) |
 | `research/` | The original screening-assignment notebook and its known issues |
 
