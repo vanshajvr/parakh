@@ -35,7 +35,7 @@ python -m jobs.retrain --publish     # create tables, store the model as the act
 python -m jobs.daily                 # refresh prices, score matured calls, publish the next calls
 ```
 
-In production the jobs run in GitHub Actions with a `DATABASE_URL` repository secret: [daily](../.github/workflows/daily.yml) at 18:00 IST on weekdays (with catch-up runs), [retrain](../.github/workflows/retrain.yml) on Saturdays, and a monthly [keepalive](../.github/workflows/keepalive.yml). The ledger rules are in [decision D-015](decisions.md). The news job (`python -m jobs.news`) is paused and has no schedule: Google News feeds may only be shown in a personal feed reader ([D-042](decisions.md)).
+In production the jobs run in GitHub Actions with a `DATABASE_URL` repository secret: [daily](../.github/workflows/daily.yml) several times each weekday evening and early morning ([D-047](decisions.md)), [retrain](../.github/workflows/retrain.yml) on Saturdays, and a monthly [keepalive](../.github/workflows/keepalive.yml). The ledger rules are in [decision D-015](decisions.md). The news job (`python -m jobs.news`) is paused and has no schedule: Google News feeds may only be shown in a personal feed reader ([D-042](decisions.md)).
 
 ### API
 
@@ -86,7 +86,7 @@ Each scheduled job finishes by pinging [healthchecks.io](https://healthchecks.io
 
    | Check | Cron | Grace time | Secret to store its ping URL in |
    |---|---|---|---|
-   | Parakh daily | `30 12 * * 1-5` | 4 hours (catch-up runs at 21:00 and 07:30 IST) | `HEALTHCHECK_DAILY_URL` |
+   | Parakh daily | `30 12 * * 1-5` | 4 hours (runs repeat until 08:23 IST; a missed publish window also pings /fail, D-047) | `HEALTHCHECK_DAILY_URL` |
    | Parakh retrain | `30 3 * * 6` | 6 hours | `HEALTHCHECK_RETRAIN_URL` |
    | Parakh keepalive | `0 4 1 * *` | 2 days | `HEALTHCHECK_KEEPALIVE_URL` |
 

@@ -3,11 +3,26 @@ name: Daily ledger
 # After the NSE close: score matured calls and publish the next session's calls.
 on:
   schedule:
-    - cron: "30 12 * * 1-5" # 18:00 IST, Monday–Friday
-    # Catch-up runs in case Yahoo's NIFTY 50 close arrives late. Re-running is safe, and the
-    # publish window stays open until the next 09:15 IST open (decision D-015).
-    - cron: "30 15 * * 1-5" # 21:00 IST, Monday–Friday
-    - cron: "0 2 * * 1-6" # 07:30 IST, Monday–Saturday (the previous session's last chance)
+    # Yahoo shows a session's close from the close until midnight IST, then drops it until a batch
+    # rewrites it the next morning. GitHub often starts scheduled runs hours late (6-7 hours in
+    # Nov 2026), so run often, at odd minutes (fewer delays than :00 and :30), to land one run in
+    # each window. Re-running is safe, and the publish window stays open until the next 09:15 IST
+    # open (decisions D-015, D-047).
+    - cron: "37 10 * * 1-5" # 16:07 IST, Monday–Friday
+    - cron: "13 11 * * 1-5" # 16:43 IST
+    - cron: "49 11 * * 1-5" # 17:19 IST
+    - cron: "23 12 * * 1-5" # 17:53 IST
+    - cron: "11 13 * * 1-5" # 18:41 IST
+    - cron: "47 13 * * 1-5" # 19:17 IST
+    - cron: "41 14 * * 1-5" # 20:11 IST
+    - cron: "37 15 * * 1-5" # 21:07 IST
+    - cron: "43 16 * * 1-5" # 22:13 IST
+    - cron: "47 23 * * 0-4" # 05:17 IST, Monday–Friday: the previous session's last chances
+    - cron: "17 1 * * 1-5" # 06:47 IST
+    - cron: "7 2 * * 1-5" # 07:37 IST
+    - cron: "53 2 * * 1-5" # 08:23 IST
+    - cron: "19 5 * * 6" # 10:49 IST, Saturday: Friday's close, after Yahoo's batch (deadline Monday 09:15)
+    - cron: "41 9 * * 6" # 15:11 IST, Saturday
   workflow_dispatch:
 
 concurrency:
@@ -28,18 +43,27 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -e ".[ml]"
-      - run: python -m jobs.daily
+      - id: daily
+        shell: bash
+        run: |
+          python -m jobs.daily | tee daily.txt
+          grep -q "; published" daily.txt && echo "published=true" >> "$GITHUB_OUTPUT" || true
+          grep -q "missed publish window" daily.txt && echo "missed=true" >> "$GITHUB_OUTPUT" || true
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
       # Rebuild the site so the time machine's static price file includes today's close (D-044).
+      # Only when calls were published, so a dozen runs a day don't mean a dozen deploys.
       - name: Refresh the site's price snapshot
-        if: success() && env.VERCEL_DEPLOY_HOOK_URL != ''
+        if: success() && steps.daily.outputs.published == 'true' && env.VERCEL_DEPLOY_HOOK_URL != ''
         run: curl -fsS -m 30 -X POST "$(printf %s "$VERCEL_DEPLOY_HOOK_URL" | tr -d '[:space:]')" > /dev/null
-      # Heartbeat for healthchecks.io (decision D-043): an alert if a run fails, or if none arrives on schedule.
+      # Heartbeat for healthchecks.io (decision D-043): an alert if a run fails, if a session's calls
+      # missed their publish window (D-047), or if no run arrives on schedule.
       - name: Report to healthchecks.io
         if: always() && env.HEALTHCHECK_URL != ''
-        # Trim the URL (a pasted secret can carry a newline), and add /fail only when the job failed.
+        # Trim the URL (a pasted secret can carry a newline), and add /fail when the job failed or
+        # missed the window. healthchecks.io emails once per change, not once per run.
         run: |
           url=$(printf %s "$HEALTHCHECK_URL" | tr -d '[:space:]')
-          suffix=""; [ "${{ job.status }}" = "success" ] || suffix="/fail"
+          suffix=""
+          { [ "${{ job.status }}" = "success" ] && [ "${{ steps.daily.outputs.missed }}" != "true" ]; } || suffix="/fail"
           curl -fsS -m 10 --retry 3 "$url$suffix"

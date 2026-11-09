@@ -4,6 +4,14 @@ Each entry records what was decided, why, and what else was considered. Newest f
 
 ---
 
+### D-047 · Run the daily job many times a day, and alert on a missed window
+**Date:** 2026-11-09
+**Decision:** Run `jobs.daily` 13 times on weekdays (16:07–22:13 IST, then 05:17–08:23 IST for the previous session) and twice on Saturday, at odd minutes. Rebuild the site only when calls were published, and send healthchecks.io a fail ping when a session's calls miss their publish window.
+**Why:** No calls were published for 2–6 Nov, and every run still reported "ok". Two things lined up. Yahoo shows a session's close only until midnight IST, then drops it until a batch rewrites it the next morning. And GitHub started scheduled runs 6–7 hours late, so the 18:00 IST run landed after midnight and the 07:30 IST run after the 09:15 deadline. More runs, at minutes GitHub delays less, put at least one run in each window. The job was already safe to re-run (D-015). A missed window is the failure that matters to users, so it now raises an alert; healthchecks.io emails once per change, not per run.
+**Alternatives:** An external scheduler calling `workflow_dispatch` (more reliable timing, but another account and a token to manage); a paid cron on Render; another price source with predictable timing (licensing, D-046); publishing late (breaks the before-the-open rule, D-015).
+
+---
+
 ### D-046 · What Parakh is, for data terms and regulation
 **Date:** 2026-10-25
 **Decision:** Parakh is a personal, non-commercial portfolio project that demonstrates data and product skills on public market data. It keeps using Yahoo Finance data via `yfinance` and showing named-stock leans, with the disclaimer stating this plainly.
