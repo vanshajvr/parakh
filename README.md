@@ -4,7 +4,7 @@
 
 **Practise investing with fake money, and see honestly what works.** A web app for beginner Indian investors. Replay real markets in a time machine, follow stock signals that show their track record, and judge everything against simply holding a NIFTY 50 index fund. In English and Hindi.
 
-**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Case study deck (PDF, 12 slides)](docs/parakh-case-study.pdf) · [Decision log](docs/decisions.md) (46 decisions) · [PRD](docs/PRD.md) · [Model card](docs/model-card.md) · [SQL analysis](analysis/track_record_sql.ipynb)
+**Live app:** [parakh-bi78.vercel.app](https://parakh-bi78.vercel.app/) · [Case study deck (PDF, 12 slides)](docs/parakh-case-study.pdf) · [Decision log](docs/decisions.md) (47 decisions) · [PRD](docs/PRD.md) · [Model card](docs/model-card.md) · [SQL analysis](analysis/track_record_sql.ipynb)
 
 > **The short version.** I set out to build an ML model that tells beginners whether a stock will beat the NIFTY 50 over the next week. Under rules written down before testing, a one-line rule matched a LightGBM model built on 15 features, and on two years of held-back data neither was reliably better than a coin flip. So I stopped competing on accuracy. Parakh shows its receipts on every call, and teaches the lesson the data taught me through a game: picking stocks is hard, so measure everything against the index fund.
 
@@ -65,7 +65,7 @@ Even at face value, the gap between bullish and bearish leans (about 0.2% over 5
 
 ## Key decisions
 
-All 46 are in the [decision log](docs/decisions.md), each with the alternatives considered.
+All 47 are in the [decision log](docs/decisions.md), each with the alternatives considered.
 
 | Decision | Why |
 |---|---|
@@ -90,7 +90,7 @@ All 46 are in the [decision log](docs/decisions.md), each with the alternatives 
 flowchart LR
     Y[Yahoo Finance<br/>daily prices] --> D
     subgraph GA[GitHub Actions]
-        D[Daily job, 18:00 IST<br/>score calls, publish next]
+        D[Daily job, after the close<br/>score calls, publish next]
         W[Weekly retrain]
     end
     D & W --> DB[(Neon Postgres<br/>append-only ledger)]
