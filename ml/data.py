@@ -19,23 +19,37 @@ def drop_placeholders(df: pd.DataFrame) -> pd.DataFrame:
     return df[~(flat & (df["volume"].fillna(0) == 0))]
 
 
-def download_prices(tickers: list[str], start: str = config.START_DATE) -> pd.DataFrame:
-    """Return long-format prices: one row per (date, ticker), split/dividend adjusted."""
+def _fetch(tickers: list[str], start: str, threads: bool) -> dict[str, pd.DataFrame]:
+    """Download and clean each ticker's prices. A ticker that came back empty is left out."""
     raw = yf.download(
-        tickers, start=start, auto_adjust=True, progress=False, group_by="ticker", threads=True
+        tickers, start=start, auto_adjust=True, progress=False, group_by="ticker", threads=threads
     )
-    frames = []
+    frames = {}
     for ticker in tickers:
         if ticker not in raw.columns.get_level_values(0):
-            raise RuntimeError(f"No data returned for {ticker}")
+            continue
         df = raw[ticker].rename(columns=str.lower)[PRICE_COLUMNS]
         # yfinance can return a trailing row with volume but no prices for an unfinished session.
         df = df.dropna(subset=["open", "high", "low", "close"])
         df = drop_placeholders(df)
-        df = df.assign(ticker=ticker)
-        frames.append(df)
+        if not df.empty:
+            frames[ticker] = df.assign(ticker=ticker)
+    return frames
 
-    prices = pd.concat(frames).rename_axis("date").reset_index()
+
+def download_prices(tickers: list[str], start: str = config.START_DATE) -> pd.DataFrame:
+    """Return long-format prices: one row per (date, ticker), split/dividend adjusted."""
+    frames = _fetch(tickers, start, threads=True)
+    # Parallel downloads can collide on yfinance's local cache ("database is locked") and come back
+    # empty, as the NIFTY 50 did on 9 Nov 2026. Retry those once, one at a time.
+    missing = [t for t in tickers if t not in frames]
+    if missing:
+        frames |= _fetch(missing, start, threads=False)
+    missing = [t for t in tickers if t not in frames]
+    if missing:
+        raise RuntimeError(f"No data returned for {', '.join(missing)} (after a retry)")
+
+    prices = pd.concat(frames[t] for t in tickers).rename_axis("date").reset_index()
     prices["date"] = pd.to_datetime(prices["date"]).dt.tz_localize(None).dt.normalize()
     return prices.sort_values(["ticker", "date"]).reset_index(drop=True)
 

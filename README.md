@@ -103,7 +103,7 @@ flowchart LR
 - **Time machine:** a pure TypeScript engine replays a game from its saved orders, so a game can be resumed or replayed exactly. Its prices are a static file saved at build time and served by Vercel's CDN, rebuilt after each daily run, so Practice never waits for the API to wake ([D-044](docs/decisions.md)). Games are saved on the device.
 - **App:** React, TypeScript and Tailwind, with types generated from the API schema and typed English/Hindi dictionaries (a missing Hindi line fails the build). It's an installable PWA.
 - **Monitoring:** each job pings healthchecks.io, which emails if a run fails or doesn't arrive on time, and a monthly keepalive stops GitHub switching the schedules off after 60 quiet days ([D-043](docs/decisions.md)).
-- **Quality:** 58 Python and 80 frontend tests, including look-ahead checks and engine tests on real 2020–23 prices.
+- **Quality:** 60 Python and 80 frontend tests, including look-ahead checks and engine tests on real 2020–23 prices.
 
 Setup and deployment: [development guide](docs/development.md). The original screening-assignment notebook this grew from is in [`research/`](research/README.md), with its methodology issues listed.
 
